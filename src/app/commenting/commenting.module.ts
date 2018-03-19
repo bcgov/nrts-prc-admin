@@ -2,7 +2,8 @@
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { SharedModule } from '../shared/shared.module';
+import { SharedModule } from 'app/shared/shared.module';
+import { NgxPaginationModule } from 'ngx-pagination';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { CommentingRoutingModule } from './commenting-routing.module';
 
@@ -25,6 +26,7 @@ import { AddCommentComponent } from './review-comments/add-comment/add-comment.c
     FormsModule,
     CommonModule,
     SharedModule,
+    NgxPaginationModule,
     NgbModule.forRoot(),
     CommentingRoutingModule
   ],
