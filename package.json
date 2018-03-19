@@ -5,13 +5,13 @@
   "scripts": {
     "ng": "ng",
     "prestart": "",
-    "start": "ng serve -o --base-href /admin/ --deploy-url /admin/",
-    "build": "npm run lint && ng build --prod --deploy-url /admin/ --base-href /admin/",
+    "start": "ng serve -o --base-href /admin/",
+    "build": "npm run lint && ng build --prod --base-href /admin/",
     "pretest": "",
     "test": "ng test",
     "lint": "ng lint --format=stylish",
     "e2e": "ng e2e",
-    "postinstall": "ng build --prod --prod --deploy-url /admin/ --base-href /admin/"
+    "postinstall": "ng build --prod --prod --base-href /admin/"
   },
   "private": true,
   "dependencies": {
