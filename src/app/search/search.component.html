@@ -55,6 +55,7 @@
                <th>Status</th>
                <th>Type</th>
                <th>SubType</th>
+               <th>Clients</th>
             </tr>
           </thead>
           <tbody *ngIf="results && groupByResults">
@@ -74,6 +75,13 @@
               <td>{{item.properties.TENURE_STATUS}}</td>
               <td>{{item.properties.TENURE_TYPE}}</td>
               <td>{{item.properties.TENURE_SUBTYPE}}</td>
+              <td>
+                <span class="import-link"
+                      (click)="showClientInformation(item)"
+                      title="Show Client Information">
+                      <i class="material-icons">assignment_ind</i>
+                </span>
+              </td>
             </tr>
           </tbody>
         </table>
