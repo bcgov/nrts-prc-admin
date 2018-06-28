@@ -105,6 +105,67 @@ export class ApplicationAsideComponent implements OnChanges, OnDestroy {
       }
     });
     self.map.addControl(new resetViewControl());
+
+    if (this.application) {
+        // get comment period days remaining
+        if (this.application._id !== '0' && this.application.currentPeriod) {
+          const now = new Date();
+          const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+          // use moment to handle Daylight Saving Time changes
+          const days = moment(this.application.currentPeriod.endDate).diff(moment(today), 'days') + 1;
+          this.daysRemaining = days + (days === 1 ? ' Day ' : ' Days ') + 'Remaining';
+        }
+
+        // get number of pending comments
+        if (this.application._id !== '0') {
+          this.commentService.getAllByApplicationId(this.application._id)
+            .takeUntil(this.ngUnsubscribe)
+            .subscribe(
+              (comments: Comment[]) => {
+                const pending = comments.filter(comment => this.commentService.isPending(comment));
+                this.numComments = pending.length.toString();
+              },
+              error => console.log('couldn\'t get pending comments, error =', error)
+            );
+        }
+        const self = this;
+        if (self.fg) {
+          _.each(self.layers, function (layer) {
+            self.map.removeLayer(layer);
+          });
+          self.fg.clearLayers();
+        } else {
+          self.fg = L.featureGroup();
+        }
+        // NB: always reload results to reduce chance of race condition
+        //     with drawing map and features
+        this.searchService.getByDTID(this.application.tantalisID)
+          .takeUntil(this.ngUnsubscribe)
+          .subscribe(
+            features => {
+                try {
+                  _.each(features, function (feature) {
+                  const f = JSON.parse(JSON.stringify(feature));
+                  // Needed to be valid GeoJSON
+                  delete f.geometry_name;
+                  const featureObj: GeoJSON.Feature<any> = f;
+                  const layer = L.geoJSON(featureObj);
+                  const options = { maxWidth: 400 };
+                  self.fg.addLayer(layer);
+                  layer.addTo(self.map);
+                });
+  
+                const bounds = self.fg.getBounds();
+                if (bounds && bounds.isValid()) {
+                  self.map.fitBounds(bounds, self.maxZoom);
+                }
+              } catch (e) { }
+            },
+            error => {
+              console.log('error =', error);
+            }
+          );
+    }
   }
 
   ngOnChanges(changes: SimpleChanges) {
