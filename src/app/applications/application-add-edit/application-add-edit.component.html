@@ -27,7 +27,7 @@
               </div>
               <div class="title-container__actions">
                 <!-- to select client, application must have been created -->
-                <button type="button" class="btn btn-light" (click)="selectClient()" [disabled]="application._id === '0'">
+                <button type="button" class="btn btn-light" (click)="selectClient()">
                   <span>{{application.client ? 'Change Client' : 'Select Client'}}</span>
                 </button>
               </div>
