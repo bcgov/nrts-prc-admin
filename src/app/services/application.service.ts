@@ -35,7 +35,17 @@ export class ApplicationService {
   // special status when no data
   readonly UNKNOWN = 'UN';
 
+  readonly CARIBOO = 'CA';
+  readonly KOOTENAY = 'KO';
+  readonly LOWER_MAINLAND = 'LM';
+  readonly OMENICA = 'OM';
+  readonly PEACE = 'PE';
+  readonly SKEENA = 'SK';
+  readonly SOUTHERN_INTERIOR = 'SI';
+  readonly VANCOUVER_ISLAND = 'VI';
+
   public applicationStatuses: Array<string> = [];
+  public regions: Array<string> = [];
   private application: Application = null;
 
   constructor(
@@ -60,6 +70,15 @@ export class ApplicationService {
     this.applicationStatuses[this.SUSPENDED] = 'Tenure: Suspended';
     this.applicationStatuses[this.DECISION_MADE] = 'Decision Made';
     this.applicationStatuses[this.UNKNOWN] = 'Unknown Application Status';
+
+    this.regions[this.CARIBOO] = 'Cariboo, Williams Lake';
+    this.regions[this.KOOTENAY] = 'Kootenay, Cranbrook';
+    this.regions[this.LOWER_MAINLAND] = 'Lower Mainland, Surrey';
+    this.regions[this.OMENICA] = 'Omenica/Peace, Prince George';
+    this.regions[this.PEACE] = 'Peace, Ft. St. John';
+    this.regions[this.SKEENA] = 'Skeena, Smithers';
+    this.regions[this.SOUTHERN_INTERIOR] = 'Thompson Okanagan, Kamloops';
+    this.regions[this.VANCOUVER_ISLAND] = 'West Coast, Nanaimo';
   }
 
   // get count of applications
@@ -150,6 +169,7 @@ export class ApplicationService {
                 application.tenureStage = application.features[0].properties.TENURE_STAGE;
                 application.location = application.features[0].properties.TENURE_LOCATION;
                 application.businessUnit = application.features[0].properties.RESPONSIBLE_BUSINESS_UNIT;
+                application.region = this.getRegion(application.features[0].properties.RESPONSIBLE_BUSINESS_UNIT);
               }
 
               // derive application status for app list display + sorting
@@ -264,6 +284,7 @@ export class ApplicationService {
               application.tenureStage = application.features[0].properties.TENURE_STAGE;
               application.location = application.features[0].properties.TENURE_LOCATION;
               application.businessUnit = application.features[0].properties.RESPONSIBLE_BUSINESS_UNIT;
+              application.region = this.getRegion(application.features[0].properties.RESPONSIBLE_BUSINESS_UNIT);
             }
           })
         );
@@ -283,7 +304,6 @@ export class ApplicationService {
     // boilerplate for new application
     app.agency = 'Crown Land Allocation';
     app.name = 'New Application'; // TODO: remove if not needed
-    app.region = 'Skeena';
 
     // id must not exist on POST
     delete app._id;
@@ -412,5 +432,22 @@ export class ApplicationService {
 
   isSuspended(status: string): boolean {
     return (status && status.toUpperCase() === 'SUSPENDED');
+  }
+
+  private getRegion(businessUnit: string): string {
+    if (businessUnit) {
+      switch (businessUnit.toUpperCase().split(' ')[0]) {
+        case this.CARIBOO: return this.regions[this.CARIBOO];
+        case this.KOOTENAY: return this.regions[this.KOOTENAY];
+        case this.LOWER_MAINLAND: return this.regions[this.LOWER_MAINLAND];
+        case this.OMENICA: return this.regions[this.OMENICA];
+        case this.PEACE: return this.regions[this.PEACE];
+        case this.SKEENA: return this.regions[this.SKEENA];
+        case this.SOUTHERN_INTERIOR: return this.regions[this.SOUTHERN_INTERIOR];
+        case this.VANCOUVER_ISLAND: return this.regions[this.VANCOUVER_ISLAND];
+      }
+    }
+
+    return null;
   }
 }
