@@ -120,7 +120,6 @@ export class ApiService {
       'name',
       'postID',
       'publishDate',
-      'region',
       'tantalisID'
     ];
     let queryString = 'application?isDeleted=false&fields=';
@@ -148,7 +147,6 @@ export class ApiService {
       'name',
       'postID',
       'publishDate',
-      'region',
       'tantalisID'
     ];
     let queryString = 'application/' + id + '?fields=';
@@ -206,7 +204,6 @@ export class ApiService {
       'name',
       'postID',
       'publishDate',
-      'region',
       'tantalisID'
     ];
     let queryString = 'application/' + app._id + '?fields=';

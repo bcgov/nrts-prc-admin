@@ -35,7 +35,17 @@ export class ApplicationService {
   // special status when no data
   readonly UNKNOWN = 'UN';
 
+  readonly CARIBOO = 'CA';
+  readonly KOOTENAY = 'KO';
+  readonly LOWER_MAINLAND = 'LM';
+  readonly OMENICA = 'OM';
+  readonly PEACE = 'PE';
+  readonly SKEENA = 'SK';
+  readonly SOUTHERN_INTERIOR = 'SI';
+  readonly VANCOUVER_ISLAND = 'VI';
+
   public applicationStatuses: Array<string> = [];
+  public regions: Array<string> = [];
   private application: Application = null;
 
   constructor(
@@ -60,6 +70,15 @@ export class ApplicationService {
     this.applicationStatuses[this.SUSPENDED] = 'Tenure: Suspended';
     this.applicationStatuses[this.DECISION_MADE] = 'Decision Made';
     this.applicationStatuses[this.UNKNOWN] = 'Unknown Application Status';
+
+    this.regions[this.CARIBOO] = 'Cariboo, Williams Lake';
+    this.regions[this.KOOTENAY] = 'Kootenay, Cranbrook';
+    this.regions[this.LOWER_MAINLAND] = 'Lower Mainland, Surrey';
+    this.regions[this.OMENICA] = 'Omenica/Peace, Prince George';
+    this.regions[this.PEACE] = 'Peace, Ft. St. John';
+    this.regions[this.SKEENA] = 'Skeena, Smithers';
+    this.regions[this.SOUTHERN_INTERIOR] = 'Thompson Okanagan, Kamloops';
+    this.regions[this.VANCOUVER_ISLAND] = 'West Coast, Nanaimo';
   }
 
   // get count of applications
@@ -415,17 +434,17 @@ export class ApplicationService {
     return (status && status.toUpperCase() === 'SUSPENDED');
   }
 
-  getRegion(businessUnit: string): string {
+  private getRegion(businessUnit: string): string {
     if (businessUnit) {
-      switch (businessUnit.split(' ')[0]) {
-        case 'CA': return 'Cariboo, Williams Lake';
-        case 'KO': return 'Kootenay, Cranbrook';
-        case 'LM': return 'Lower Mainland, Surrey';
-        case 'OM': return 'Omenica/Peace, Prince George';
-        case 'PE': return 'Peace, Ft. St. John';
-        case 'SK': return 'Skeena, Smithers';
-        case 'SI': return 'Southern Interior, Kamloops';
-        case 'VI': return 'Vancouver Island, Nanaimo';
+      switch (businessUnit.toUpperCase().split(' ')[0]) {
+        case this.CARIBOO: return this.regions[this.CARIBOO];
+        case this.KOOTENAY: return this.regions[this.KOOTENAY];
+        case this.LOWER_MAINLAND: return this.regions[this.LOWER_MAINLAND];
+        case this.OMENICA: return this.regions[this.OMENICA];
+        case this.PEACE: return this.regions[this.PEACE];
+        case this.SKEENA: return this.regions[this.SKEENA];
+        case this.SOUTHERN_INTERIOR: return this.regions[this.SOUTHERN_INTERIOR];
+        case this.VANCOUVER_ISLAND: return this.regions[this.VANCOUVER_ISLAND];
       }
     }
 
