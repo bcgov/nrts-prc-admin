@@ -29,7 +29,7 @@ export class Application {
   name: string;
   postID: number;
   publishDate: Date;
-  region: string;
+  region: string; // TODO: remove if obsolete (also in api.ts)
   tantalisID: number;
 
   // the following are cached from features[0].properties

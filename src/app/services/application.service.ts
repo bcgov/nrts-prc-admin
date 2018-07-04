@@ -150,6 +150,7 @@ export class ApplicationService {
                 application.tenureStage = application.features[0].properties.TENURE_STAGE;
                 application.location = application.features[0].properties.TENURE_LOCATION;
                 application.businessUnit = application.features[0].properties.RESPONSIBLE_BUSINESS_UNIT;
+                application.region = this.getRegion(application.features[0].properties.RESPONSIBLE_BUSINESS_UNIT);
               }
 
               // derive application status for app list display + sorting
@@ -264,6 +265,7 @@ export class ApplicationService {
               application.tenureStage = application.features[0].properties.TENURE_STAGE;
               application.location = application.features[0].properties.TENURE_LOCATION;
               application.businessUnit = application.features[0].properties.RESPONSIBLE_BUSINESS_UNIT;
+              application.region = this.getRegion(application.features[0].properties.RESPONSIBLE_BUSINESS_UNIT);
             }
           })
         );
@@ -283,7 +285,6 @@ export class ApplicationService {
     // boilerplate for new application
     app.agency = 'Crown Land Allocation';
     app.name = 'New Application'; // TODO: remove if not needed
-    app.region = 'Skeena';
 
     // id must not exist on POST
     delete app._id;
@@ -412,5 +413,22 @@ export class ApplicationService {
 
   isSuspended(status: string): boolean {
     return (status && status.toUpperCase() === 'SUSPENDED');
+  }
+
+  getRegion(businessUnit: string): string {
+    if (businessUnit) {
+      switch (businessUnit.split(' ')[0]) {
+        case 'CA': return 'Cariboo, Williams Lake';
+        case 'KO': return 'Kootenay, Cranbrook';
+        case 'LM': return 'Lower Mainland, Surrey';
+        case 'OM': return 'Omenica/Peace, Prince George';
+        case 'PE': return 'Peace, Ft. St. John';
+        case 'SK': return 'Skeena, Smithers';
+        case 'SI': return 'Southern Interior, Kamloops';
+        case 'VI': return 'Vancouver Island, Nanaimo';
+      }
+    }
+
+    return null;
   }
 }
