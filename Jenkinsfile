@@ -4,7 +4,7 @@ pipeline {
     skipDefaultCheckout()
   }
   stages {
-    stage('Building: admin-angular-on-nginx-build-angular-app-build develop branch') {
+    stage('Building: admin (develop branch)') {
       steps {
         script {
           try {
@@ -18,7 +18,7 @@ pipeline {
         }
       }
     }
-    stage('Deploy admin-angular-on-nginx-build-angular-app-build develop branch') {
+    stage('Deploying: admin (develop branch)') {
       steps {
         script {
           try {
