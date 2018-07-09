@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { Response } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/mergeMap';
 import 'rxjs/add/operator/toPromise';
@@ -7,11 +6,12 @@ import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/observable/of';
 import * as _ from 'lodash';
+import * as L from 'leaflet';
 
 import { Application } from 'app/models/application';
 import { ApiService } from './api';
 import { DocumentService } from './document.service';
-import { OrganizationService } from './organization.service';
+// import { OrganizationService } from './organization.service';
 import { CommentPeriodService } from './commentperiod.service';
 import { CommentService } from './comment.service';
 import { DecisionService } from './decision.service';
@@ -19,6 +19,7 @@ import { SearchService } from './search.service';
 
 @Injectable()
 export class ApplicationService {
+  //#region Constants
   // statuses / query param options
   readonly ABANDONED = 'AB';
   readonly ACCEPTED = 'AC';
@@ -43,6 +44,7 @@ export class ApplicationService {
   readonly SKEENA = 'SK';
   readonly SOUTHERN_INTERIOR = 'SI';
   readonly VANCOUVER_ISLAND = 'VI';
+  //#endregion
 
   public applicationStatuses: Array<string> = [];
   public regions: Array<string> = [];
@@ -51,7 +53,7 @@ export class ApplicationService {
   constructor(
     private api: ApiService,
     private documentService: DocumentService,
-    private organizationService: OrganizationService,
+    // private organizationService: OrganizationService,
     private commentPeriodService: CommentPeriodService,
     private commentService: CommentService,
     private decisionService: DecisionService,
@@ -332,6 +334,13 @@ export class ApplicationService {
     // make a (deep) copy of the passed-in application so we don't change it
     const app = _.cloneDeep(orig);
 
+    // update cached lat/lng
+    const center: L.LatLng = this.getAppCenter(app);
+    if (center) {
+      app.latitude = center.lat;
+      app.longitude = center.lng;
+    }
+
     // don't send features or documents
     delete app.features;
     delete app.documents;
@@ -350,6 +359,25 @@ export class ApplicationService {
         return a ? new Application(a) : null;
       })
       .catch(this.api.handleError);
+  }
+
+  private getAppCenter(app: Application): L.LatLng {
+    if (app && app.features) {
+      const appFG = L.featureGroup();
+      app.features.forEach(f => {
+        const feature = JSON.parse(JSON.stringify(f));
+        // needs to be valid GeoJSON
+        delete f.geometry_name;
+        const featureObj: GeoJSON.Feature<any> = feature;
+        const layer = L.geoJSON(featureObj);
+        layer.addTo(appFG);
+      });
+      const appBounds = appFG.getBounds();
+      if (appBounds && appBounds.isValid()) {
+        return appBounds.getCenter();
+      }
+    }
+    return null;
   }
 
   delete(app: Application): Observable<Application> {
