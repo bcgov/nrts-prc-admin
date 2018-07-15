@@ -80,9 +80,11 @@ export class SearchComponent implements OnInit, OnDestroy {
       this.tileLayers = [];
     }
     const World_Topo_Map = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 16,
       attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ, TomTom, Intermap, iPC, USGS, FAO, NPS, NRCAN, GeoBase, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), and the GIS User Community'
     });
     const World_Imagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 17,
       attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
     });
     const OpenMapSurfer_Roads = L.tileLayer('https://korona.geog.uni-heidelberg.de/tiles/roads/x={x}&y={y}&z={z}', {
@@ -100,7 +102,8 @@ export class SearchComponent implements OnInit, OnDestroy {
     this.map = L.map('map', {
       layers: [World_Imagery]
     });
-    this.map.setView(new L.LatLng(53.7267, -127.6476), 5);
+    // this.map.setView(new L.LatLng(53.7267, -127.6476), 5); // default view
+    this.map.fitBounds(L.latLngBounds([48, -139], [60, -114])); // all of BC
 
     // set up the controls
     this.baseMaps = {
@@ -176,10 +179,11 @@ export class SearchComponent implements OnInit, OnDestroy {
       item.subpurpose = item.properties.TENURE_SUBPURPOSE;
       item.type = item.properties.TENURE_TYPE;
       item.subtype = item.properties.TENURE_SUBTYPE;
-      item.status = item.properties.TENURE_STATUS;
+      item.status = this.applicationService.getStatusCode(item.properties.TENURE_STATUS);
       item.tenureStage = item.properties.TENURE_STAGE;
       item.location = item.properties.TENURE_LOCATION;
       item.businessUnit = item.properties.RESPONSIBLE_BUSINESS_UNIT;
+      item.region = this.applicationService.getRegionCode(item.businessUnit);
       // these are special
       // we will persist them to db as search keys
       item.cl_file = +item.properties.CROWN_LANDS_FILE; // NOTE: unary operator
@@ -217,9 +221,12 @@ export class SearchComponent implements OnInit, OnDestroy {
       .takeUntil(this.ngUnsubscribe)
       .subscribe(
         data => {
+          // console.log('data =', data);
           this.loading = false;
-          // This outputs the value of data to the web console.
-          this.results = data;
+          if (!data.totalFeatures || (data.features && data.features.length === 0)) {
+            return; // no results
+          }
+          this.results = data; // display results on web page
 
           const self = this;
 
@@ -293,7 +300,10 @@ export class SearchComponent implements OnInit, OnDestroy {
 
           self.control = L.control.layers(self.baseMaps, overlayMaps, { collapsed: false }).addTo(self.map);
 
-          self.map.fitBounds(self.fg.getBounds(), self.maxZoom);
+          const bounds = self.fg.getBounds();
+          if (bounds && bounds.isValid()) {
+            self.map.fitBounds(bounds, self.maxZoom);
+          }
 
           if (self.groupByResults) {
             this.count = self.groupByResults.length;

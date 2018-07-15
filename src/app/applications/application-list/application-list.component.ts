@@ -18,6 +18,8 @@ import { CommentPeriodService } from 'app/services/commentperiod.service';
 })
 
 export class ApplicationListComponent implements OnInit, OnDestroy {
+  readonly PAGE_SIZE = 10;
+
   public loading = true;
   private paramMap: ParamMap = null;
   public showOnlyOpenApps: boolean;
@@ -25,6 +27,16 @@ export class ApplicationListComponent implements OnInit, OnDestroy {
   public column: string = null;
   public direction = 0;
   private ngUnsubscribe: Subject<boolean> = new Subject<boolean>();
+
+  public pageCount = 1; // in case getCount() fails
+  public pageNum = 1; // first page
+  private regionFilters: object = { /*VI: true*/ }; // array-like object
+  private cpStatusFilters: object = {}; // array-like object
+  private appStatusFilters: object = {}; // array-like object
+  private applicantFilter: string = null;
+  private clFileFilter: string = null;
+  private dispIdFilter: string = null;
+  private purposeFilter: string = null;
 
   constructor(
     private location: Location,
@@ -51,12 +63,32 @@ export class ApplicationListComponent implements OnInit, OnDestroy {
         this.resetFilters();
       });
 
-    // get data
-    this.applicationService.getAll()
+    this.applicationService.getCount()
+      .takeUntil(this.ngUnsubscribe)
+      .subscribe(
+        value => {
+          this.pageCount = Math.ceil(value / this.PAGE_SIZE);
+        });
+
+    // get initial data
+    this.getData();
+  }
+
+  private getData() {
+    this.applicationService.getAllFull(this.pageNum - 1, this.PAGE_SIZE, this.regionFilters, this.cpStatusFilters, this.appStatusFilters,
+      this.applicantFilter, this.clFileFilter, this.dispIdFilter, this.purposeFilter)
       .takeUntil(this.ngUnsubscribe)
       .subscribe(applications => {
         this.applications = applications;
         this.loading = false;
+
+        // DEBUGGING - to cache app data
+        // this.applications.forEach(app => {
+        //   this.applicationService.save(app)
+        //     .takeUntil(this.ngUnsubscribe)
+        //     .subscribe((ret) => { console.log('id =', ret._id) });
+        // });
+
       }, error => {
         console.log(error);
         alert('Uh-oh, couldn\'t load applications');
@@ -64,6 +96,18 @@ export class ApplicationListComponent implements OnInit, OnDestroy {
         // applications not found --> navigate back to home
         this.router.navigate(['/']);
       });
+  }
+
+  public prevPage() {
+    this.pageNum--;
+    this.loading = true;
+    this.getData();
+  }
+
+  public nextPage() {
+    this.pageNum++;
+    this.loading = true;
+    this.getData();
   }
 
   public showOnlyOpenAppsChange(checked: boolean) {
