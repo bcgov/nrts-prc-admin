@@ -174,10 +174,11 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
                     this.application.subpurpose = this.application.features[0].properties.TENURE_SUBPURPOSE;
                     this.application.type = this.application.features[0].properties.TENURE_TYPE;
                     this.application.subtype = this.application.features[0].properties.TENURE_SUBTYPE;
-                    this.application.status = this.application.features[0].properties.TENURE_STATUS;
+                    this.application.status = this.applicationService.getStatusCode(this.application.features[0].properties.TENURE_STATUS);
                     this.application.tenureStage = this.application.features[0].properties.TENURE_STAGE;
                     this.application.location = this.application.features[0].properties.TENURE_LOCATION;
                     this.application.businessUnit = this.application.features[0].properties.RESPONSIBLE_BUSINESS_UNIT;
+                    this.application.region = this.applicationService.getRegionCode(this.application.businessUnit);
                     // this is special
                     // we will persist it to db as a search key
                     this.application.cl_file = +this.application.features[0].properties.CROWN_LANDS_FILE; // NOTE: unary operator
