@@ -12,6 +12,8 @@ import { Organization } from 'app/models/organization';
 import { Search, SearchTerms } from 'app/models/search';
 import { ApplicationService } from 'app/services/application.service';
 import { SearchService } from 'app/services/search.service';
+import { DialogService } from 'ng2-bootstrap-modal';
+import { SelectOrganizationComponent } from 'app/applications/select-organization/select-organization.component';
 
 @Component({
   selector: 'app-search',
@@ -59,6 +61,7 @@ export class SearchComponent implements OnInit, OnDestroy {
 
   constructor(
     private applicationService: ApplicationService,
+    private dialogService: DialogService,
     private searchService: SearchService,
     private _changeDetectionRef: ChangeDetectorRef,
     private router: Router,
@@ -136,6 +139,31 @@ export class SearchComponent implements OnInit, OnDestroy {
           if (!_.isEmpty(this.terms.getParams())) {
             this.doSearch(true);
           }
+        }
+      );
+  }
+
+  showClientInformation(item: any) {
+    let dispId: number = null;
+
+    if (item && item.properties && item.properties.DISPOSITION_TRANSACTION_SID) {
+      dispId = item.properties.DISPOSITION_TRANSACTION_SID;
+    }
+
+    this.dialogService.addDialog(SelectOrganizationComponent,
+      {
+        dispositionId: dispId,
+        clientListing: true
+      }, {
+        backdropColor: 'rgba(0, 0, 0, 0.5)'
+      })
+      .takeUntil(this.ngUnsubscribe)
+      .subscribe(
+        clientString => {
+          // Do nothing, this is client listing only.
+        },
+        error => {
+          console.log('error =', error);
         }
       );
   }

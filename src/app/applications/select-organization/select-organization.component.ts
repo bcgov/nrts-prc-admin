@@ -8,6 +8,7 @@ import { Client } from 'app/models/client';
 
 export interface DataModel {
   dispositionId: number;
+  clientListing: boolean;
 }
 
 @Component({
@@ -20,6 +21,7 @@ export interface DataModel {
 //       otherwise they don't return a result
 export class SelectOrganizationComponent extends DialogComponent<DataModel, string> implements DataModel, OnInit {
   public dispositionId: number = null;
+  public clientListing: boolean = false;
   public clients: Array<Client> = [];
   public selectedClients: Array<Client> = [];
   public page = 1;

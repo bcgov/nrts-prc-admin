@@ -29,13 +29,13 @@ export class Application {
   name: string;
   postID: number;
   publishDate: Date;
-  region: string;
   tantalisID: number;
 
   // the following are cached from features[0].properties
   businessUnit: string;
   location: string;
   purpose: string;
+  region: string;
   subpurpose: string;
   status: string;
   tenureStage: string;
@@ -69,12 +69,12 @@ export class Application {
     this.name                    = obj && obj.name                    || null;
     this.postID                  = obj && obj.postID                  || null;
     this.publishDate             = obj && obj.publishDate             || null;
-    this.region                  = obj && obj.region                  || null;
     this.tantalisID              = obj && obj.tantalisID              || null; // not zero
 
     this.businessUnit            = obj && obj.businessUnit            || null;
     this.location                = obj && obj.location                || null;
     this.purpose                 = obj && obj.purpose                 || null;
+    this.region                  = obj && obj.region                  || null;
     this.subpurpose              = obj && obj.subpurpose              || null;
     this.status                  = obj && obj.status                  || null;
     this.tenureStage             = obj && obj.tenureStage             || null;
