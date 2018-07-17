@@ -31,7 +31,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       return false;
     }
 
-    // although we aren't currently using numApplications,
+    // NB: although we aren't currently using numApplications,
     // this verifies our login token and redirects in case of error
     this.applicationService.getCount()
       .takeUntil(this.ngUnsubscribe)

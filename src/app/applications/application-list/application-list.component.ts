@@ -52,7 +52,7 @@ export class ApplicationListComponent implements OnInit, OnDestroy {
       });
 
     // get data
-    this.applicationService.getAll()
+    this.applicationService.getAllFull()
       .takeUntil(this.ngUnsubscribe)
       .subscribe(applications => {
         this.applications = applications;

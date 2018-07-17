@@ -57,13 +57,13 @@ export class ApiService {
         break;
 
       case 'nrts-prc-scale.pathfinder.gov.bc.ca':
-        // Demo
+        // Scale
         this.pathAPI = 'https://nrts-prc-scale.pathfinder.gov.bc.ca/api';
         this.env = 'scale';
         break;
 
       case 'nrts-prc-beta.pathfinder.gov.bc.ca':
-        // Demo
+        // Beta
         this.pathAPI = 'https://nrts-prc-beta.pathfinder.gov.bc.ca/api';
         this.env = 'beta';
         break;
@@ -138,6 +138,10 @@ export class ApiService {
       'name',
       'postID',
       'publishDate',
+      'purpose',
+      'region',
+      'status',
+      'subpurpose',
       'tantalisID'
     ];
     let queryString = 'application?isDeleted=false&fields=';
@@ -165,6 +169,10 @@ export class ApiService {
       'name',
       'postID',
       'publishDate',
+      'purpose',
+      'region',
+      'status',
+      'subpurpose',
       'tantalisID'
     ];
     let queryString = 'application/' + id + '?fields=';
@@ -222,6 +230,10 @@ export class ApiService {
       'name',
       'postID',
       'publishDate',
+      'purpose',
+      'region',
+      'status',
+      'subpurpose',
       'tantalisID'
     ];
     let queryString = 'application/' + app._id + '?fields=';

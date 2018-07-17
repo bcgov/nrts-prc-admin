@@ -83,19 +83,35 @@ export class ApplicationService {
     this.regions[this.VANCOUVER_ISLAND] = 'West Coast, Nanaimo';
   }
 
+  // get just the applications
+  getAll(): Observable<Application[]> {
+    return this.api.getApplications()
+      .map(res => {
+        const applications = res.text() ? res.json() : [];
+        applications.forEach((application, i) => {
+          applications[i] = new Application(application);
+        });
+        return applications;
+      })
+      .catch(this.api.handleError);
+  }
+
   // get count of applications
+  // FUTURE: use dedicated API for this because we don't need any data
   getCount(): Observable<number> {
-    return this.getAllInternal()
+    return this.getAll()
       .map(applications => {
         return applications.length;
       })
       .catch(this.api.handleError);
   }
 
-  // get all applications
-  getAll(): Observable<Application[]> {
+  // get all applications and related data
+  // TODO: instead of using promises to get all data at once, use observables and DEEP-OBSERVE changes
+  // see https://github.com/angular/angular/issues/11704
+  getAllFull(): Observable<Application[]> {
     // first get the applications
-    return this.getAllInternal()
+    return this.getAll()
       .mergeMap(applications => {
         if (applications.length === 0) {
           return Observable.of([] as Application[]);
@@ -167,33 +183,20 @@ export class ApplicationService {
                 application.subpurpose = application.features[0].properties.TENURE_SUBPURPOSE;
                 application.type = application.features[0].properties.TENURE_TYPE;
                 application.subtype = application.features[0].properties.TENURE_SUBTYPE;
-                application.status = application.features[0].properties.TENURE_STATUS;
+                application.status = this.getStatusCode(application.features[0].properties.TENURE_STATUS);
                 application.tenureStage = application.features[0].properties.TENURE_STAGE;
                 application.location = application.features[0].properties.TENURE_LOCATION;
                 application.businessUnit = application.features[0].properties.RESPONSIBLE_BUSINESS_UNIT;
-                application.region = this.getRegion(application.features[0].properties.RESPONSIBLE_BUSINESS_UNIT);
+                application.region = this.getRegionCode(application.businessUnit);
               }
 
               // derive application status for app list display + sorting
-              application['appStatus'] = this.getStatus(application);
+              application['appStatus'] = this.getStatusString(application.status);
             })
           );
         });
 
         return Promise.all(promises).then(() => { return applications; });
-      })
-      .catch(this.api.handleError);
-  }
-
-  // get just the applications
-  private getAllInternal(): Observable<Application[]> {
-    return this.api.getApplications()
-      .map(res => {
-        const applications = res.text() ? res.json() : [];
-        applications.forEach((application, i) => {
-          applications[i] = new Application(application);
-        });
-        return applications;
       })
       .catch(this.api.handleError);
   }
@@ -282,12 +285,15 @@ export class ApplicationService {
               application.subpurpose = application.features[0].properties.TENURE_SUBPURPOSE;
               application.type = application.features[0].properties.TENURE_TYPE;
               application.subtype = application.features[0].properties.TENURE_SUBTYPE;
-              application.status = application.features[0].properties.TENURE_STATUS;
+              application.status = this.getStatusCode(application.features[0].properties.TENURE_STATUS);
               application.tenureStage = application.features[0].properties.TENURE_STAGE;
               application.location = application.features[0].properties.TENURE_LOCATION;
               application.businessUnit = application.features[0].properties.RESPONSIBLE_BUSINESS_UNIT;
-              application.region = this.getRegion(application.features[0].properties.RESPONSIBLE_BUSINESS_UNIT);
+              application.region = this.getRegionCode(application.businessUnit);
             }
+
+            // derive application status for app list display + sorting
+            application['appStatus'] = this.getStatusString(application.status);
           })
         );
 
@@ -305,7 +311,7 @@ export class ApplicationService {
 
     // boilerplate for new application
     app.agency = 'Crown Land Allocation';
-    app.name = 'New Application'; // TODO: remove if not needed
+    app.name = item.cl_file ? item.cl_file.toString() : 'New Application'; // TODO: remove if not needed
 
     // id must not exist on POST
     delete app._id;
@@ -407,27 +413,50 @@ export class ApplicationService {
       .catch(this.api.handleError);
   }
 
-  // returns application status based on status code
-  getStatus(application: Application): string {
-    if (!application || !application.status) {
-      return null; // this.applicationStatuses[this.UNKNOWN]; // no data
+  /**
+   * Returns status abbreviation.
+   */
+  getStatusCode(status: string): string {
+    if (status) {
+      switch (status.toUpperCase()) {
+        case 'ABANDONED': return this.ABANDONED;
+        case 'ACCEPTED': return this.ACCEPTED;
+        case 'ALLOWED': return this.ALLOWED;
+        case 'CANCELLED': return this.CANCELLED;
+        case 'DISALLOWED': return this.DISALLOWED;
+        case 'DISPOSITION IN GOOD STANDING': return this.DISPOSITION_GOOD_STANDING;
+        case 'OFFER ACCEPTED': return this.OFFER_ACCEPTED;
+        case 'OFFER NOT ACCEPTED': return this.OFFER_NOT_ACCEPTED;
+        case 'OFFERED': return this.OFFERED;
+        case 'SUSPENDED': return this.SUSPENDED;
+      }
+      // else return given status in title case
+      return _.startCase(_.camelCase(status));
     }
+    return this.UNKNOWN; // no data
+  }
 
-    switch (application.status.toUpperCase()) {
-      case 'ABANDONED': return this.applicationStatuses[this.ABANDONED];
-      case 'ACCEPTED': return this.applicationStatuses[this.ACCEPTED];
-      case 'ALLOWED': return this.applicationStatuses[this.ALLOWED];
-      case 'CANCELLED': return this.applicationStatuses[this.CANCELLED];
-      case 'DISALLOWED': return this.applicationStatuses[this.DISALLOWED];
-      case 'DISPOSITION IN GOOD STANDING': return this.applicationStatuses[this.DISPOSITION_GOOD_STANDING];
-      case 'OFFER ACCEPTED': return this.applicationStatuses[this.OFFER_ACCEPTED];
-      case 'OFFER NOT ACCEPTED': return this.applicationStatuses[this.OFFER_NOT_ACCEPTED];
-      case 'OFFERED': return this.applicationStatuses[this.OFFERED];
-      case 'SUSPENDED': return this.applicationStatuses[this.SUSPENDED];
+  /**
+   * Returns user-friendly status string.
+   */
+  getStatusString(status: string): string {
+    if (status) {
+      switch (status.toUpperCase()) {
+        case this.ABANDONED: return this.applicationStatuses[this.ABANDONED];
+        case this.ACCEPTED: return this.applicationStatuses[this.ACCEPTED];
+        case this.ALLOWED: return this.applicationStatuses[this.ALLOWED];
+        case this.CANCELLED: return this.applicationStatuses[this.CANCELLED];
+        case this.DISALLOWED: return this.applicationStatuses[this.DISALLOWED];
+        case this.DISPOSITION_GOOD_STANDING: return this.applicationStatuses[this.DISPOSITION_GOOD_STANDING];
+        case this.OFFER_ACCEPTED: return this.applicationStatuses[this.OFFER_ACCEPTED];
+        case this.OFFER_NOT_ACCEPTED: return this.applicationStatuses[this.OFFER_NOT_ACCEPTED];
+        case this.OFFERED: return this.applicationStatuses[this.OFFERED];
+        case this.SUSPENDED: return this.applicationStatuses[this.SUSPENDED];
+        case this.UNKNOWN: return this.applicationStatuses[this.UNKNOWN];
+      }
+      return status; // not one of the above, but return it anyway
     }
-
-    // else return current status in title case
-    return _.startCase(_.camelCase(application.status));
+    return null;
   }
 
   isAccepted(status: string): boolean {
@@ -462,20 +491,13 @@ export class ApplicationService {
     return (status && status.toUpperCase() === 'SUSPENDED');
   }
 
-  private getRegion(businessUnit: string): string {
+  /**
+   * Returns region abbreviation.
+   */
+  getRegionCode(businessUnit: string): string {
     if (businessUnit) {
-      switch (businessUnit.toUpperCase().split(' ')[0]) {
-        case this.CARIBOO: return this.regions[this.CARIBOO];
-        case this.KOOTENAY: return this.regions[this.KOOTENAY];
-        case this.LOWER_MAINLAND: return this.regions[this.LOWER_MAINLAND];
-        case this.OMENICA: return this.regions[this.OMENICA];
-        case this.PEACE: return this.regions[this.PEACE];
-        case this.SKEENA: return this.regions[this.SKEENA];
-        case this.SOUTHERN_INTERIOR: return this.regions[this.SOUTHERN_INTERIOR];
-        case this.VANCOUVER_ISLAND: return this.regions[this.VANCOUVER_ISLAND];
-      }
+      return businessUnit.toUpperCase().split(' ')[0];
     }
-
     return null;
   }
 }
