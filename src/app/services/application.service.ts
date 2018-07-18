@@ -84,8 +84,8 @@ export class ApplicationService {
   }
 
   // get just the applications
-  getAll(): Observable<Application[]> {
-    return this.api.getApplications()
+  getAll(pageNum: number = null, pageSize: number = null): Observable<Application[]> {
+    return this.api.getApplications(pageNum, pageSize)
       .map(res => {
         const applications = res.text() ? res.json() : [];
         applications.forEach((application, i) => {
@@ -109,9 +109,9 @@ export class ApplicationService {
   // get all applications and related data
   // TODO: instead of using promises to get all data at once, use observables and DEEP-OBSERVE changes
   // see https://github.com/angular/angular/issues/11704
-  getAllFull(): Observable<Application[]> {
+  getAllFull(pageNum: number, pageSize: number): Observable<Application[]> {
     // first get the applications
-    return this.getAll()
+    return this.getAll(pageNum, pageSize)
       .mergeMap(applications => {
         if (applications.length === 0) {
           return Observable.of([] as Application[]);
