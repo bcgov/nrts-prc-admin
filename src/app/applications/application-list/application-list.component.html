@@ -3,7 +3,7 @@
     <div class="spinner-new rotating"></div>
   </div>
 
-  <main *ngIf="!loading">
+  <main>
     <section>
       <h2>Crown Lands Applications in British Columbia</h2>
       <p class="tab-intro">Use the list below to navigate to individual applications. Click on any application to go directly to its details page
@@ -20,6 +20,10 @@
           Only show applications with an open or future comment period
         </mat-slide-toggle>
       </div>
+
+      <button class="btn" type="button" (click)="prevPage()" [disabled]="pageNum <= 1">&larr;</button>
+      <span>&nbsp;Page {{pageNum}} of {{pageCount}}&nbsp;</span>
+      <button class="btn" type="button" (click)="nextPage()" [disabled]="pageNum >= pageCount">&rarr;</button>
 
       <table class="table application-table">
         <thead class="application-table__sort-header">
@@ -123,6 +127,7 @@
           </ng-template>
         </tbody>
       </table>
+
     </section>
   </main>
 </div>

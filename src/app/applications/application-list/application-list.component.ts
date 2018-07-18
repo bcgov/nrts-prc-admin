@@ -18,12 +18,16 @@ import { CommentPeriodService } from 'app/services/commentperiod.service';
 })
 
 export class ApplicationListComponent implements OnInit, OnDestroy {
-  public loading = true;
+  readonly PAGE_SIZE = 10;
+
+  public loading: boolean;
   private paramMap: ParamMap = null;
   public showOnlyOpenApps: boolean;
   public applications: Array<Application> = [];
   public column: string = null;
   public direction = 0;
+  public pageCount = 1; // in case getCount() fails
+  public pageNum = 1; // first page
   private ngUnsubscribe: Subject<boolean> = new Subject<boolean>();
 
   constructor(
@@ -51,8 +55,20 @@ export class ApplicationListComponent implements OnInit, OnDestroy {
         this.resetFilters();
       });
 
-    // get data
-    this.applicationService.getAllFull()
+    this.applicationService.getCount()
+      .takeUntil(this.ngUnsubscribe)
+      .subscribe(
+        value => {
+          this.pageCount = Math.ceil(value / this.PAGE_SIZE);
+        });
+
+    // get initial data
+    this.getData();
+  }
+
+  private getData() {
+    this.loading = true;
+    this.applicationService.getAllFull(this.pageNum - 1, this.PAGE_SIZE)
       .takeUntil(this.ngUnsubscribe)
       .subscribe(applications => {
         this.applications = applications;
@@ -64,6 +80,16 @@ export class ApplicationListComponent implements OnInit, OnDestroy {
         // applications not found --> navigate back to home
         this.router.navigate(['/']);
       });
+  }
+
+  public prevPage() {
+    this.pageNum--;
+    this.getData();
+  }
+
+  public nextPage() {
+    this.pageNum++;
+    this.getData();
   }
 
   public showOnlyOpenAppsChange(checked: boolean) {
