@@ -23,7 +23,7 @@ export class ApiService {
   public token: string;
   public isMS: boolean; // IE, Edge, etc
   public pathAPI: string;
-  public env: 'local' | 'dev' | 'test' | 'demo' | 'scale' | 'beta' | 'prod';
+  public env: 'local' | 'dev' | 'test' | 'demo' | 'scale' | 'beta' | 'master' | 'prod';
 
   constructor(
     private http: Http,
@@ -68,6 +68,12 @@ export class ApiService {
         // Beta
         this.pathAPI = 'https://nrts-prc-beta.pathfinder.gov.bc.ca/api';
         this.env = 'beta';
+        break;
+
+      case 'nrts-prc-master.pathfinder.gov.bc.ca':
+        // Master
+        this.pathAPI = 'https://nrts-prc-master.pathfinder.gov.bc.ca/api';
+        this.env = 'master';
         break;
 
       default:
