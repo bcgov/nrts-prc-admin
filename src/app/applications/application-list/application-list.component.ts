@@ -20,7 +20,7 @@ import { CommentPeriodService } from 'app/services/commentperiod.service';
 export class ApplicationListComponent implements OnInit, OnDestroy {
   readonly PAGE_SIZE = 10;
 
-  public loading: boolean;
+  public loading = true;
   private paramMap: ParamMap = null;
   public showOnlyOpenApps: boolean;
   public applications: Array<Application> = [];
@@ -67,7 +67,6 @@ export class ApplicationListComponent implements OnInit, OnDestroy {
   }
 
   private getData() {
-    this.loading = true;
     this.applicationService.getAllFull(this.pageNum - 1, this.PAGE_SIZE)
       .takeUntil(this.ngUnsubscribe)
       .subscribe(applications => {
@@ -84,11 +83,13 @@ export class ApplicationListComponent implements OnInit, OnDestroy {
 
   public prevPage() {
     this.pageNum--;
+    this.loading = true;
     this.getData();
   }
 
   public nextPage() {
     this.pageNum++;
+    this.loading = true;
     this.getData();
   }
 

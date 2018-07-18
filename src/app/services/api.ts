@@ -125,6 +125,11 @@ export class ApiService {
   //
   // Applications
   //
+  getApplicationsNoFields() {
+    const headers = new Headers({ 'Authorization': 'Bearer ' + this.token });
+    return this.get(this.pathAPI, 'application?isDeleted=false', { headers: headers });
+  }
+
   getApplications(pageNum: number, pageSize: number) {
     const fields = [
       'agency',
