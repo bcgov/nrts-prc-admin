@@ -10,6 +10,8 @@ import { ObjectFilterPipe } from 'app/pipes/object-filter.pipe';
 
 import { FileUploadComponent } from 'app/file-upload/file-upload.component';
 
+import { VarDirective } from 'app/utils/ng-var.directive';
+
 @NgModule({
   imports: [
     // CommonModule,
@@ -21,14 +23,16 @@ import { FileUploadComponent } from 'app/file-upload/file-upload.component';
     NewlinesPipe,
     PublishedPipe,
     ObjectFilterPipe,
-    FileUploadComponent
+    FileUploadComponent,
+    VarDirective
   ],
   exports: [
     MatSlideToggleModule,
     OrderByPipe,
     NewlinesPipe,
     PublishedPipe,
-    FileUploadComponent
+    FileUploadComponent,
+    VarDirective
   ]
 })
 
