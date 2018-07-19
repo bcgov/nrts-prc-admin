@@ -6,7 +6,7 @@ import 'rxjs/add/operator/takeUntil';
 import { Application } from 'app/models/application';
 import { ApiService } from 'app/services/api';
 import { ApplicationService } from 'app/services/application.service';
-import { AuthenticationService } from 'app/services/authentication.service';
+// import { AuthenticationService } from 'app/services/authentication.service';
 
 @Component({
   selector: 'app-home',
@@ -15,13 +15,12 @@ import { AuthenticationService } from 'app/services/authentication.service';
 })
 
 export class HomeComponent implements OnInit, OnDestroy {
-  numApplications: number;
   private ngUnsubscribe: Subject<boolean> = new Subject<boolean>();
 
   constructor(
     private router: Router,
     private applicationService: ApplicationService,
-    private authenticationService: AuthenticationService,
+    // private authenticationService: AuthenticationService,
     private api: ApiService
   ) { }
 
@@ -31,12 +30,13 @@ export class HomeComponent implements OnInit, OnDestroy {
       return false;
     }
 
-    // NB: although we aren't currently using numApplications,
     // this verifies our login token and redirects in case of error
     this.applicationService.getCount()
       .takeUntil(this.ngUnsubscribe)
       .subscribe(
-        value => { this.numApplications = value; },
+        value => {
+          console.log('num applications =', value);
+        },
         error => {
           console.log('error =', 'could not count applications');
           this.router.navigate(['login']);

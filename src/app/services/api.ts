@@ -126,8 +126,9 @@ export class ApiService {
   // Applications
   //
   getApplicationsNoFields() {
+    let queryString = 'application?isDeleted=false&pageNum=0&pageSize=1000000';
     const headers = new Headers({ 'Authorization': 'Bearer ' + this.token });
-    return this.get(this.pathAPI, 'application?isDeleted=false', { headers: headers });
+    return this.get(this.pathAPI, queryString, { headers: headers });
   }
 
   getApplications(pageNum: number, pageSize: number) {

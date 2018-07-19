@@ -72,6 +72,14 @@ export class ApplicationListComponent implements OnInit, OnDestroy {
       .subscribe(applications => {
         this.applications = applications;
         this.loading = false;
+
+        // DEBUGGING - to cache app data
+        // this.applications.forEach(app => {
+        //   this.applicationService.save(app)
+        //     .takeUntil(this.ngUnsubscribe)
+        //     .subscribe((ret) => { console.log('id =', ret._id) });
+        // });
+
       }, error => {
         console.log(error);
         alert('Uh-oh, couldn\'t load applications');
