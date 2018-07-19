@@ -20,7 +20,7 @@ import { CommentPeriodService } from 'app/services/commentperiod.service';
 export class ApplicationListComponent implements OnInit, OnDestroy {
   readonly PAGE_SIZE = 10;
 
-  public loading: boolean;
+  public loading = true;
   private paramMap: ParamMap = null;
   public showOnlyOpenApps: boolean;
   public applications: Array<Application> = [];
@@ -67,12 +67,19 @@ export class ApplicationListComponent implements OnInit, OnDestroy {
   }
 
   private getData() {
-    this.loading = true;
     this.applicationService.getAllFull(this.pageNum - 1, this.PAGE_SIZE)
       .takeUntil(this.ngUnsubscribe)
       .subscribe(applications => {
         this.applications = applications;
         this.loading = false;
+
+        // DEBUGGING - to cache app data
+        // this.applications.forEach(app => {
+        //   this.applicationService.save(app)
+        //     .takeUntil(this.ngUnsubscribe)
+        //     .subscribe((ret) => { console.log('id =', ret._id) });
+        // });
+
       }, error => {
         console.log(error);
         alert('Uh-oh, couldn\'t load applications');
@@ -84,11 +91,13 @@ export class ApplicationListComponent implements OnInit, OnDestroy {
 
   public prevPage() {
     this.pageNum--;
+    this.loading = true;
     this.getData();
   }
 
   public nextPage() {
     this.pageNum++;
+    this.loading = true;
     this.getData();
   }
 

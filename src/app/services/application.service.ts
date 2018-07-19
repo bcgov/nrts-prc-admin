@@ -97,10 +97,10 @@ export class ApplicationService {
   }
 
   // get count of applications
-  // FUTURE: use dedicated API for this because we don't need any data
   getCount(): Observable<number> {
-    return this.getAll()
-      .map(applications => {
+    return this.api.getApplicationsNoFields()
+      .map(res => {
+        const applications = res.text() ? res.json() : [];
         return applications.length;
       })
       .catch(this.api.handleError);
