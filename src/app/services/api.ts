@@ -131,7 +131,8 @@ export class ApiService {
     return this.get(this.pathAPI, queryString, { headers: headers });
   }
 
-  getApplications(pageNum: number, pageSize: number) {
+  getApplications(pageNum: number, pageSize: number, regions: string[] = [], cpStatuses: string[] = [], appStatuses: string[] = [],
+    applicant: string = null, clFile: string = null, dispId: string = null, purpose: string = null) {
     const fields = [
       'agency',
       'cl_file',
@@ -156,6 +157,13 @@ export class ApiService {
     let queryString = 'application?isDeleted=false&';
     if (pageNum !== null) { queryString += `pageNum=${pageNum}&`; }
     if (pageSize !== null) { queryString += `pageSize=${pageSize}&`; }
+    if (regions.length > 0) { queryString += `regions=${this.buildValues(regions)}&`; }
+    if (cpStatuses.length > 0) { queryString += `cpStatuses=${this.buildValues(cpStatuses)}&`; }
+    if (appStatuses.length > 0) { queryString += `statuses=${this.buildValues(appStatuses)}&`; }
+    if (applicant !== null) { queryString += `client=${applicant}&`; }
+    if (clFile !== null) { queryString += `cl_file=${clFile}&`; }
+    if (dispId !== null) { queryString += `tantalisID=${dispId}&`; }
+    if (purpose !== null) { queryString += `purpose=${purpose}&`; }
     queryString += `fields=${this.buildValues(fields)}`;
 
     const headers = new Headers({ 'Authorization': 'Bearer ' + this.token });
@@ -190,7 +198,7 @@ export class ApiService {
 
   // for now, this is just a quick lookup by Tantalis ID
   getApplicationByTantalisId(tantalisId: number) {
-    const queryString = 'application?isDeleted=false&tantalisId=' + tantalisId;
+    const queryString = 'application?isDeleted=false&tantalisID=' + tantalisId;
     const headers = new Headers({ 'Authorization': 'Bearer ' + this.token });
     return this.get(this.pathAPI, queryString, { headers: headers });
   }

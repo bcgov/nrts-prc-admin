@@ -26,9 +26,17 @@ export class ApplicationListComponent implements OnInit, OnDestroy {
   public applications: Array<Application> = [];
   public column: string = null;
   public direction = 0;
+  private ngUnsubscribe: Subject<boolean> = new Subject<boolean>();
+
   public pageCount = 1; // in case getCount() fails
   public pageNum = 1; // first page
-  private ngUnsubscribe: Subject<boolean> = new Subject<boolean>();
+  private regionFilters: object = { /*VI: true*/ }; // array-like object
+  private cpStatusFilters: object = {}; // array-like object
+  private appStatusFilters: object = {}; // array-like object
+  private applicantFilter: string = null;
+  private clFileFilter: string = null;
+  private dispIdFilter: string = null;
+  private purposeFilter: string = null;
 
   constructor(
     private location: Location,
@@ -67,7 +75,8 @@ export class ApplicationListComponent implements OnInit, OnDestroy {
   }
 
   private getData() {
-    this.applicationService.getAllFull(this.pageNum - 1, this.PAGE_SIZE)
+    this.applicationService.getAllFull(this.pageNum - 1, this.PAGE_SIZE, this.regionFilters, this.cpStatusFilters, this.appStatusFilters,
+      this.applicantFilter, this.clFileFilter, this.dispIdFilter, this.purposeFilter)
       .takeUntil(this.ngUnsubscribe)
       .subscribe(applications => {
         this.applications = applications;

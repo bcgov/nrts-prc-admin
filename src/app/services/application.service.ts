@@ -84,8 +84,18 @@ export class ApplicationService {
   }
 
   // get just the applications
-  getAll(pageNum: number = null, pageSize: number = null): Observable<Application[]> {
-    return this.api.getApplications(pageNum, pageSize)
+  getAll(pageNum: number = 0, pageSize: number = 1000000, regionFilters: object = {}, cpStatusFilters: object = {}, appStatusFilters: object = {},
+    applicantFilter: string = null, clFileFilter: string = null, dispIdFilter: string = null, purposeFilter: string = null): Observable<Application[]> {
+      const regions: Array<string> = [];
+      const cpStatuses: Array<string> = [];
+      const appStatuses: Array<string> = [];
+  
+      // convert array-like objects to arrays
+      Object.keys(regionFilters).forEach(key => { if (regionFilters[key]) { regions.push(key); } });
+      Object.keys(cpStatusFilters).forEach(key => { if (cpStatusFilters[key]) { cpStatuses.push(key); } });
+      Object.keys(appStatusFilters).forEach(key => { if (appStatusFilters[key]) { appStatuses.push(key); } });
+      
+      return this.api.getApplications(pageNum, pageSize, regions, cpStatuses, appStatuses, applicantFilter, clFileFilter, dispIdFilter, purposeFilter)
       .map(res => {
         const applications = res.text() ? res.json() : [];
         applications.forEach((application, i) => {
@@ -109,9 +119,10 @@ export class ApplicationService {
   // get all applications and related data
   // TODO: instead of using promises to get all data at once, use observables and DEEP-OBSERVE changes
   // see https://github.com/angular/angular/issues/11704
-  getAllFull(pageNum: number, pageSize: number): Observable<Application[]> {
+  getAllFull(pageNum: number = 0, pageSize: number = 1000000, regionFilters: object = {}, cpStatusFilters: object = {}, appStatusFilters: object = {},
+    applicantFilter: string = null, clFileFilter: string = null, dispIdFilter: string = null, purposeFilter: string = null): Observable<Application[]> {
     // first get the applications
-    return this.getAll(pageNum, pageSize)
+    return this.getAll(pageNum, pageSize, regionFilters, cpStatusFilters, appStatusFilters, applicantFilter, clFileFilter, dispIdFilter, purposeFilter)
       .mergeMap(applications => {
         if (applications.length === 0) {
           return Observable.of([] as Application[]);
