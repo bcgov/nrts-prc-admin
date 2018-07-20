@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Http, Response, ResponseContentType, RequestOptions, Headers } from '@angular/http';
-import { Params, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 import { ErrorObservable } from 'rxjs/observable/ErrorObservable';
 import { Subscription } from 'rxjs/Subscription';
@@ -23,10 +23,12 @@ export class ApiService {
   public token: string;
   public isMS: boolean; // IE, Edge, etc
   pathAPI: string;
-  params: Params;
-  env: 'local' | 'dev' | 'test' | 'demo' | 'scale' | 'beta' | 'prod';
+  env: 'local' | 'dev' | 'test' | 'demo' | 'scale' | 'beta' | 'master' | 'prod';
 
-  constructor(private http: Http, private router: Router) {
+  constructor(
+    private http: Http,
+    private router: Router
+  ) {
     const currentUser = JSON.parse(window.localStorage.getItem('currentUser'));
     this.token = currentUser && currentUser.token;
     this.isMS = window.navigator.msSaveOrOpenBlob ? true : false;
@@ -57,15 +59,21 @@ export class ApiService {
         break;
 
       case 'nrts-prc-scale.pathfinder.gov.bc.ca':
-        // Demo
+        // Scale
         this.pathAPI = 'https://nrts-prc-scale.pathfinder.gov.bc.ca/api';
         this.env = 'scale';
         break;
 
       case 'nrts-prc-beta.pathfinder.gov.bc.ca':
-        // Demo
+        // Beta
         this.pathAPI = 'https://nrts-prc-beta.pathfinder.gov.bc.ca/api';
         this.env = 'beta';
+        break;
+
+      case 'nrts-prc-master.pathfinder.gov.bc.ca':
+        // Master
+        this.pathAPI = 'https://nrts-prc-master.pathfinder.gov.bc.ca/api';
+        this.env = 'master';
         break;
 
       default:
@@ -117,7 +125,14 @@ export class ApiService {
   //
   // Applications
   //
-  getApplications() {
+  getApplicationsNoFields() {
+    let queryString = 'application?isDeleted=false&pageNum=0&pageSize=1000000';
+    const headers = new Headers({ 'Authorization': 'Bearer ' + this.token });
+    return this.get(this.pathAPI, queryString, { headers: headers });
+  }
+
+  getApplications(pageNum: number, pageSize: number, regions: string[] = [], cpStatuses: string[] = [], appStatuses: string[] = [],
+    applicant: string = null, clFile: string = null, dispId: string = null, purpose: string = null) {
     const fields = [
       'agency',
       'cl_file',
@@ -132,14 +147,25 @@ export class ApiService {
       'name',
       'postID',
       'publishDate',
+      'purpose',
+      'region',
+      'status',
+      'subpurpose',
       'tantalisID'
     ];
-    let queryString = 'application?isDeleted=false&fields=';
-    _.each(fields, function (f) {
-      queryString += f + '|';
-    });
-    // Trim the last |
-    queryString = queryString.replace(/\|$/, '');
+
+    let queryString = 'application?isDeleted=false&';
+    if (pageNum !== null) { queryString += `pageNum=${pageNum}&`; }
+    if (pageSize !== null) { queryString += `pageSize=${pageSize}&`; }
+    if (regions.length > 0) { queryString += `regions=${this.buildValues(regions)}&`; }
+    if (cpStatuses.length > 0) { queryString += `cpStatuses=${this.buildValues(cpStatuses)}&`; }
+    if (appStatuses.length > 0) { queryString += `statuses=${this.buildValues(appStatuses)}&`; }
+    if (applicant !== null) { queryString += `client=${applicant}&`; }
+    if (clFile !== null) { queryString += `cl_file=${clFile}&`; }
+    if (dispId !== null) { queryString += `tantalisID=${dispId}&`; }
+    if (purpose !== null) { queryString += `purpose=${purpose}&`; }
+    queryString += `fields=${this.buildValues(fields)}`;
+
     const headers = new Headers({ 'Authorization': 'Bearer ' + this.token });
     return this.get(this.pathAPI, queryString, { headers: headers });
   }
@@ -159,21 +185,20 @@ export class ApiService {
       'name',
       'postID',
       'publishDate',
+      'purpose',
+      'region',
+      'status',
+      'subpurpose',
       'tantalisID'
     ];
-    let queryString = 'application/' + id + '?fields=';
-    _.each(fields, function (f) {
-      queryString += f + '|';
-    });
-    // Trim the last |
-    queryString = queryString.replace(/\|$/, '');
+    const queryString = 'application/' + id + '?fields=' + this.buildValues(fields);
     const headers = new Headers({ 'Authorization': 'Bearer ' + this.token });
     return this.get(this.pathAPI, queryString, { headers: headers });
   }
 
   // for now, this is just a quick lookup by Tantalis ID
   getApplicationByTantalisId(tantalisId: number) {
-    const queryString = 'application?isDeleted=false&tantalisId=' + tantalisId;
+    const queryString = 'application?isDeleted=false&tantalisID=' + tantalisId;
     const headers = new Headers({ 'Authorization': 'Bearer ' + this.token });
     return this.get(this.pathAPI, queryString, { headers: headers });
   }
@@ -216,14 +241,13 @@ export class ApiService {
       'name',
       'postID',
       'publishDate',
+      'purpose',
+      'region',
+      'status',
+      'subpurpose',
       'tantalisID'
     ];
-    let queryString = 'application/' + app._id + '?fields=';
-    _.each(fields, function (f) {
-      queryString += f + '|';
-    });
-    // Trim the last |
-    queryString = queryString.replace(/\|$/, '');
+    const queryString = 'application/' + app._id + '?fields=' + this.buildValues(fields);
     const headers = new Headers({ 'Authorization': 'Bearer ' + this.token });
     return this.put(this.pathAPI, queryString, app, { headers: headers });
   }
@@ -237,12 +261,7 @@ export class ApiService {
       'code',
       'name'
     ];
-    let queryString = 'organization?fields=';
-    _.each(fields, function (f) {
-      queryString += f + '|';
-    });
-    // Trim the last |
-    queryString = queryString.replace(/\|$/, '');
+    const queryString = 'organization?fields=' + this.buildValues(fields);
     const headers = new Headers({ 'Authorization': 'Bearer ' + this.token });
     return this.get(this.pathAPI, queryString, { headers: headers });
   }
@@ -253,12 +272,7 @@ export class ApiService {
       'code',
       'name'
     ];
-    let queryString = 'organization/' + id + '?fields=';
-    _.each(fields, function (f) {
-      queryString += f + '|';
-    });
-    // Trim the last |
-    queryString = queryString.replace(/\|$/, '');
+    const queryString = 'organization/' + id + '?fields=' + this.buildValues(fields);
     const headers = new Headers({ 'Authorization': 'Bearer ' + this.token });
     return this.get(this.pathAPI, queryString, { headers: headers });
   }
@@ -274,12 +288,7 @@ export class ApiService {
       'name',
       'description'
     ];
-    let queryString = 'decision?_application=' + appId + '&fields=';
-    _.each(fields, function (f) {
-      queryString += f + '|';
-    });
-    // Trim the last |
-    queryString = queryString.replace(/\|$/, '');
+    const queryString = 'decision?_application=' + appId + '&fields=' + this.buildValues(fields);
     const headers = new Headers({ 'Authorization': 'Bearer ' + this.token });
     return this.get(this.pathAPI, queryString, { headers: headers });
   }
@@ -292,36 +301,27 @@ export class ApiService {
       'name',
       'description'
     ];
-    let queryString = 'decision/' + id + '?fields=';
-    _.each(fields, function (f) {
-      queryString += f + '|';
-    });
-    // Trim the last |
-    queryString = queryString.replace(/\|$/, '');
+    const queryString = 'decision/' + id + '?fields=' + this.buildValues(fields);
     const headers = new Headers({ 'Authorization': 'Bearer ' + this.token });
     return this.get(this.pathAPI, queryString, { headers: headers });
   }
 
   addDecision(decision: Decision) {
-    const fields = ['_application', 'description'];
-    let queryString = 'decision?fields=';
-    _.each(fields, function (f) {
-      queryString += f + '|';
-    });
-    // Trim the last |
-    queryString = queryString.replace(/\|$/, '');
+    const fields = [
+      '_application',
+      'description'
+    ];
+    const queryString = 'decision?fields=' + this.buildValues(fields);
     const headers = new Headers({ 'Authorization': 'Bearer ' + this.token });
     return this.post(this.pathAPI, queryString, decision, { headers: headers });
   }
 
   saveDecision(decision: Decision) {
-    const fields = ['_application', 'description'];
-    let queryString = 'decision/' + decision._id + '?fields=';
-    _.each(fields, function (f) {
-      queryString += f + '|';
-    });
-    // Trim the last |
-    queryString = queryString.replace(/\|$/, '');
+    const fields = [
+      '_application',
+      'description'
+    ];
+    const queryString = 'decision/' + decision._id + '?fields=' + this.buildValues(fields);
     const headers = new Headers({ 'Authorization': 'Bearer ' + this.token });
     return this.put(this.pathAPI, queryString, decision, { headers: headers });
   }
@@ -353,12 +353,7 @@ export class ApiService {
       'description',
       'internal'
     ];
-    let queryString = 'commentperiod?isDeleted=false&_application=' + appId + '&fields=';
-    _.each(fields, function (f) {
-      queryString += f + '|';
-    });
-    // Trim the last |
-    queryString = queryString.replace(/\|$/, '');
+    const queryString = 'commentperiod?isDeleted=false&_application=' + appId + '&fields=' + this.buildValues(fields);
     const headers = new Headers({ 'Authorization': 'Bearer ' + this.token });
     return this.get(this.pathAPI, queryString, { headers: headers });
   }
@@ -372,36 +367,31 @@ export class ApiService {
       'description',
       'internal'
     ];
-    let queryString = 'commentperiod/' + id + '?fields=';
-    _.each(fields, function (f) {
-      queryString += f + '|';
-    });
-    // Trim the last |
-    queryString = queryString.replace(/\|$/, '');
+    const queryString = 'commentperiod/' + id + '?fields=' + this.buildValues(fields);
     const headers = new Headers({ 'Authorization': 'Bearer ' + this.token });
     return this.get(this.pathAPI, queryString, { headers: headers });
   }
 
   addCommentPeriod(period: CommentPeriod) {
-    const fields = ['_application', 'startDate', 'endDate', 'description'];
-    let queryString = 'commentperiod?fields=';
-    _.each(fields, function (f) {
-      queryString += f + '|';
-    });
-    // Trim the last |
-    queryString = queryString.replace(/\|$/, '');
+    const fields = [
+      '_application',
+      'startDate',
+      'endDate',
+      'description'
+    ];
+    const queryString = 'commentperiod?fields=' + this.buildValues(fields);
     const headers = new Headers({ 'Authorization': 'Bearer ' + this.token });
     return this.post(this.pathAPI, queryString, period, { headers: headers });
   }
 
   saveCommentPeriod(period: CommentPeriod) {
-    const fields = ['_application', 'startDate', 'endDate', 'description'];
-    let queryString = 'commentperiod/' + period._id + '?fields=';
-    _.each(fields, function (f) {
-      queryString += f + '|';
-    });
-    // Trim the last |
-    queryString = queryString.replace(/\|$/, '');
+    const fields = [
+      '_application',
+      'startDate',
+      'endDate',
+      'description'
+    ];
+    const queryString = 'commentperiod/' + period._id + '?fields=' + this.buildValues(fields);
     const headers = new Headers({ 'Authorization': 'Bearer ' + this.token });
     return this.put(this.pathAPI, queryString, period, { headers: headers });
   }
@@ -435,12 +425,7 @@ export class ApiService {
       'dateAdded',
       'commentStatus'
     ];
-    let queryString = 'comment?isDeleted=false&_commentPeriod=' + periodId + '&fields=';
-    _.each(fields, function (f) {
-      queryString += f + '|';
-    });
-    // Trim the last |
-    queryString = queryString.replace(/\|$/, '');
+    const queryString = 'comment?isDeleted=false&_commentPeriod=' + periodId + '&fields=' + this.buildValues(fields);
     const headers = new Headers({ 'Authorization': 'Bearer ' + this.token });
     return this.get(this.pathAPI, queryString, { headers: headers });
   }
@@ -456,36 +441,27 @@ export class ApiService {
       'dateAdded',
       'commentStatus'
     ];
-    let queryString = 'comment/' + id + '?fields=';
-    _.each(fields, function (f) {
-      queryString += f + '|';
-    });
-    // Trim the last |
-    queryString = queryString.replace(/\|$/, '');
+    const queryString = 'comment/' + id + '?fields=' + this.buildValues(fields);
     const headers = new Headers({ 'Authorization': 'Bearer ' + this.token });
     return this.get(this.pathAPI, queryString, { headers: headers });
   }
 
   addComment(comment: Comment) {
-    const fields = ['comment', 'commentAuthor'];
-    let queryString = 'comment?fields=';
-    _.each(fields, function (f) {
-      queryString += f + '|';
-    });
-    // Trim the last |
-    queryString = queryString.replace(/\|$/, '');
+    const fields = [
+      'comment',
+      'commentAuthor'
+    ];
+    const queryString = 'comment?fields=' + this.buildValues(fields);
     const headers = new Headers({ 'Authorization': 'Bearer ' + this.token });
     return this.post(this.pathAPI, queryString, comment, { headers: headers });
   }
 
   saveComment(comment: Comment) {
-    const fields = ['review', 'commentStatus'];
-    let queryString = 'comment/' + comment._id + '?fields=';
-    _.each(fields, function (f) {
-      queryString += f + '|';
-    });
-    // Trim the last |
-    queryString = queryString.replace(/\|$/, '');
+    const fields = [
+      'review',
+      'commentStatus'
+    ];
+    const queryString = 'comment/' + comment._id + '?fields=' + this.buildValues(fields);
     const headers = new Headers({ 'Authorization': 'Bearer ' + this.token });
     return this.put(this.pathAPI, queryString, comment, { headers: headers });
   }
@@ -504,37 +480,40 @@ export class ApiService {
   // Documents
   //
   getDocumentsByAppId(appId: string) {
-    const fields = ['_application', 'documentFileName', 'displayName', 'internalURL', 'internalMime'];
-    let queryString = 'document?isDeleted=false&_application=' + appId + '&fields=';
-    _.each(fields, function (f) {
-      queryString += f + '|';
-    });
-    // Trim the last |
-    queryString = queryString.replace(/\|$/, '');
+    const fields = [
+      '_application',
+      'documentFileName',
+      'displayName',
+      'internalURL',
+      'internalMime'
+    ];
+    const queryString = 'document?isDeleted=false&_application=' + appId + '&fields=' + this.buildValues(fields);
     const headers = new Headers({ 'Authorization': 'Bearer ' + this.token });
     return this.get(this.pathAPI, queryString, { headers: headers });
   }
 
   getDocumentsByCommentId(commentId: string) {
-    const fields = ['_comment', 'documentFileName', 'displayName', 'internalURL', 'internalMime'];
-    let queryString = 'document?isDeleted=false&_comment=' + commentId + '&fields=';
-    _.each(fields, function (f) {
-      queryString += f + '|';
-    });
-    // Trim the last |
-    queryString = queryString.replace(/\|$/, '');
+    const fields = [
+      '_comment',
+      'documentFileName',
+      'displayName',
+      'internalURL',
+      'internalMime'
+    ];
+    const queryString = 'document?isDeleted=false&_comment=' + commentId + '&fields=' + this.buildValues(fields);
     const headers = new Headers({ 'Authorization': 'Bearer ' + this.token });
     return this.get(this.pathAPI, queryString, { headers: headers });
   }
 
   getDocumentsByDecisionId(decisionId: string) {
-    const fields = ['_decision', 'documentFileName', 'displayName', 'internalURL', 'internalMime'];
-    let queryString = 'document?isDeleted=false&_decision=' + decisionId + '&fields=';
-    _.each(fields, function (f) {
-      queryString += f + '|';
-    });
-    // Trim the last |
-    queryString = queryString.replace(/\|$/, '');
+    const fields = [
+      '_decision',
+      'documentFileName',
+      'displayName',
+      'internalURL',
+      'internalMime'
+    ];
+    const queryString = 'document?isDeleted=false&_decision=' + decisionId + '&fields=' + this.buildValues(fields);
     const headers = new Headers({ 'Authorization': 'Bearer ' + this.token });
     return this.get(this.pathAPI, queryString, { headers: headers });
   }
@@ -560,13 +539,13 @@ export class ApiService {
   }
 
   uploadDocument(formData: FormData) {
-    const fields = ['documentFileName', 'displayName', 'internalURL', 'internalMime'];
-    let queryString = 'document/?fields=';
-    _.each(fields, function (f) {
-      queryString += f + '|';
-    });
-    // Trim the last |
-    queryString = queryString.replace(/\|$/, '');
+    const fields = [
+      'documentFileName',
+      'displayName',
+      'internalURL',
+      'internalMime'
+    ];
+    const queryString = 'document/?fields=' + this.buildValues(fields);
     const headers = new Headers({ 'Authorization': 'Bearer ' + this.token });
     return this.post(this.pathAPI, queryString, formData, { headers: headers });
   }
@@ -609,37 +588,29 @@ export class ApiService {
   // Crown Lands files
   //
   getBCGWCrownLands(id: string) {
-    const fields = ['name', 'isImported'];
-    let queryString = 'public/search/bcgw/crownLandsId/' + id + '?fields=';
-    _.each(fields, function (f) {
-      queryString += f + '|';
-    });
-    // Trim the last |
-    queryString = queryString.replace(/\|$/, '');
+    const fields = [
+      'name',
+      'isImported'
+    ];
+    const queryString = 'public/search/bcgw/crownLandsId/' + id + '?fields=' + this.buildValues(fields);
     const headers = new Headers({ 'Authorization': 'Bearer ' + this.token });
     return this.get(this.pathAPI, queryString, { headers: headers });
   }
 
   getBCGWDispositionByTransactionId(transactionId: number) {
-    const fields = ['name'];
-    let queryString = 'public/search/bcgw/dispositionTransactionId/' + transactionId + '?fields=';
-    _.each(fields, function (f) {
-      queryString += f + '|';
-    });
-    // Trim the last |
-    queryString = queryString.replace(/\|$/, '');
+    const fields = [
+      'name'
+    ];
+    const queryString = 'public/search/bcgw/dispositionTransactionId/' + transactionId + '?fields=' + this.buildValues(fields);
     const headers = new Headers({ 'Authorization': 'Bearer ' + this.token });
     return this.get(this.pathAPI, queryString, { headers: headers });
   }
 
   getClientsInfoByDispositionId(dispositionId: number) {
-    const fields = ['name'];
-    let queryString = 'public/search/bcgw/getClientsInfoByDispositionId/' + dispositionId + '?fields=';
-    _.each(fields, function (f) {
-      queryString += f + '|';
-    });
-    // Trim the last |
-    queryString = queryString.replace(/\|$/, '');
+    const fields = [
+      'name'
+    ];
+    const queryString = 'public/search/bcgw/getClientsInfoByDispositionId/' + dispositionId + '?fields=' + this.buildValues(fields);
     const headers = new Headers({ 'Authorization': 'Bearer ' + this.token });
     return this.get(this.pathAPI, queryString, { headers: headers });
   }
@@ -648,44 +619,53 @@ export class ApiService {
   // Users
   //
   getAllUsers() {
-    const fields = ['displayName', 'username', 'firstName', 'lastName'];
-    let queryString = 'user?fields=';
-    _.each(fields, function (f) {
-      queryString += f + '|';
-    });
-    // Trim the last |
-    queryString = queryString.replace(/\|$/, '');
+    const fields = [
+      'displayName',
+      'username',
+      'firstName',
+      'lastName'
+    ];
+    const queryString = 'user?fields=' + this.buildValues(fields);
     const headers = new Headers({ 'Authorization': 'Bearer ' + this.token });
     return this.get(this.pathAPI, queryString, { headers: headers });
   }
 
   saveUser(user: User) {
-    const fields = ['displayName', 'username', 'firstName', 'lastName'];
-    let queryString = 'user/' + user._id + '?fields=';
-    _.each(fields, function (f) {
-      queryString += f + '|';
-    });
-    // Trim the last |
-    queryString = queryString.replace(/\|$/, '');
+    const fields = [
+      'displayName',
+      'username',
+      'firstName',
+      'lastName'
+    ];
+    const queryString = 'user/' + user._id + '?fields=' + this.buildValues(fields);
     const headers = new Headers({ 'Authorization': 'Bearer ' + this.token });
     return this.put(this.pathAPI, queryString, user, { headers: headers });
   }
 
   addUser(user: User) {
-    const fields = ['displayName', 'username', 'firstName', 'lastName'];
-    let queryString = 'user?fields=';
-    _.each(fields, function (f) {
-      queryString += f + '|';
-    });
-    // Trim the last |
-    queryString = queryString.replace(/\|$/, '');
+    const fields = [
+      'displayName',
+      'username',
+      'firstName',
+      'lastName'
+    ];
+    const queryString = 'user?fields=' + this.buildValues(fields);
     const headers = new Headers({ 'Authorization': 'Bearer ' + this.token });
     return this.post(this.pathAPI, queryString, user, { headers: headers });
   }
 
   //
-  // Private
+  // Local helpers
   //
+  private buildValues(collection: any[]): string {
+    let values = '';
+    _.each(collection, function (a) {
+      values += a + '|';
+    });
+    // trim the last |
+    return values.replace(/\|$/, '');
+  }
+
   private get(apiPath: string, apiRoute: string, options?: Object) {
     return this.http.get(`${apiPath}/${apiRoute}`, options || null);
   }
