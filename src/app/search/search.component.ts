@@ -195,7 +195,7 @@ export class SearchComponent implements OnInit, OnDestroy {
     this.applicationService.add(item)
       .takeUntil(this.ngUnsubscribe)
       .subscribe(application => {
-        this.router.navigate(['/a', application._id]);
+        this.router.navigate(['/a', application._id, 'edit']);
       });
   }
 
