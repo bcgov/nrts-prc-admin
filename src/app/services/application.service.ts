@@ -86,16 +86,16 @@ export class ApplicationService {
   // get just the applications
   getAll(pageNum: number = 0, pageSize: number = 1000000, regionFilters: object = {}, cpStatusFilters: object = {}, appStatusFilters: object = {},
     applicantFilter: string = null, clFileFilter: string = null, dispIdFilter: string = null, purposeFilter: string = null): Observable<Application[]> {
-      const regions: Array<string> = [];
-      const cpStatuses: Array<string> = [];
-      const appStatuses: Array<string> = [];
-  
-      // convert array-like objects to arrays
-      Object.keys(regionFilters).forEach(key => { if (regionFilters[key]) { regions.push(key); } });
-      Object.keys(cpStatusFilters).forEach(key => { if (cpStatusFilters[key]) { cpStatuses.push(key); } });
-      Object.keys(appStatusFilters).forEach(key => { if (appStatusFilters[key]) { appStatuses.push(key); } });
-      
-      return this.api.getApplications(pageNum, pageSize, regions, cpStatuses, appStatuses, applicantFilter, clFileFilter, dispIdFilter, purposeFilter)
+    const regions: Array<string> = [];
+    const cpStatuses: Array<string> = [];
+    const appStatuses: Array<string> = [];
+
+    // convert array-like objects to arrays
+    Object.keys(regionFilters).forEach(key => { if (regionFilters[key]) { regions.push(key); } });
+    Object.keys(cpStatusFilters).forEach(key => { if (cpStatusFilters[key]) { cpStatuses.push(key); } });
+    Object.keys(appStatusFilters).forEach(key => { if (appStatusFilters[key]) { appStatuses.push(key); } });
+
+    return this.api.getApplications(pageNum, pageSize, regions, cpStatuses, appStatuses, applicantFilter, clFileFilter, dispIdFilter, purposeFilter)
       .map(res => {
         const applications = res.text() ? res.json() : [];
         applications.forEach((application, i) => {
@@ -319,10 +319,6 @@ export class ApplicationService {
   // create new application
   add(item: any): Observable<Application> {
     const app = new Application(item);
-
-    // boilerplate for new application
-    app.agency = 'Crown Land Allocation';
-    app.name = item.cl_file ? item.cl_file.toString() : 'New Application'; // TODO: remove if not needed
 
     // id must not exist on POST
     delete app._id;

@@ -190,6 +190,9 @@ export class SearchComponent implements OnInit, OnDestroy {
       item.tantalisID = item.properties.DISPOSITION_TRANSACTION_SID;
     }
 
+    item.agency = 'Crown Land Allocation';
+    item.name = item.cl_file ? item.cl_file.toString() : 'Imported using CL File Number';
+
     // add the application
     // on success go to edit page
     this.applicationService.add(item)

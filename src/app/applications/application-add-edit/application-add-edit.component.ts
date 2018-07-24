@@ -184,6 +184,9 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
                     this.application.cl_file = +this.application.features[0].properties.CROWN_LANDS_FILE; // NOTE: unary operator
                   }
 
+                  this.application.agency = 'Crown Land Allocation';
+                  this.application.name = this.application.cl_file ? this.application.cl_file.toString() : 'Created from Disposition ID';
+
                   // unset old client
                   this.application.client = null;
 
