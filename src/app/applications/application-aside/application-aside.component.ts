@@ -1,4 +1,4 @@
-import { Component, OnChanges, OnDestroy, Input, SimpleChanges } from '@angular/core';
+import { Component, OnInit, OnChanges, OnDestroy, Input, SimpleChanges } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject } from 'rxjs/Subject';
 import 'rxjs/add/operator/takeUntil';
@@ -19,7 +19,7 @@ import { SearchService } from '../../services/search.service';
   styleUrls: ['./application-aside.component.scss']
 })
 
-export class ApplicationAsideComponent implements OnChanges, OnDestroy {
+export class ApplicationAsideComponent implements OnInit, OnChanges, OnDestroy {
   @Input() application: Application = null;
   public daysRemaining = '-';
   public numComments = '-';
@@ -41,39 +41,47 @@ export class ApplicationAsideComponent implements OnChanges, OnDestroy {
   ) { }
 
   ngOnInit() {
-    const self = this;
+    const self = this; // for nested functions
+
     const World_Topo_Map = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
-      attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ, TomTom, Intermap, iPC, USGS, FAO, NPS, NRCAN, GeoBase, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), and the GIS User Community'
+      attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ, TomTom, Intermap, iPC, USGS, FAO, NPS, NRCAN, GeoBase, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), and the GIS User Community',
+      maxZoom: 16,
+      noWrap: true
     });
     const World_Imagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-      attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+      attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+      maxZoom: 17,
+      noWrap: true
     });
     const OpenMapSurfer_Roads = L.tileLayer('https://korona.geog.uni-heidelberg.de/tiles/roads/x={x}&y={y}&z={z}', {
+      attribution: 'Imagery from <a href="http://giscience.uni-hd.de/">GIScience Research Group @ University of Heidelberg</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
       maxZoom: 20,
-      attribution: 'Imagery from <a href="http://giscience.uni-hd.de/">GIScience Research Group @ University of Heidelberg</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+      noWrap: true
     });
     const Esri_OceanBasemap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Ocean_Basemap/MapServer/tile/{z}/{y}/{x}', {
       attribution: 'Tiles &copy; Esri &mdash; Sources: GEBCO, NOAA, CHS, OSU, UNH, CSUMB, National Geographic, DeLorme, NAVTEQ, and Esri',
-      maxZoom: 13
+      maxZoom: 13,
+      noWrap: true
     });
     const Esri_NatGeoWorldMap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/{z}/{y}/{x}', {
       attribution: 'Tiles &copy; Esri &mdash; National Geographic, Esri, DeLorme, NAVTEQ, UNEP-WCMC, USGS, NASA, ESA, METI, NRCAN, GEBCO, NOAA, iPC',
-      maxZoom: 16
+      maxZoom: 16,
+      noWrap: true
     });
 
-    self.map = L.map('map', {
+    this.map = L.map('map', {
       layers: [World_Imagery]
     });
 
     // set up the controls
-    self.baseMaps = {
+    this.baseMaps = {
       'Ocean Base': Esri_OceanBasemap,
       'Nat Geo World Map': Esri_NatGeoWorldMap,
       'Open Surfer Roads': OpenMapSurfer_Roads,
       'World Topographic': World_Topo_Map,
       'World Imagery': World_Imagery
     };
-    self.control = L.control.layers(self.baseMaps, null, { collapsed: true }).addTo(self.map);
+    this.control = L.control.layers(this.baseMaps, null, { collapsed: true }).addTo(this.map);
     const resetViewControl = L.Control.extend({
       options: {
         position: 'topleft'
@@ -104,67 +112,66 @@ export class ApplicationAsideComponent implements OnChanges, OnDestroy {
         map.getPanes().overlayPane.removeChild(this._element);
       }
     });
-    self.map.addControl(new resetViewControl());
+    this.map.addControl(new resetViewControl());
 
     if (this.application) {
-        // get comment period days remaining
-        if (this.application._id !== '0' && this.application.currentPeriod) {
-          const now = new Date();
-          const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-          // use moment to handle Daylight Saving Time changes
-          const days = moment(this.application.currentPeriod.endDate).diff(moment(today), 'days') + 1;
-          this.daysRemaining = days + (days === 1 ? ' Day ' : ' Days ') + 'Remaining';
-        }
+      // get comment period days remaining
+      if (this.application._id !== '0' && this.application.currentPeriod) {
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        // use moment to handle Daylight Saving Time changes
+        const days = moment(this.application.currentPeriod.endDate).diff(moment(today), 'days') + 1;
+        this.daysRemaining = days + (days === 1 ? ' Day ' : ' Days ') + 'Remaining';
+      }
 
-        // get number of pending comments
-        if (this.application._id !== '0') {
-          this.commentService.getAllByApplicationId(this.application._id)
-            .takeUntil(this.ngUnsubscribe)
-            .subscribe(
-              (comments: Comment[]) => {
-                const pending = comments.filter(comment => this.commentService.isPending(comment));
-                this.numComments = pending.length.toString();
-              },
-              error => console.log('couldn\'t get pending comments, error =', error)
-            );
-        }
-        const self = this;
-        if (self.fg) {
-          _.each(self.layers, function (layer) {
-            self.map.removeLayer(layer);
-          });
-          self.fg.clearLayers();
-        } else {
-          self.fg = L.featureGroup();
-        }
-        // NB: always reload results to reduce chance of race condition
-        //     with drawing map and features
-        this.searchService.getByDTID(this.application.tantalisID)
+      // get number of pending comments
+      if (this.application._id !== '0') {
+        this.commentService.getAllByApplicationId(this.application._id)
           .takeUntil(this.ngUnsubscribe)
           .subscribe(
-            features => {
-                try {
-                  _.each(features, function (feature) {
-                  const f = JSON.parse(JSON.stringify(feature));
-                  // Needed to be valid GeoJSON
-                  delete f.geometry_name;
-                  const featureObj: GeoJSON.Feature<any> = f;
-                  const layer = L.geoJSON(featureObj);
-                  const options = { maxWidth: 400 };
-                  self.fg.addLayer(layer);
-                  layer.addTo(self.map);
-                });
-  
-                const bounds = self.fg.getBounds();
-                if (bounds && bounds.isValid()) {
-                  self.map.fitBounds(bounds, self.maxZoom);
-                }
-              } catch (e) { }
+            (comments: Comment[]) => {
+              const pending = comments.filter(comment => this.commentService.isPending(comment));
+              this.numComments = pending.length.toString();
             },
-            error => {
-              console.log('error =', error);
-            }
+            error => console.log('couldn\'t get pending comments, error =', error)
           );
+      }
+      if (this.fg) {
+        _.each(this.layers, function (layer) {
+          self.map.removeLayer(layer);
+        });
+        this.fg.clearLayers();
+      } else {
+        this.fg = L.featureGroup();
+      }
+      // NB: always reload results to reduce chance of race condition
+      //     with drawing map and features
+      this.searchService.getByDTID(this.application.tantalisID)
+        .takeUntil(this.ngUnsubscribe)
+        .subscribe(
+          features => {
+            try {
+              _.each(features, function (feature) {
+                const f = JSON.parse(JSON.stringify(feature));
+                // needs to be valid GeoJSON
+                delete f.geometry_name;
+                const featureObj: GeoJSON.Feature<any> = f;
+                const layer = L.geoJSON(featureObj);
+                const options = { maxWidth: 400 };
+                self.fg.addLayer(layer);
+                layer.addTo(self.map);
+              });
+
+              const bounds = self.fg.getBounds();
+              if (bounds && bounds.isValid()) {
+                self.map.fitBounds(bounds, self.maxZoom);
+              }
+            } catch (e) { }
+          },
+          error => {
+            console.log('error =', error);
+          }
+        );
     }
   }
 
@@ -209,10 +216,10 @@ export class ApplicationAsideComponent implements OnChanges, OnDestroy {
         .takeUntil(this.ngUnsubscribe)
         .subscribe(
           features => {
-              try {
-                _.each(features, function (feature) {
+            try {
+              _.each(features, function (feature) {
                 const f = JSON.parse(JSON.stringify(feature));
-                // Needed to be valid GeoJSON
+                // needs to be valid GeoJSON
                 delete f.geometry_name;
                 const featureObj: GeoJSON.Feature<any> = f;
                 const layer = L.geoJSON(featureObj);
@@ -250,7 +257,7 @@ export class ApplicationAsideComponent implements OnChanges, OnDestroy {
             }
             _.each(features, function (feature) {
               const f = JSON.parse(JSON.stringify(feature));
-              // Needed to be valid GeoJSON
+              // needs to be valid GeoJSON
               delete f.geometry_name;
               const featureObj: GeoJSON.Feature<any> = f;
               const layer = L.geoJSON(featureObj);
