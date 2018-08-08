@@ -21,7 +21,7 @@ export interface DataModel {
 //       otherwise they don't return a result
 export class SelectOrganizationComponent extends DialogComponent<DataModel, string> implements DataModel, OnInit {
   public dispositionId: number = null;
-  public clientListing: boolean = false;
+  public clientListing = false;
   public clients: Array<Client> = [];
   public selectedClients: Array<Client> = [];
   public page = 1;
