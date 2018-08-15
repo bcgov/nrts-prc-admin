@@ -96,6 +96,19 @@ export class ApplicationListComponent implements OnInit, OnDestroy {
         // applications not found --> navigate back to home
         this.router.navigate(['/']);
       });
+
+    // DEBUGGING - to remove duplicates
+    // this.applicationService.getAll()
+    //   .takeUntil(this.ngUnsubscribe)
+    //   .subscribe(applications => {
+    //     for (const app of applications) {
+    //       const last = _.findLast(applications, { tantalisID: app.tantalisID });
+    //       if (app !== last) {
+    //         console.log('deleting duplicate app =', app, last);
+    //         this.applicationService.delete(app).takeUntil(this.ngUnsubscribe).subscribe();
+    //       }
+    //     }
+    //   });
   }
 
   public prevPage() {
