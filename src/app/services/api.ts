@@ -585,32 +585,22 @@ export class ApiService {
   }
 
   //
-  // Crown Lands files
+  // Searching
   //
-  getBCGWCrownLands(id: string) {
-    const fields = [
-      'name',
-      'isImported'
-    ];
-    const queryString = 'public/search/bcgw/crownLandsId/' + id + '?fields=' + this.buildValues(fields);
+  getAppsByCLID(clid: string) {
+    const queryString = 'public/search/bcgw/crownLandsId/' + clid;
     const headers = new Headers({ 'Authorization': 'Bearer ' + this.token });
     return this.get(this.pathAPI, queryString, { headers: headers });
   }
 
-  getBCGWDispositionByTransactionId(transactionId: number) {
-    const fields = [
-      'name'
-    ];
-    const queryString = 'public/search/bcgw/dispositionTransactionId/' + transactionId + '?fields=' + this.buildValues(fields);
+  getAppsByDTID(dtid: string) {
+    const queryString = 'public/search/bcgw/dispositionTransactionId/' + dtid;
     const headers = new Headers({ 'Authorization': 'Bearer ' + this.token });
     return this.get(this.pathAPI, queryString, { headers: headers });
   }
 
-  getClientsInfoByDispositionId(dispositionId: number) {
-    const fields = [
-      'name'
-    ];
-    const queryString = 'public/search/bcgw/getClientsInfoByDispositionId/' + dispositionId + '?fields=' + this.buildValues(fields);
+  getClientsByDTID(dtid: string) {
+    const queryString = 'public/search/bcgw/getClientsInfoByDispositionId/' + dtid;
     const headers = new Headers({ 'Authorization': 'Bearer ' + this.token });
     return this.get(this.pathAPI, queryString, { headers: headers });
   }

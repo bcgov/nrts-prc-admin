@@ -35,7 +35,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       .takeUntil(this.ngUnsubscribe)
       .subscribe(
         value => {
-          console.log('num applications =', value);
+          // console.log('num applications =', value);
         },
         error => {
           console.log('error =', 'could not count applications');

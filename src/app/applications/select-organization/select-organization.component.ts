@@ -36,7 +36,7 @@ export class SelectOrganizationComponent extends DialogComponent<DataModel, stri
 
   ngOnInit() {
     const self = this;
-    this.searchService.getClientsByDispositionId(this.dispositionId)
+    this.searchService.getClientsByDispositionId(this.dispositionId.toString())
       .subscribe(
         data => {
           _.each(data, function (i) {
