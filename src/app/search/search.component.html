@@ -2,9 +2,9 @@
   <div class="container">
     <h1>Find Crown Lands Applications in British Columbia</h1>
     <form #f="ngForm" class="search-form ui form" (ngSubmit)="onSubmit()">
-      <label for="keywordInput">Enter a Crown Land File Number or Disposition Transaction ID</label>
+      <label for="keywordInput">Enter Crown Land File Numbers or Disposition Transaction IDs</label>
       <div class="input-group main-search-field">
-        <input class="form-control" type="text" placeholder="eg: 123456" name="keywordInput" id="keywordInput"
+        <input class="form-control" type="text" placeholder="eg: 123456, 123456" name="keywordInput" id="keywordInput"
             [(ngModel)]="terms.keywords" [disabled]="searching" autofocus/>
         <div class="input-group-btn">
           <!-- prevent searching if input is empty or we're already searching -->
@@ -57,7 +57,7 @@
               *ngIf="!item.app" 
               (click)="importProject(item)">
               <i class="material-icons">add</i>
-              Add
+              Create
             </button>
             <div ngbDropdown *ngIf="item.app">
               <button class="btn btn-sm btn-outline-primary" type="button" ngbDropdownToggle>
@@ -83,22 +83,22 @@
             </div>
           </td>
         </tr>
-        <tr class="app-comment-details" *ngIf="item.app">
+        <tr class="app-comment-details">
           <td colspan="6">
             <span class="comment-info">
-              <span *ngIf="item.app.numComments > 0">
+              <span *ngIf="item.app?.numComments > 0">
                 <strong>
                   <a [routerLink]="['/comments', item.app._id]">{{item.app.numComments}} comments</a>
                 </strong>
                 &nbsp;-&nbsp;
               </span>
-              <span *ngIf="item.app.cpStatus">
+              <span *ngIf="item.app?.cpStatus">
                 {{item.app.cpStatus}}
               </span>
-              <span *ngIf="item.app.currentPeriod">
+              <span *ngIf="item.app?.currentPeriod">
                 &nbsp;-&nbsp; {{item.app.currentPeriod.startDate | date:'longDate'}} to {{item.app.currentPeriod.endDate | date:'longDate'}}
               </span>
-              <em class="loading-comment-info">
+              <em class="loading-comment-info" *ngIf="item.app">
                 Fetching Comment Info
               </em>
             </span>
