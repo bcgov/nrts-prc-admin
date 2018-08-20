@@ -1,10 +1,10 @@
 <div class="search-container">
   <div class="container">
-    <h1>Find Crown Lands Applications in British Columbia</h1>
+    <h1>Find Crown Lands Applications</h1>
     <form #f="ngForm" class="search-form ui form" (ngSubmit)="onSubmit()">
-      <label for="keywordInput">Enter Crown Land File Numbers or Disposition Transaction IDs</label>
+      <label for="keywordInput">Enter Crown Land File or Disposition Numbers</label>
       <div class="input-group main-search-field">
-        <input class="form-control" type="text" placeholder="eg: 123456, 123456" name="keywordInput" id="keywordInput"
+        <input class="form-control" type="text" name="keywordInput" id="keywordInput"
             [(ngModel)]="terms.keywords" [disabled]="searching" autofocus/>
         <div class="input-group-btn">
           <!-- prevent searching if input is empty or we're already searching -->
