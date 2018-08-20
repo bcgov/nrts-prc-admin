@@ -146,10 +146,11 @@ export class ApplicationAsideComponent implements OnInit, OnChanges, OnDestroy {
       }
       // NB: always reload results to reduce chance of race condition
       //     with drawing map and features
-      this.searchService.getByDTID(this.application.tantalisID)
+      this.searchService.getByDTID(this.application.tantalisID.toString())
         .takeUntil(this.ngUnsubscribe)
         .subscribe(
-          features => {
+          search => {
+            const features = search && search.features;
             try {
               _.each(features, function (feature) {
                 const f = JSON.parse(JSON.stringify(feature));
@@ -212,10 +213,11 @@ export class ApplicationAsideComponent implements OnInit, OnChanges, OnDestroy {
       }
       // NB: always reload results to reduce chance of race condition
       //     with drawing map and features
-      this.searchService.getByDTID(this.application.tantalisID)
+      this.searchService.getByDTID(this.application.tantalisID.toString())
         .takeUntil(this.ngUnsubscribe)
         .subscribe(
-          features => {
+          search => {
+            const features = search && search.features;
             try {
               _.each(features, function (feature) {
                 const f = JSON.parse(JSON.stringify(feature));
@@ -245,10 +247,11 @@ export class ApplicationAsideComponent implements OnInit, OnChanges, OnDestroy {
   public drawMap(app: Application) {
     if (app.tantalisID) {
       const self = this;
-      this.searchService.getByDTID(app.tantalisID)
+      this.searchService.getByDTID(app.tantalisID.toString())
         .takeUntil(this.ngUnsubscribe)
         .subscribe(
-          features => {
+          search => {
+            const features = search && search.features;
             if (self.fg) {
               _.each(self.layers, function (layer) {
                 self.map.removeLayer(layer);

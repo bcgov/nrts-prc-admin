@@ -152,11 +152,11 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
               );
           } else {
             // (re)load features/shapes
-            this.searchService.getByDTID(this.application.tantalisID)
+            this.searchService.getByDTID(this.application.tantalisID.toString())
               .takeUntil(this.ngUnsubscribe)
               .subscribe(
-                features => {
-                  this.application.features = features;
+                search => {
+                  this.application.features = search && search.features;
 
                   // calculate Total Area (hectares)
                   let areaHectares = 0;

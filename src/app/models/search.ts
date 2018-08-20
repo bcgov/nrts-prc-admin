@@ -1,3 +1,6 @@
+import { Params } from '@angular/router';
+import * as _ from 'lodash';
+
 import { Feature } from './feature';
 import { Application } from './application';
 import { Organization } from './organization';
@@ -6,31 +9,32 @@ import { NgbDateStruct } from '@ng-bootstrap/ng-bootstrap';
 export class Search {
   _id: string;
   totalFeatures: number;
-  features: Array<Feature>;
   date: Date;
   crs: string;
   type: string;
   status: string;
   hostname: string;
-  application: Application;
-  sidsFound: Array<string>;
+  features: Array<Feature> = [];
+  applications: Array<Application> = [];
 
   constructor(search?: any, hostname?: any) {
     this._id            = search && search._id            || null;
     this.totalFeatures  = search && search.totalFeatures  || 0;
+    this.date           = search && search.date           || null;
     this.crs            = search && search.crs            || null;
     this.type           = search && search.type           || null;
-    this.date           = search && search.date           || null;
     this.status         = search && search.status         || null;
-    this.application    = search && search.application    || null;
-    this.sidsFound      = search && search.sidsFound      || [];
     this.hostname       = hostname;
-
-    this.features = [];
 
     if (search && search.features) {
       search.features.forEach(feature => {
         this.features.push(feature);
+      });
+    }
+
+    if (search && search.applications) {
+      search.applications.forEach(app => {
+        this.applications.push(app);
       });
     }
   }
@@ -44,14 +48,14 @@ export class SearchArray {
   }
 
   sort() {
-    this.items.sort(function(a: Search, b: Search) {
+    this.items.sort(function (a: Search, b: Search) {
       const aDate = a && a.date ? new Date(a.date).getTime() : 0;
       const bDate = b && b.date ? new Date(b.date).getTime() : 0;
       return bDate - aDate;
     });
   }
 
-  get length() {
+  get length(): number {
     return this.items.length;
   }
 
@@ -63,65 +67,46 @@ export class SearchArray {
 }
 
 export class SearchTerms {
-  keywords: string;
-  clfile: string;
-  dtid: string;
-  applications: Array<Application>;
-  organizations: Array<Organization>;
-  ownerships: Array<Organization>;
+  keywords: string; // comma- or space-delimited list
   dateStart: NgbDateStruct;
   dateEnd: NgbDateStruct;
+  organizations: Array<Organization> = [];
 
-  constructor() {
-    this.keywords       = '';
-    this.clfile         = '';
-    this.dtid           = '';
-    this.applications   = [];
-    this.organizations  = [];
-    this.ownerships     = [];
-    this.dateStart      = null;
-    this.dateEnd        = null;
+  constructor(obj?: any) {
+    this.keywords      = obj && obj.keywords      || null;
+    this.dateStart     = obj && obj.dateStart     || null;
+    this.dateEnd       = obj && obj.dateEnd       || null;
+
+    if (obj && obj.organizations) {
+      obj.organizations.forEach(org => {
+        this.organizations.push(org);
+      });
+    }
   }
 
-  getParams() {
+  getParams(): Params {
     const params = {};
 
     if (this.keywords) {
-      params['keywords'] = this.keywords.split(' ').join(',');
+      // tokenize by comma, space, etc and remove duplicate items
+      const keywords = _.uniq(this.keywords.match(/\b(\w+)/g));
+      params['keywords'] = keywords.join(',');
     }
-
-    if (this.clfile) {
-      params['clfile'] = this.clfile.split(' ').join(',');
-    }
-
-    if (this.dtid) {
-      params['dtid'] = this.dtid.split(' ').join(',');
-    }
-
-    if (this.applications.length) {
-      params['applications'] = this.applications.map(p => p._id).join(',');
-    }
-
-    if (this.organizations.length) {
-      params['organizations'] = this.organizations.map(p => p._id).join(',');
-    }
-
-    if (this.ownerships.length) {
-      params['ownerships'] = this.ownerships.map(o => o._id).join(',');
-    }
-
     if (this.dateStart) {
       params['datestart'] = this.getDateParam(this.dateStart);
     }
-
     if (this.dateEnd) {
       params['dateend'] = this.getDateParam(this.dateEnd);
+    }
+    if (this.organizations.length > 0) {
+      // remove empty and duplicate elements
+      params['organizations'] = _.uniq(_.compact(this.organizations)).map(p => p._id).join(',');
     }
 
     return params;
   }
 
-  private getDateParam(date: NgbDateStruct) {
+  private getDateParam(date: NgbDateStruct): string {
     let dateParam = date.year + '-';
 
     if (date.month < 10) {

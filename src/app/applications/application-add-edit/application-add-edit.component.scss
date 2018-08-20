@@ -1,19 +1,5 @@
 @import "~assets/styles/base/base.scss";
 
-// Todo - Why are we using the spinner container for an alert???
-.spinner-container {
-  .alert {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    text-align: center;
-    width: 250px;
-    height: 50px;
-    margin-top: calc(-#{$spinner-width} / 1.5);
-    margin-left: calc(-#{$spinner-width} / 2);
-  }
-}
-
 .application-edit {
   main {
     section {
