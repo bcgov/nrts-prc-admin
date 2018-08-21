@@ -11,7 +11,6 @@ import * as L from 'leaflet';
 import { Application } from 'app/models/application';
 import { ApiService } from './api';
 import { DocumentService } from './document.service';
-// import { OrganizationService } from './organization.service';
 import { CommentPeriodService } from './commentperiod.service';
 import { CommentService } from './comment.service';
 import { DecisionService } from './decision.service';
@@ -56,7 +55,6 @@ export class ApplicationService {
   constructor(
     private api: ApiService,
     private documentService: DocumentService,
-    // private organizationService: OrganizationService,
     private commentPeriodService: CommentPeriodService,
     private commentService: CommentService,
     private decisionService: DecisionService,
@@ -143,14 +141,7 @@ export class ApplicationService {
 
         const promises: Array<Promise<any>> = [];
 
-        // now get the organization for each application
-        // applications.forEach((application, i) => {
-        //   if (applications[i]._organization) {
-        //     promises.push(this.organizationService.getById(applications[i]._organization)
-        //       .toPromise()
-        //       .then(organization => application.organization = organization));
-        //   }
-        // });
+        // FUTURE: get the organization here
 
         // now get the current comment period for each application
         applications.forEach((application, i) => {
@@ -185,9 +176,9 @@ export class ApplicationService {
         //   );
         // });
 
-        // now get the referenced data (features)
+        // now get the referenced data (features) for each application
         applications.forEach((application, i) => {
-          promises.push(this.searchService.getByDTID(application.tantalisID.toString())
+          promises.push(this.searchService.getByDTID(application.tantalisID)
             .toPromise()
             .then(search => {
               application.features = search && search.features;
@@ -225,24 +216,32 @@ export class ApplicationService {
   }
 
   // get a specific application by its Tantalis ID
-  // without related data
-  getByTantalisId(tantalisId: number): Observable<Application> {
+  getByTantalisId(tantalisId: number, forceReload: boolean = false): Observable<Application> {
+    if (this.application && this.application.tantalisID === tantalisId && !forceReload) {
+      return Observable.of(this.application);
+    }
+
+    // first get the base application data
     return this.api.getApplicationByTantalisId(tantalisId)
       .map(res => {
         const applications = res.text() ? res.json() : [];
         // return the first (only) application
         return applications.length > 0 ? new Application(applications[0]) : null;
       })
+      .mergeMap(application => {
+        // now get the rest of the application data
+        return this._getApplicationData(application, forceReload);
+      })
       .catch(this.api.handleError);
   }
 
-  // get a specific application by its id
+  // get a specific application by its object id
   getById(appId: string, forceReload: boolean = false): Observable<Application> {
     if (this.application && this.application._id === appId && !forceReload) {
       return Observable.of(this.application);
     }
 
-    // first get the application data
+    // first get the base application data
     return this.api.getApplication(appId)
       .map(res => {
         const applications = res.text() ? res.json() : [];
@@ -250,97 +249,96 @@ export class ApplicationService {
         return applications.length > 0 ? new Application(applications[0]) : null;
       })
       .mergeMap(application => {
-        if (!application) { return Observable.of(null as Application); }
-
-        // replace \\n (JSON format) with newlines
-        if (application.description) {
-          application.description = application.description.replace(/\\n/g, '\n');
-        }
-        if (application.legalDescription) {
-          application.legalDescription = application.legalDescription.replace(/\\n/g, '\n');
-        }
-
-        const promises: Array<Promise<any>> = [];
-
-        // now get the organization
-        // if (application._organization) {
-        //   promises.push(this.organizationService.getById(application._organization, forceReload)
-        //     .toPromise()
-        //     .then(organization => application.organization = organization)
-        //   );
-        // }
-
-        // now get the documents
-        promises.push(this.documentService.getAllByApplicationId(application._id)
-          .toPromise()
-          .then(documents => application.documents = documents)
-        );
-
-        // now get the current comment period
-        promises.push(this.commentPeriodService.getAllByApplicationId(application._id)
-          .toPromise()
-          .then(periods => {
-            const cp = this.commentPeriodService.getCurrent(periods);
-            application.currentPeriod = cp;
-            // derive comment period status for app list display + sorting
-            application['cpStatus'] = this.commentPeriodService.getStatus(cp);
-          })
-        );
-
-        // now get the number of pending comments
-        promises.push(this.commentService.getAllByApplicationId(application._id)
-          .toPromise()
-          .then(comments => {
-            const pending = comments.filter(comment => this.commentService.isPending(comment));
-            application['numComments'] = pending.length.toString();
-          })
-        );
-
-        // now get the decision
-        promises.push(this.decisionService.getByApplicationId(application._id, forceReload)
-          .toPromise()
-          .then(decision => application.decision = decision)
-        );
-
-        // now get the referenced data (features)
-        promises.push(this.searchService.getByDTID(application.tantalisID.toString(), forceReload)
-          .toPromise()
-          .then(search => {
-            application.features = search && search.features;
-
-            // calculate Total Area (hectares) from all features
-            application.areaHectares = 0;
-            _.each(application.features, function (f) {
-              if (f['properties']) {
-                application.areaHectares += f['properties'].TENURE_AREA_IN_HECTARES;
-              }
-            });
-
-            // cache application properties from first feature
-            if (application.features && application.features.length > 0) {
-              application.purpose = application.features[0].properties.TENURE_PURPOSE;
-              application.subpurpose = application.features[0].properties.TENURE_SUBPURPOSE;
-              application.type = application.features[0].properties.TENURE_TYPE;
-              application.subtype = application.features[0].properties.TENURE_SUBTYPE;
-              application.status = this.getStatusCode(application.features[0].properties.TENURE_STATUS);
-              application.tenureStage = application.features[0].properties.TENURE_STAGE;
-              application.location = application.features[0].properties.TENURE_LOCATION;
-              application.businessUnit = application.features[0].properties.RESPONSIBLE_BUSINESS_UNIT;
-              application.region = this.getRegionCode(application.businessUnit);
-            }
-
-            // derive application status for app list display + sorting
-            application['appStatus'] = this.getStatusString(application.status);
-          })
-        );
-
-        return Promise.all(promises).then(() => {
-          this.application = application;
-          return this.application;
-        });
+        // now get the rest of the application data
+        return this._getApplicationData(application, forceReload);
       })
       .catch(this.api.handleError);
   }
+
+  private _getApplicationData(application: Application, forceReload: boolean): Promise<Application> {
+    if (!application) { return Promise.resolve(null); }
+
+    // replace \\n (JSON format) with newlines
+    if (application.description) {
+      application.description = application.description.replace(/\\n/g, '\n');
+    }
+    if (application.legalDescription) {
+      application.legalDescription = application.legalDescription.replace(/\\n/g, '\n');
+    }
+
+    const promises: Array<Promise<any>> = [];
+
+    // FUTURE: get the organization here
+
+    // get the documents
+    promises.push(this.documentService.getAllByApplicationId(application._id)
+      .toPromise()
+      .then(documents => application.documents = documents)
+    );
+
+    // get the current comment period
+    promises.push(this.commentPeriodService.getAllByApplicationId(application._id)
+      .toPromise()
+      .then(periods => {
+        const cp = this.commentPeriodService.getCurrent(periods);
+        application.currentPeriod = cp;
+        // derive comment period status for app list display + sorting
+        application['cpStatus'] = this.commentPeriodService.getStatus(cp);
+      })
+    );
+
+    // get the number of pending comments
+    promises.push(this.commentService.getAllByApplicationId(application._id)
+      .toPromise()
+      .then(comments => {
+        const pending = comments.filter(comment => this.commentService.isPending(comment));
+        application['numComments'] = pending.length.toString();
+      })
+    );
+
+    // get the decision
+    promises.push(this.decisionService.getByApplicationId(application._id, forceReload)
+      .toPromise()
+      .then(decision => application.decision = decision)
+    );
+
+    // get the referenced data (features)
+    promises.push(this.searchService.getByDTID(application.tantalisID, forceReload)
+      .toPromise()
+      .then(search => {
+        application.features = search && search.features;
+
+        // calculate Total Area (hectares) from all features
+        application.areaHectares = 0;
+        _.each(application.features, function (f) {
+          if (f['properties']) {
+            application.areaHectares += f['properties'].TENURE_AREA_IN_HECTARES;
+          }
+        });
+
+        // cache application properties from first feature
+        if (application.features && application.features.length > 0) {
+          application.purpose = application.features[0].properties.TENURE_PURPOSE;
+          application.subpurpose = application.features[0].properties.TENURE_SUBPURPOSE;
+          application.type = application.features[0].properties.TENURE_TYPE;
+          application.subtype = application.features[0].properties.TENURE_SUBTYPE;
+          application.status = this.getStatusCode(application.features[0].properties.TENURE_STATUS);
+          application.tenureStage = application.features[0].properties.TENURE_STAGE;
+          application.location = application.features[0].properties.TENURE_LOCATION;
+          application.businessUnit = application.features[0].properties.RESPONSIBLE_BUSINESS_UNIT;
+          application.region = this.getRegionCode(application.businessUnit);
+        }
+
+        // derive application status for app list display + sorting
+        application['appStatus'] = this.getStatusString(application.status);
+      })
+    );
+
+    return Promise.all(promises).then(() => {
+      this.application = application;
+      return this.application;
+    });
+}
 
   // create new application
   add(item: any): Observable<Application> {

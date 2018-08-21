@@ -74,23 +74,28 @@ export class SearchComponent implements OnInit, OnDestroy {
             const self = this; // for closure below
             _.each(groupedFeatures, function (value: any, key: string) {
               // ensure result is not already in list
-              if (!_.find(self.groupByResults, result => { return result.properties.DISPOSITION_TRANSACTION_SID === value[0].properties.DISPOSITION_TRANSACTION_SID; })) {
-                // initially display search results, then update with new query results
-                value[0].app = _.find(search.applications, { tantalisID: +key }); // NOTE: unary operator
-                if (value[0].app) {
-                  self.applicationService.getById(value[0].app._id, true)
+              if (!_.find(self.groupByResults, result => { return result.properties.DISPOSITION_TRANSACTION_SID === +key; })) {
+                // if app is in PRC, query application data to update UI
+                if (_.includes(search.sidsFound, +key)) {
+                  value[0].loaded = false;
+                  self.applicationService.getByTantalisId(+key, true)
                     .takeUntil(self.ngUnsubscribe)
                     .subscribe(
                       application => {
-                        value[0].app = application;
-                        // Force change detection since we changed a bound property after the normal check cycle and outside anything
-                        // that would trigger a CD cycle - this will eliminate the error we get when running in dev mode.
-                        self._changeDetectionRef.detectChanges();
+                        value[0].loaded = true;
+                        if (application) {
+                          value[0].app = application;
+                          // Force change detection since we changed a bound property after the normal check cycle and outside anything
+                          // that would trigger a CD cycle - this will eliminate the error we get when running in dev mode.
+                          self._changeDetectionRef.detectChanges();
+                        }
                       },
                       error => {
-                        self.snackBarRef = this.snackBar.open('Error retrieving application ...', null, { duration: 3000 });
+                        self.snackBarRef = self.snackBar.open('Error retrieving application ...', null, { duration: 3000 });
                       }
                     );
+                } else {
+                  value[0].loaded = true;
                 }
                 self.groupByResults.push(value[0]);
               }

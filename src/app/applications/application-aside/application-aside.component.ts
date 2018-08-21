@@ -146,7 +146,7 @@ export class ApplicationAsideComponent implements OnInit, OnChanges, OnDestroy {
       }
       // NB: always reload results to reduce chance of race condition
       //     with drawing map and features
-      this.searchService.getByDTID(this.application.tantalisID.toString())
+      this.searchService.getByDTID(this.application.tantalisID)
         .takeUntil(this.ngUnsubscribe)
         .subscribe(
           search => {
@@ -213,7 +213,7 @@ export class ApplicationAsideComponent implements OnInit, OnChanges, OnDestroy {
       }
       // NB: always reload results to reduce chance of race condition
       //     with drawing map and features
-      this.searchService.getByDTID(this.application.tantalisID.toString())
+      this.searchService.getByDTID(this.application.tantalisID)
         .takeUntil(this.ngUnsubscribe)
         .subscribe(
           search => {
@@ -247,7 +247,7 @@ export class ApplicationAsideComponent implements OnInit, OnChanges, OnDestroy {
   public drawMap(app: Application) {
     if (app.tantalisID) {
       const self = this;
-      this.searchService.getByDTID(app.tantalisID.toString())
+      this.searchService.getByDTID(app.tantalisID)
         .takeUntil(this.ngUnsubscribe)
         .subscribe(
           search => {

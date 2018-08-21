@@ -191,14 +191,33 @@ export class ApiService {
       'subpurpose',
       'tantalisID'
     ];
-    const queryString = 'application/' + id + '?fields=' + this.buildValues(fields);
+    const queryString = `application/${id}?isDeleted=false&fields=${this.buildValues(fields)}`;
     const headers = new Headers({ 'Authorization': 'Bearer ' + this.token });
     return this.get(this.pathAPI, queryString, { headers: headers });
   }
 
-  // for now, this is just a quick lookup by Tantalis ID
   getApplicationByTantalisId(tantalisId: number) {
-    const queryString = 'application?isDeleted=false&tantalisID=' + tantalisId;
+    const fields = [
+      'agency',
+      'cl_file',
+      'client',
+      'code',
+      'description',
+      'internal',
+      'internalID',
+      'latitude',
+      'legalDescription',
+      'longitude',
+      'name',
+      'postID',
+      'publishDate',
+      'purpose',
+      'region',
+      'status',
+      'subpurpose',
+      'tantalisID'
+    ];
+    const queryString = `application?isDeleted=false&tantalisID=${tantalisId}&fields=${this.buildValues(fields)}`;
     const headers = new Headers({ 'Authorization': 'Bearer ' + this.token });
     return this.get(this.pathAPI, queryString, { headers: headers });
   }
@@ -589,20 +608,17 @@ export class ApiService {
   //
   getAppsByCLID(clid: string) {
     const queryString = 'public/search/bcgw/crownLandsId/' + clid;
-    const headers = new Headers({ 'Authorization': 'Bearer ' + this.token });
-    return this.get(this.pathAPI, queryString, { headers: headers });
+    return this.get(this.pathAPI, queryString);
   }
 
-  getAppsByDTID(dtid: string) {
+  getAppsByDTID(dtid: number) {
     const queryString = 'public/search/bcgw/dispositionTransactionId/' + dtid;
-    const headers = new Headers({ 'Authorization': 'Bearer ' + this.token });
-    return this.get(this.pathAPI, queryString, { headers: headers });
+    return this.get(this.pathAPI, queryString);
   }
 
-  getClientsByDTID(dtid: string) {
+  getClientsByDTID(dtid: number) {
     const queryString = 'public/search/bcgw/getClientsInfoByDispositionId/' + dtid;
-    const headers = new Headers({ 'Authorization': 'Bearer ' + this.token });
-    return this.get(this.pathAPI, queryString, { headers: headers });
+    return this.get(this.pathAPI, queryString);
   }
 
   //

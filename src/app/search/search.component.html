@@ -38,7 +38,7 @@
         </tr>
       </thead>
       <ng-template ngFor let-item [ngForOf]="groupByResults">
-        <tr class="app-details">
+        <tr class="app-details" *ngIf="item.loaded">
           <td class="cl-file">
             <span class="cl-arrow">{{item.properties.CROWN_LANDS_FILE}}</span>
           </td>

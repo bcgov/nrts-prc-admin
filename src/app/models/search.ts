@@ -2,11 +2,10 @@ import { Params } from '@angular/router';
 import * as _ from 'lodash';
 
 import { Feature } from './feature';
-import { Application } from './application';
-import { Organization } from './organization';
 import { NgbDateStruct } from '@ng-bootstrap/ng-bootstrap';
+import { Organization } from './organization';
 
-export class Search {
+export class SearchResults {
   _id: string;
   totalFeatures: number;
   date: Date;
@@ -15,16 +14,16 @@ export class Search {
   status: string;
   hostname: string;
   features: Array<Feature> = [];
-  applications: Array<Application> = [];
+  sidsFound: Array<number> = [];
 
   constructor(search?: any, hostname?: any) {
-    this._id            = search && search._id            || null;
-    this.totalFeatures  = search && search.totalFeatures  || 0;
-    this.date           = search && search.date           || null;
-    this.crs            = search && search.crs            || null;
-    this.type           = search && search.type           || null;
-    this.status         = search && search.status         || null;
-    this.hostname       = hostname;
+    this._id           = search && search._id           || null;
+    this.totalFeatures = search && search.totalFeatures || 0;
+    this.date          = search && search.date          || null;
+    this.crs           = search && search.crs           || null;
+    this.type          = search && search.type          || null;
+    this.status        = search && search.status        || null;
+    this.hostname      = hostname;
 
     if (search && search.features) {
       search.features.forEach(feature => {
@@ -32,23 +31,23 @@ export class Search {
       });
     }
 
-    if (search && search.applications) {
-      search.applications.forEach(app => {
-        this.applications.push(app);
+    if (search && search.sidsFound) {
+      search.sidsFound.forEach(sidFound => {
+        this.sidsFound.push(sidFound);
       });
     }
   }
 }
 
 export class SearchArray {
-  items: Array<Search>;
+  items: Array<SearchResults>;
 
   constructor(obj?: any) {
     this.items = obj && obj.items || [];
   }
 
   sort() {
-    this.items.sort(function (a: Search, b: Search) {
+    this.items.sort(function (a: SearchResults, b: SearchResults) {
       const aDate = a && a.date ? new Date(a.date).getTime() : 0;
       const bDate = b && b.date ? new Date(b.date).getTime() : 0;
       return bDate - aDate;
@@ -59,7 +58,7 @@ export class SearchArray {
     return this.items.length;
   }
 
-  add(search?: Search) {
+  add(search?: SearchResults) {
     if (search) {
       this.items.push(search);
     }
@@ -73,9 +72,9 @@ export class SearchTerms {
   organizations: Array<Organization> = [];
 
   constructor(obj?: any) {
-    this.keywords      = obj && obj.keywords      || null;
-    this.dateStart     = obj && obj.dateStart     || null;
-    this.dateEnd       = obj && obj.dateEnd       || null;
+    this.keywords  = obj && obj.keywords  || null;
+    this.dateStart = obj && obj.dateStart || null;
+    this.dateEnd   = obj && obj.dateEnd   || null;
 
     if (obj && obj.organizations) {
       obj.organizations.forEach(org => {
