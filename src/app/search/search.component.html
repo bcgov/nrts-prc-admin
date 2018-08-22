@@ -83,7 +83,7 @@
             </div>
           </td>
         </tr>
-        <tr class="app-comment-details">
+        <tr class="app-comment-details" *ngIf="item.loaded">
           <td colspan="6">
             <span class="comment-info">
               <span *ngIf="item.app?.numComments > 0">
