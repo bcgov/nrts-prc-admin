@@ -1,9 +1,12 @@
 // Document List Shared Styling
 .doc-list {
+  margin: 0;
+  padding: 0;
+
   li {
     @include flex-box();
     @include flex-direction(row);
-    background: #fff;
+    background: #f7f8fa;
 
     + li {
       margin-top: 2px;
@@ -20,16 +23,24 @@
       margin-top: 0.3rem;
       display: inline-block;
       white-space: nowrap;
+
+      a {
+        text-decoration: underline;
+        color: #007bff;
+        cursor: default;
+      }
     }
 
     // Icon Column
     &.icon {
       @include flex(0 0 auto);
       padding-right: 0;
-      color: #777;
+      color: #007bff;
   
       i {
-        margin-top: 0.2rem;
+        margin-top: 0.3rem;
+        font-size: 1.35rem;
+        cursor: default;
       }
     }
   

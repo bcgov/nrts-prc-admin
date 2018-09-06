@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy, ViewChild, HostListener } from '@angular/core';
+import { Location } from '@angular/common';
 import { NgForm } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Response } from '@angular/http/src/static_response';
@@ -42,6 +43,7 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
+    private _location: Location,
     public api: ApiService, // also used in template
     private applicationService: ApplicationService,
     private dialogService: DialogService,
@@ -59,22 +61,22 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
     }
   }
 
-  // check for unsaved changes before navigating away from current route (ie, this page)
+  // Check for unsaved changes before navigating away from current route (ie, this page)
   canDeactivate(): Observable<boolean> | boolean {
-    // allow synchronous navigation if everything is OK
-    if (this.allowDeactivate || (this.applicationForm.pristine && this.decisionForm.pristine)) {
-      return true;
-    }
+  // allow synchronous navigation if everything is OK
+  if (this.allowDeactivate || (this.applicationForm.pristine && this.decisionForm.pristine)) {
+    return true;
+  }
 
-    // otherwise prompt the user with observable (asynchronous) dialog
-    return this.dialogService.addDialog(ConfirmComponent,
-      {
-        title: 'Unsaved Changes',
-        message: 'Click OK to discard your changes or Cancel to return to the application.'
-      }, {
-        backdropColor: 'rgba(0, 0, 0, 0.5)'
-      })
-      .takeUntil(this.ngUnsubscribe);
+  // otherwise prompt the user with observable (asynchronous) dialog
+  return this.dialogService.addDialog(ConfirmComponent,
+    {
+      title: 'Unsaved Changes',
+      message: 'Click OK to discard your changes or Cancel to return to the application.'
+    }, {
+      backdropColor: 'rgba(0, 0, 0, 0.5)'
+    })
+    .takeUntil(this.ngUnsubscribe);
   }
 
   ngOnInit() {
@@ -235,28 +237,6 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
       && this.application.features[0].properties.DISPOSITION_TRANSACTION_SID === this.application.tantalisID);
   }
 
-  public resetApplication() {
-    if (this.applicationForm.pristine && this.decisionForm.pristine) {
-      this.reloadData(this.application._id);
-    } else {
-      this.dialogService.addDialog(ConfirmComponent,
-        {
-          title: 'Confirm Reset',
-          message: 'Click OK to discard your changes or Cancel to return to the application.'
-        }, {
-          backdropColor: 'rgba(0, 0, 0, 0.5)'
-        })
-        .takeUntil(this.ngUnsubscribe)
-        .subscribe(
-          isConfirmed => {
-            if (isConfirmed) {
-              this.reloadData(this.application._id);
-            }
-          }
-        );
-    }
-  }
-
   private reloadData(id: string) {
     // force-reload cached app data
     this.applicationService.getById(id, true)
@@ -321,6 +301,13 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
     }
   }
 
+  // Cancel
+  // See 'canDeactivate' for the UI notification / form reset functionality
+  public cancelChanges() {
+    this._location.back();
+  }
+
+  // Save Changes to Application
   public saveApplication() {
     if (this.applicationForm.invalid) {
       this.dialogService.addDialog(ConfirmComponent,

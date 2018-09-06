@@ -4,6 +4,7 @@ import { Routes, RouterModule } from '@angular/router';
 import { ApplicationListComponent } from './application-list/application-list.component';
 import { ApplicationDetailComponent } from './application-detail/application-detail.component';
 import { ApplicationAddEditComponent } from './application-add-edit/application-add-edit.component';
+import { ApplicationDecisionComponent } from './application-decision/application-decision.component';
 import { ApplicationDetailResolver } from './application-resolver.service';
 
 import { CanDeactivateGuard } from 'app/services/can-deactivate-guard.service';
@@ -16,6 +17,13 @@ const routes: Routes = [
   {
     path: 'a/:appId',
     component: ApplicationDetailComponent,
+    resolve: {
+      application: ApplicationDetailResolver
+    }
+  },
+  {
+    path: 'a/:appId/decision',
+    component: ApplicationDecisionComponent,
     resolve: {
       application: ApplicationDetailResolver
     }

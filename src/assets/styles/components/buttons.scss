@@ -147,19 +147,23 @@ main {
 }
 
 .content-btn-alt {
-  padding: 0.6rem 1rem;
-  color: #5091cd;
-  border: 2px solid #5091cd;
+  padding: 0.35rem 1rem;
+  color: #007bff;
+  border: 2px solid #007bff;
   background: transparent;
-  text-transform: uppercase;
   font-size: 0.85rem;
   font-weight: 700;
 
   &:focus,
   &:hover {
     color: $white;
-    border-color: #5091cd;
-    background: #5091cd;
+    border-color: #007bff;
+    background: #007bff;
+  }
+
+  i {
+    margin-top: -0.2rem;
+    margin-left: -0.2rem;
   }
 }
 
@@ -191,8 +195,30 @@ main {
 
 // Fix active and focus stats for btn-light
 .btn-light {
+  background: #f1f1f1;
+
   &:active,
   &:focus {
     box-shadow: 0 0 0 0.2rem #ccc;
+  }
+}
+
+.btn-icon {
+  min-width: 2.5rem !important;
+  padding-left: 0;
+  padding-right: 0;
+  overflow: hidden;
+  background: transparent;
+
+  i {
+    margin-top: -0.2rem;
+  }
+  
+  .btn-txt {
+    visibility: hidden;
+  }
+
+  &:hover {
+    background: #f1f1f1;
   }
 }

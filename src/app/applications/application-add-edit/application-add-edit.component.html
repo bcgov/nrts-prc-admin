@@ -1,24 +1,168 @@
-<div class="application-edit">
-  <div class="container" *ngIf="application">
-    <div class="title-container mb-4">
-      <h1 class="title-container__title" *ngIf="application._id === '0'">Create New Application</h1>
-      <h1 class="title-container__title" *ngIf="application._id !== '0'">Edit Application</h1>
+<div class="top-container">
+  <div class="container">
+    <div class="title-container">
+      <h1 class="title-container__title"><span class="text-muted">{{application._id === '0' ? 'Create' : 'Edit Public Review'}} &nbsp;&rsaquo;&nbsp; </span>Crown Land File: {{application.cl_file}}</h1>
       <div class="title-container__actions">
-        <!-- to navigate to details, application must have been created -->
+        <!--
+        <button class="btn btn-light" type="button" title="Cancel changes and return to previous page" 
+          [routerLink]="application._id === '0' ? ['../'] : ['/search']">
+          Cancel
+        </button>
+        -->
+        <button class="btn btn-light" type="button"  (click)="cancelChanges()">
+          Cancel
+        </button>
+        <button class="btn btn-primary" type="button" title="Save application"
+          *ngIf="application._id !== '0'" 
+          (click)="saveApplication()">
+          Save
+        </button>
+        <!--
+        <button class="btn btn-primary" type="button" title="Publish application"
+          *ngIf="application._id !== '0' && !application.isPublished"
+          (click)="publishApplication()">
+          Publish
+        </button>
+        <button class="btn btn-danger" type="button" title="Un-publish application"
+          *ngIf="application._id !== '0' && application.isPublished"
+          (click)="unPublishApplication()">
+          Unpublish
+        </button>
+        -->
+        <!--
+        <button class="btn btn-danger" type="button" title="Delete application"
+          *ngIf="application._id !== '0' && !application.isPublished"
+          (click)="deleteApplication()">
+          Delete
+        </button>
+        -->
+      </div>
+      
+      <!--
+      <div class="title-container__actions">
         <button type="button" class="btn btn-light slide-l-btn" [routerLink]="['/a', application._id]" [disabled]="application._id === '0'">
           <i class="material-icons">info_outline</i>
           <span>Application Details</span>
         </button>
       </div>
+      -->
+      
     </div>
+  </div>
+</div>
+  
+<div class="bottom-container">
+  <div class="container">
+    <form class="mb-3" #applicationForm="ngForm">
+      <fieldset>
+        <legend>Public Review</legend>
+        <div class="review-dates">
+          <div class="form-group">
+            <label>Start Date</label>
+            <input class="form-control" type="date"/>
+          </div>
+          <span class="spacer">+</span>
+          <div class="form-group">
+            <label>Days</label>
+            <input class="form-control" type="number"/>
+          </div>
+          <span class="spacer">=</span>
+          <div class="form-group">
+            <label>End Date</label>
+            <input class="form-control" type="date"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Description (Optional)</label>
+          <textarea class="form-control" rows="3"></textarea>
+        </div>
+        <div class="form-group mb-0">
+          <label>Internal Notes (Optional)</label>
+          <textarea class="form-control" rows="3"></textarea>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Application Details</legend>
+        <div class="form-group">
+          <label>Applicant</label>
+          <div class="input-group applicant-input">
+            <input class="form-control" type="text" readonly value="{{application.client | lowercase}}" />
+            <span class="input-group-btn">
+            <button class="btn btn-light" type="button" (click)="selectClient()">
+              <span>{{application.client ? 'Change Applicant' : 'Select Applicant'}}</span>
+            </button>
+            </span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea class="form-control" rows="3" id="description" name="description"
+            #description="ngModel" 
+            [(ngModel)]="application.description">
+          </textarea>
+        </div>
+        <div class="form-group">
+          <label>Application Documents</label>
+          <ul class="doc-list mb-3" *ngIf="application.documents.length > 0">
+              <li *ngFor="let file of application.documents">
+                <span class="cell icon">
+                  <i class="material-icons">insert_drive_file</i>
+                </span>
+                <span class="cell name" [title]="file.displayName || ''">
+                  <span class="cell__txt-content">{{file.documentFileName}}</span>
+                </span>
+                <!--
+                <span class="cell publish-actions">
+                  <span class="btn-group">
+                    <button class="btn btn-sm" [ngClass]="file.isPublished ? 'btn-success':'btn-light'" [disabled]="file.isPublished" title="Publish this document"
+                      (click)="publishDocument(file, application.documents)">
+                      Published
+                    </button>
+                    <button class="btn btn-sm" [ngClass]="!file.isPublished ? 'btn-dark active':'btn-light'" [disabled]="!file.isPublished" title="Unpublish this document"
+                      (click)="unPublishDocument(file, application.documents)">
+                      Unpublished
+                    </button>
+                  </span>
+                </span>
+                -->
+                <span class="cell actions">
+                  <!--
+                  <button class="btn btn-light btn-sm" type="button" (click)="api.downloadDocument(file)" title="Download this document">
+                    <i class="material-icons">file_download</i>
+                  </button>
+                  <button class="btn btn-light btn-sm" type="button" (click)="api.openDocument(file)" title="Open this document" [hidden]="api.isMS">
+                    <i class="material-icons">open_in_new</i>
+                  </button>
+                  -->
+                  <span placement="top" title="{{file.isPublished ? 'Documents must be unpublished before they can be deleted':'Delete this document'}}">
+                    <button class="btn btn-light btn-sm" type="button" [disabled]="file.isPublished" (click)="deleteDocument(file, application.documents)">
+                      <i class="material-icons">delete</i>
+                    </button>
+                  </span>
+                </span>
+              </li>
+          </ul>
+          <div class="file-upload">
+            <input type="file" name="fileInput1" size="5000000" (change)="uploadFiles($event.target.files, application.documents)" multiple [disabled]="application._id === '0'">
+            <div class="file-upload__target">
+              <span class="file-upload__prompt">
+                <i class="file-upload__prompt-icon material-icons">file_upload</i>
+                <span class="file-upload__prompt-msg">Drop files to attach, or <strong>browse</strong>.</span>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="form-group mb-0">
+          <label>Internal Notes (Optional)</label>
+          <textarea class="form-control" rows="3" id="internalNotes" name="internalNotes" 
+            #internalNotes="ngModel" 
+            [(ngModel)]="application.internal.notes">
+          </textarea>
+        </div>
+      </fieldset>
 
-    <div class="row">
-      <main class="col-lg-8">
-
-        <!-- APPLICATION FORM -->
-        <form class="mb-3" #applicationForm="ngForm">
-
-          <!-- HEADER -->
+      <!-- Old Stuff -->
+      <div class="old-stuff" style="display: none;">
           <section class="card bg-dark">
             <div class="title-container">
               <div class="title-container__title">
@@ -26,7 +170,6 @@
                 <div>{{application.purpose || '-'}} / {{application.subpurpose || '-'}}</div>
               </div>
               <div class="title-container__actions">
-                <!-- to select client, application must have been created -->
                 <button type="button" class="btn btn-light" (click)="selectClient()" [disabled]="application._id === '0'">
                   <span>{{application.client ? 'Change Client' : 'Select Client'}}</span>
                 </button>
@@ -216,15 +359,32 @@
                 [(ngModel)]="application.internal.notes"></textarea>
             </section>
           </section>
-        </form>
+      </div>
 
-        <!-- MESSAGES FOR BOTH APPLICATION AND DECISION -->
+    </form>
+  </div>
+</div>
+
+<!-- More Old Stuff -->
+<div class="application-edit" style="display: none;">
+  <div class="container" *ngIf="application">
+    <div class="title-container mb-4">
+      <h1 class="title-container__title" *ngIf="application._id === '0'">Create New Application</h1>
+      <h1 class="title-container__title" *ngIf="application._id !== '0'">Edit Application</h1>
+      <div class="title-container__actions">
+        <!-- to navigate to details, application must have been created -->
+        <button type="button" class="btn btn-light slide-l-btn" [routerLink]="['/a', application._id]" [disabled]="application._id === '0'">
+          <i class="material-icons">info_outline</i>
+          <span>Application Details</span>
+        </button>
+      </div>
+    </div>
+    <div class="row">
+      <main class="col-lg-8">
         <div class="spinner-container full-screen" *ngIf="showMsg">
           <div *ngIf="error" class="alert alert-danger">{{status}}</div>
           <div *ngIf="!error" class="alert alert-success">{{status}}</div>
         </div>
-
-        <!-- DECISION FORM -->
         <form class="mt-3" #decisionForm="ngForm">
           <section class="card bg-light">
             <h3 for="decisionDesc">Decision</h3>
@@ -329,48 +489,7 @@
             </div>
           </section>
         </form>
-
-        <!-- GEOGRAPHIC SHAPE DATA -->
-        <section class="geo-shape-data card bg-light" *ngIf="application.features">
-          <div class="title-container">
-            <h3 class="title-container__title mb-0">Geographic Shape Data</h3>
-            <div class="title-container__actions">
-              <button type="button" class="btn btn-white slide-r-btn" (click)="launchMap()" disabled aria-disabled="true">
-                <span>See on map</span>
-                <i class="material-icons">place</i>
-              </button>
-            </div>
-          </div>
-          <span>This application has <strong>{{application.features.length}}</strong> shape {{application.features.length === 1 ? 'file' : 'files'}}.</span>
-          <div class="geo-shape-data__list">
-            <section class="pt-3" *ngFor="let shape of application.features">
-              <h4 class="mb-3">Interest ID: {{shape.properties.INTRID_SID}}</h4>
-              <ul class="application-edit__list">
-                <li class="pt-0">
-                  <span class="name">Type / Subtype</span>
-                  <span class="value">{{shape.properties.TENURE_TYPE}} / {{shape.properties.TENURE_SUBTYPE}}</span>
-                </li>
-                <li class="pt-0">
-                  <span class="name">Area (ha)</span>
-                  <span class="value">
-                    {{shape.properties.TENURE_AREA_IN_HECTARES ? (shape.properties.TENURE_AREA_IN_HECTARES | number:'1.2-2') : '-'}}
-                  </span>
-                </li>
-                <li class="full-width">
-                  <span class="name">Legal Description</span>
-                  <span class="value">{{shape.properties.TENURE_LEGAL_DESCRIPTION}}</span>
-                </li>
-              </ul>
-            </section>
-          </div>
-        </section>
-
       </main>
-
-      <aside class="col-lg-4">
-        <app-application-aside [application]="application"></app-application-aside>
-      </aside>
-
     </div>
   </div>
 </div>

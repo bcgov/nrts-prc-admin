@@ -1,16 +1,58 @@
 @import "~assets/styles/base/base.scss";
 
-// TODO: replace this spinner with a snackbar (PRC-609)
-.spinner-container {
-  background:  rgba(255,255,255,0.8);
-  .alert {
-    top: 50%;
-    left: 50%;
+:host {
+  @include flex-box();
+  @include flex-direction(column);
+  @include flex(1 1 auto);
+  overflow: hidden;
+}
+
+form {
+  margin: 0 auto;
+  padding-top: 3rem;
+  padding-right: 6rem;
+  padding-bottom: 4.25rem;
+  padding-left: 6rem;
+  max-width: 55rem;
+  border: 1px solid #eee;
+  border-radius: 0.4rem;
+  background: #fff;
+}
+  
+.form-group {
+  margin-bottom: 2rem;
+}
+
+// Public Review Dates
+.review-dates {
+  @include clearfix();
+
+  .form-group {
+    display: inline-block;
+  }
+
+  .spacer {
+    display: inline-block;
+    width: 2rem;
     text-align: center;
-    width: 250px;
-    height: 50px;
-    margin-top: calc(-#{$spinner-lg} / 1.5);
-    margin-left: calc(-#{$spinner-lg} / 2);
+    font-weight: 700;
+  }
+}
+
+// Applicant Input 
+.applicant-input {
+  input {
+    text-transform: capitalize;
+
+    &[readonly] {
+      background: #fff;
+    }
+  }
+
+  .btn {
+    border: 1px solid #ccc;
+    font-size: 0.875rem;
+    font-weight: 600;
   }
 }
 

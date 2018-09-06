@@ -12,6 +12,7 @@ import { ApplicationListComponent } from './application-list/application-list.co
 import { ApplicationDetailComponent } from './application-detail/application-detail.component';
 import { ApplicationAsideComponent } from './application-aside/application-aside.component';
 import { ApplicationAddEditComponent } from './application-add-edit/application-add-edit.component';
+import { ApplicationDecisionComponent } from './application-decision/application-decision.component';
 import { SelectOrganizationComponent } from './select-organization/select-organization.component';
 
 // services
@@ -31,13 +32,15 @@ import { ApplicationService } from '../services/application.service';
     ApplicationListComponent,
     ApplicationDetailComponent,
     ApplicationAsideComponent,
-    ApplicationAddEditComponent
+    ApplicationAddEditComponent,
+    ApplicationDecisionComponent
   ],
   exports: [
     ApplicationListComponent,
     ApplicationDetailComponent,
     ApplicationAsideComponent,
-    ApplicationAddEditComponent
+    ApplicationAddEditComponent,
+    ApplicationDecisionComponent
   ],
   providers: [
     ApiService,
