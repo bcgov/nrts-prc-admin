@@ -2,7 +2,6 @@ import { Component, OnInit, OnDestroy, ViewChild, HostListener } from '@angular/
 import { Location } from '@angular/common';
 import { NgForm } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Response } from '@angular/http/src/static_response';
 import { DialogService } from 'ng2-bootstrap-modal';
 import { Subject } from 'rxjs/Subject';
 import { Observable } from 'rxjs/Observable';
@@ -348,105 +347,6 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
           }
         );
     }
-  }
-
-  deleteApplication() {
-    if (this.application.documents && this.application.documents.length > 0) {
-      this.dialogService.addDialog(ConfirmComponent,
-        {
-          title: 'Cannot Delete Application',
-          message: 'Please delete all documents first.',
-          okOnly: true
-        }, {
-          backdropColor: 'rgba(0, 0, 0, 0.5)'
-        })
-        .takeUntil(this.ngUnsubscribe);
-    } else {
-      this.dialogService.addDialog(ConfirmComponent,
-        {
-          title: 'Confirm Deletion',
-          message: 'Do you really want to delete this application?'
-        }, {
-          backdropColor: 'rgba(0, 0, 0, 0.5)'
-        })
-        .takeUntil(this.ngUnsubscribe)
-        .subscribe(
-          isConfirmed => {
-            if (isConfirmed) {
-              this.applicationService.delete(this.application)
-                .takeUntil(this.ngUnsubscribe)
-                .subscribe(
-                  application => {
-                    // delete succeeded --> navigate back to search
-                    this.application = null;
-                    this.allowDeactivate = true;
-                    this.router.navigate(['/search']);
-                  },
-                  error => {
-                    console.log('error =', error);
-                    this.showMessage(true, 'Error deleting application');
-                  }
-                );
-            }
-          }
-        );
-    }
-  }
-
-  publishApplication() {
-    if (this.applicationForm.dirty) {
-      this.dialogService.addDialog(ConfirmComponent,
-        {
-          title: 'Cannot Publish Application',
-          message: 'Please save pending application changes first.',
-          okOnly: true
-        }, {
-          backdropColor: 'rgba(0, 0, 0, 0.5)'
-        })
-        .takeUntil(this.ngUnsubscribe);
-    } else if (!this.application.client) {
-      this.dialogService.addDialog(ConfirmComponent,
-        {
-          title: 'Cannot Publish Application',
-          message: 'Please check that client has been entered.',
-          okOnly: true
-        }, {
-          backdropColor: 'rgba(0, 0, 0, 0.5)'
-        })
-        .takeUntil(this.ngUnsubscribe);
-    } else {
-      this.applicationService.publish(this.application)
-        .takeUntil(this.ngUnsubscribe)
-        .subscribe(
-          application => {
-            // publish succeeded
-            // reload cached app and update local data separately so we don't lose other local data
-            this.applicationService.getById(this.application._id, true).takeUntil(this.ngUnsubscribe).subscribe();
-            this.application.isPublished = true;
-          },
-          error => {
-            console.log('error =', error);
-            this.showMessage(true, 'Error publishing application');
-          }
-        );
-    }
-  }
-
-  unPublishApplication() {
-    this.applicationService.unPublish(this.application)
-      .takeUntil(this.ngUnsubscribe)
-      .subscribe(
-        application => {
-          // unpublish succeeded
-          // reload cached app and update local data separately so we don't lose other local data
-          this.applicationService.getById(this.application._id, true).takeUntil(this.ngUnsubscribe).subscribe();
-          this.application.isPublished = false;
-        },
-        error => {
-          console.log('error =', error);
-          this.showMessage(true, 'Error un-publishing application');
-        }
-      );
   }
 
   uploadFiles(fileList: FileList, documents: Document[]) {
