@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, ViewChild, HostListener } from '@angular/core';
-import { Location } from '@angular/common';
 import { NgForm } from '@angular/forms';
+import { Location } from '@angular/common';
+import { MatSnackBarRef, SimpleSnackBar, MatSnackBar } from '@angular/material';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DialogService } from 'ng2-bootstrap-modal';
 import { Subject } from 'rxjs/Subject';
@@ -32,10 +33,8 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
   @ViewChild(ApplicationAsideComponent) applicationAside: ApplicationAsideComponent;
 
   public application: Application = null;
-  public error = false;
-  public showMsg = false;
-  public status: string;
   public clFile: number = null;
+  private snackBarRef: MatSnackBarRef<SimpleSnackBar> = null;
   private ngUnsubscribe: Subject<boolean> = new Subject<boolean>();
   private allowDeactivate = false;
 
@@ -43,6 +42,7 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private _location: Location,
+    public snackBar: MatSnackBar,
     public api: ApiService, // also used in template
     private applicationService: ApplicationService,
     private dialogService: DialogService,
@@ -62,20 +62,20 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
 
   // Check for unsaved changes before navigating away from current route (ie, this page)
   canDeactivate(): Observable<boolean> | boolean {
-  // allow synchronous navigation if everything is OK
-  if (this.allowDeactivate || (this.applicationForm.pristine && this.decisionForm.pristine)) {
-    return true;
-  }
+    // allow synchronous navigation if everything is OK
+    if (this.allowDeactivate || (this.applicationForm.pristine && this.decisionForm.pristine)) {
+      return true;
+    }
 
-  // otherwise prompt the user with observable (asynchronous) dialog
-  return this.dialogService.addDialog(ConfirmComponent,
-    {
-      title: 'Unsaved Changes',
-      message: 'Click OK to discard your changes or Cancel to return to the application.'
-    }, {
-      backdropColor: 'rgba(0, 0, 0, 0.5)'
-    })
-    .takeUntil(this.ngUnsubscribe);
+    // otherwise prompt the user with observable (asynchronous) dialog
+    return this.dialogService.addDialog(ConfirmComponent,
+      {
+        title: 'Unsaved Changes',
+        message: 'Click OK to discard your changes or Cancel to return to the application.'
+      }, {
+        backdropColor: 'rgba(0, 0, 0, 0.5)'
+      })
+      .takeUntil(this.ngUnsubscribe);
   }
 
   ngOnInit() {
@@ -109,6 +109,9 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    // dismiss any open snackbar
+    if (this.snackBarRef) { this.snackBarRef.dismiss(); }
+
     this.ngUnsubscribe.next();
     this.ngUnsubscribe.complete();
   }
@@ -191,7 +194,7 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
                 },
                 error => {
                   console.log('error =', error);
-                  this.showMessage(true, 'Error loading shapes');
+                  this.snackBarRef = this.snackBar.open('Error loading shapes...', null, { duration: 3000 });
                 }
               );
           }
@@ -290,11 +293,11 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
             // TODO: update URL with new app id
             // reload cached app and local copy
             this.reloadData(application._id);
-            this.showMessage(false, 'Application created!');
+            this.snackBarRef = this.snackBar.open('Application created...', null, { duration: 3000 });
           },
           error => {
             console.log('error =', error);
-            this.showMessage(true, 'Error creating application');
+            this.snackBarRef = this.snackBar.open('Error creating application...', null, { duration: 3000 });
           }
         );
     }
@@ -339,27 +342,22 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
             // reload cached app only so we don't lose other local data
             this.applicationService.getById(this.application._id, true).takeUntil(this.ngUnsubscribe).subscribe();
             this.applicationForm.form.markAsPristine();
-            this.showMessage(false, 'Application saved!');
+            this.snackBarRef = this.snackBar.open('Application saved...', null, { duration: 3000 });
           },
           error => {
             console.log('error =', error);
-            this.showMessage(true, 'Error saving application');
+            this.snackBarRef = this.snackBar.open('Error saving application...', null, { duration: 3000 });
           }
         );
     }
   }
 
+  // Upload Application Documents
   uploadFiles(fileList: FileList, documents: Document[]) {
     for (let i = 0; i < fileList.length; i++) {
       if (fileList[i]) {
         const formData = new FormData();
-        if (documents === this.application.documents) {
-          formData.append('_application', this.application._id);
-        } else if (documents === this.application.decision.documents) {
-          formData.append('_decision', this.application.decision._id);
-        } else {
-          break; // error
-        }
+        formData.append('_application', this.application._id);
         formData.append('displayName', fileList[i].name);
         formData.append('upfile', fileList[i]);
         this.documentService.add(formData)
@@ -370,10 +368,11 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
               // reload cached app and update local data separately so we don't lose other local data
               this.applicationService.getById(this.application._id, true).takeUntil(this.ngUnsubscribe).subscribe();
               documents.push(doc);
+              this.snackBarRef = this.snackBar.open('File uploaded...', null, { duration: 3000 });
             },
             error => {
               console.log('error =', error);
-              this.showMessage(true, 'Error uploading file');
+              this.snackBarRef = this.snackBar.open('Error uploading file...', null, { duration: 3000 });
             }
           );
       }
@@ -391,10 +390,11 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
           _.remove(documents, function (item) {
             return (item._id === doc._id);
           });
+          this.snackBarRef = this.snackBar.open('Document deleted...', null, { duration: 3000 });
         },
         error => {
           console.log('error =', error);
-          this.showMessage(true, 'Error deleting document');
+          this.snackBarRef = this.snackBar.open('Error deleting document...', null, { duration: 3000 });
         }
       );
   }
@@ -408,10 +408,11 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
           // reload cached app and update local data separately so we don't lose other local data
           this.applicationService.getById(this.application._id, true).takeUntil(this.ngUnsubscribe).subscribe();
           document.isPublished = true;
+          this.snackBarRef = this.snackBar.open('Document published...', null, { duration: 3000 });
         },
         error => {
           console.log('error =', error);
-          this.showMessage(true, 'Error publishing document');
+          this.snackBarRef = this.snackBar.open('Error publishing document...', null, { duration: 3000 });
         }
       );
   }
@@ -425,10 +426,11 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
           // reload cached app and update local data separately so we don't lose other local data
           this.applicationService.getById(this.application._id, true).takeUntil(this.ngUnsubscribe).subscribe();
           document.isPublished = false;
+          this.snackBarRef = this.snackBar.open('Document unpublished...', null, { duration: 3000 });
         },
         error => {
           console.log('error =', error);
-          this.showMessage(true, 'Error un-publishing document');
+          this.snackBarRef = this.snackBar.open('Error unpublishing document...', null, { duration: 3000 });
         }
       );
   }
@@ -445,10 +447,11 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
           // reload cached app and update local data separately so we don't lose other local data
           this.applicationService.getById(this.application._id, true).takeUntil(this.ngUnsubscribe).subscribe();
           this.application.decision = decsn;
+          this.snackBarRef = this.snackBar.open('Decision added...', null, { duration: 3000 });
         },
         error => {
           console.log('error =', error);
-          this.showMessage(true, 'Error adding decision');
+          this.snackBarRef = this.snackBar.open('Error adding decision...', null, { duration: 3000 });
         }
       );
   }
@@ -462,11 +465,11 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
           // reload cached app only so we don't lose other local data
           this.applicationService.getById(this.application._id, true).takeUntil(this.ngUnsubscribe).subscribe();
           this.decisionForm.form.markAsPristine();
-          this.showMessage(false, 'Decision saved!');
+          this.snackBarRef = this.snackBar.open('Decision saved...', null, { duration: 3000 });
         },
         error => {
           console.log('error =', error);
-          this.showMessage(true, 'Error saving decision');
+          this.snackBarRef = this.snackBar.open('Error saving decision...', null, { duration: 3000 });
         }
       );
   }
@@ -491,10 +494,11 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
                   // reload cached app and update local data separately so we don't lose other local data
                   this.applicationService.getById(this.application._id, true).takeUntil(this.ngUnsubscribe).subscribe();
                   this.application.decision = null;
+                  this.snackBarRef = this.snackBar.open('Decision deleted...', null, { duration: 3000 });
                 },
                 error => {
                   console.log('error =', error);
-                  this.showMessage(true, 'Error deleting decision');
+                  this.snackBarRef = this.snackBar.open('Error deleting decision...', null, { duration: 3000 });
                 }
               );
           }
@@ -522,10 +526,11 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
             // reload cached app and update local data separately so we don't lose other local data
             this.applicationService.getById(this.application._id, true).takeUntil(this.ngUnsubscribe).subscribe();
             this.application.decision.isPublished = true;
+            this.snackBarRef = this.snackBar.open('Decision published...', null, { duration: 3000 });
           },
           error => {
             console.log('error =', error);
-            this.showMessage(true, 'Error publishing decision');
+            this.snackBarRef = this.snackBar.open('Error publishing decision...', null, { duration: 3000 });
           }
         );
     }
@@ -540,18 +545,13 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
           // reload cached app and update local data separately so we don't lose other local data
           this.applicationService.getById(this.application._id, true).takeUntil(this.ngUnsubscribe).subscribe();
           this.application.decision.isPublished = false;
+          this.snackBarRef = this.snackBar.open('Decision unpublished...', null, { duration: 3000 });
         },
         error => {
           console.log('error =', error);
-          this.showMessage(true, 'Error un-publishing decision');
+          this.snackBarRef = this.snackBar.open('Error unpublishing decision...', null, { duration: 3000 });
         }
       );
   }
 
-  private showMessage(isError, msg) {
-    this.error = isError;
-    this.showMsg = true;
-    this.status = msg;
-    setTimeout(() => this.showMsg = false, 2000);
-  }
 }

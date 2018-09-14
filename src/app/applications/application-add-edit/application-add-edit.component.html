@@ -383,10 +383,6 @@
     </div>
     <div class="row">
       <main class="col-lg-8">
-        <div class="spinner-container full-screen" *ngIf="showMsg">
-          <div *ngIf="error" class="alert alert-danger">{{status}}</div>
-          <div *ngIf="!error" class="alert alert-success">{{status}}</div>
-        </div>
         <form class="mt-3" #decisionForm="ngForm">
           <section class="card bg-light">
             <h3 for="decisionDesc">Decision</h3>
