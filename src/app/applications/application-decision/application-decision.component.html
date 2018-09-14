@@ -67,14 +67,14 @@
           <ul class="doc-list mb-3" *ngIf="application.decision.documents.length > 0">
             <li *ngFor="let file of application.decision.documents">
               <span class="cell icon">
-                <i class="material-icons" (click)="api.downloadDocument(file)">insert_drive_file</i>
+                <i class="material-icons">insert_drive_file</i>
               </span>
               <span class="cell name" [title]="file.displayName || ''">
                 <span class="cell__txt-content">
-                  <a (click)="api.downloadDocument(file)">{{file.documentFileName}}</a>
+                  {{file.documentFileName}}
                 </span>
               </span>
-              <!--
+              
               <span class="cell publish-actions">
                 <span class="btn-group">
                   <button class="btn btn-sm" [ngClass]="file.isPublished ? 'btn-success':'btn-light'" type="button" title="Publish this document"
@@ -87,7 +87,7 @@
                   </button>
                 </span>
               </span>   
-              -->      
+                  
               <span class="cell actions">
                 <!--
                 <button type="button" class="btn btn-light btn-sm" (click)="api.downloadDocument(file)" title="Download this document">
@@ -99,7 +99,7 @@
                 -->
                 <span placement="top" title="{{file.isPublished ? 'Documents must be unpublished before they can be deleted':'Remove this document'}}">
                   <button type="button" class="btn btn-light btn-sm" [disabled]="file.isPublished" (click)="deleteDocument(file, application.decision.documents)">
-                    <i class="material-icons">close</i>
+                    <i class="material-icons">delete</i>
                   </button>
                 </span>
               </span>

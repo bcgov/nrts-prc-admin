@@ -101,21 +101,26 @@
                   <ul class="doc-list">
                     <li *ngFor="let document of application.documents | published">
                       <span class="cell icon">
-                        <i class="material-icons">insert_drive_file</i>
+                        <i class="material-icons link" 
+                          (click)="api.openDocument(document)">
+                          insert_drive_file
+                        </i>
                       </span>
                       <span class="cell name" [title]="document.displayName || ''">
                         <span class="cell__txt-content">
-                            {{document.documentFileName}}
+                        <a (click)="api.openDocument(document)">
+                          {{document.documentFileName}}
+                        </a>
                         </span>
                       </span>
                       <span class="cell actions">
                         <button type="button" class="btn btn-light btn-sm" (click)="api.downloadDocument(document)" title="Download this document">
                           <i class="material-icons">file_download</i>
                         </button>
-                        <button type="button" class="btn btn-light btn-sm" (click)="api.openDocument(document)" title="Open this document" [hidden]="api.isMS">
-                          <i class="material-icons">open_in_new</i>
-                        </button>
                       </span>
+                    </li>
+                    <li class="no-results" *ngIf="!application.documents || (application.documents | published).length === 0">
+                      No documents available
                     </li>
                   </ul>
                 </section>
@@ -187,7 +192,29 @@
           <h3 class="title">Application Decision</h3>
           <div class="body">
             <div>{{application.decision.description | newlines}}</div>
-            <button class="btn btn-sm content-btn-alt" type="button" [routerLink]="['/a', application._id, 'decision']">
+            <ul class="doc-list">
+              <li *ngFor="let document of application.decision.documents | published">
+                <span class="cell icon">
+                  <i class="material-icons link" (click)="api.openDocument(document)">insert_drive_file</i>
+                </span>
+                <span class="cell name" [title]="document.displayName || ''">
+                    <span class="cell__txt-content">
+                      <a (click)="api.openDocument(document)">
+                        {{document.documentFileName}}
+                      </a>
+                    </span>
+                </span>
+                <span class="cell actions">
+                  <button class="btn btn-light btn-sm" (click)="api.downloadDocument(document)" title="Download this document">
+                    <i class="material-icons">file_download</i>
+                  </button>
+                </span>
+              </li>
+              <li class="no-results" *ngIf="!application.decision.documents || (application.decision.documents | published).length === 0">
+                  This decision has no documents.
+              </li>
+            </ul>
+            <button class="btn content-btn-alt" type="button" [routerLink]="['/a', application._id, 'decision']">
               <i class="material-icons">
                 add
               </i>
@@ -347,6 +374,9 @@
                       <i class="material-icons">open_in_new</i>
                     </button>
                   </span>
+                </li>
+                <li class="no-results" *ngIf="!application.decision.documents || (application.decision.documents | published).length === 0">
+                    This decision has no documents.
                 </li>
               </ul>
             </section>

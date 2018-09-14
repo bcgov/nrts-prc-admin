@@ -17,22 +17,26 @@
 
   .title {
     margin-bottom: 0;
-    padding: 1rem;
+    padding: 1rem 1.5rem;
     background: #f1f1f1;
     font-size: 0.9375rem;
     font-weight: 700;
   }
 
   .body {
-    padding: 1rem;
+    padding: 1rem 1.5rem;
   }
 
-  .btn {
+  .content-btn-alt {
     display: inline-block;
     margin-top: 1.25rem;
     margin-right: auto;
     margin-left: auto;
     min-width: 10rem;
+  }
+
+  .doc-list {
+    margin-top: 1rem;
   }
 
   .nv-list {
@@ -72,12 +76,12 @@ section {
 }
 
 .doc-list {
-  border-bottom: 1px solid #ddd;
+  //border-bottom: 1px solid #ddd;
 
   li {
-    border-top: 1px solid #ddd;
-    background: #fff;
-  };
+    //border-top: 1px solid #ddd;
+    //background: #fff;
+  }
 }
 
 .nv-list {

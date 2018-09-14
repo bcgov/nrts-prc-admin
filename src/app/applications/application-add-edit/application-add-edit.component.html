@@ -57,21 +57,22 @@
       <fieldset>
         <legend>Public Review</legend>
         <div class="review-dates">
-          <div class="form-group">
+          <div class="form-group mb-0">
             <label>Start Date</label>
             <input class="form-control" type="date"/>
           </div>
           <span class="spacer">+</span>
-          <div class="form-group">
+          <div class="form-group mb-0">
             <label>Days</label>
             <input class="form-control" type="number"/>
           </div>
           <span class="spacer">=</span>
-          <div class="form-group">
+          <div class="form-group mb-0">
             <label>End Date</label>
             <input class="form-control" type="date"/>
           </div>
         </div>
+        <!--
         <div class="form-group">
           <label>Description (Optional)</label>
           <textarea class="form-control" rows="3"></textarea>
@@ -80,6 +81,7 @@
           <label>Internal Notes (Optional)</label>
           <textarea class="form-control" rows="3"></textarea>
         </div>
+        -->
       </fieldset>
       <fieldset>
         <legend>Application Details</legend>
@@ -111,7 +113,7 @@
                 <span class="cell name" [title]="file.displayName || ''">
                   <span class="cell__txt-content">{{file.documentFileName}}</span>
                 </span>
-                <!--
+                
                 <span class="cell publish-actions">
                   <span class="btn-group">
                     <button class="btn btn-sm" [ngClass]="file.isPublished ? 'btn-success':'btn-light'" [disabled]="file.isPublished" title="Publish this document"
@@ -124,7 +126,7 @@
                     </button>
                   </span>
                 </span>
-                -->
+                
                 <span class="cell actions">
                   <!--
                   <button class="btn btn-light btn-sm" type="button" (click)="api.downloadDocument(file)" title="Download this document">

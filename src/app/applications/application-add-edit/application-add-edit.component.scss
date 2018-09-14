@@ -120,31 +120,6 @@ form {
   margin: 2rem 0;
 }
 
-// Document List Customization
-// Column Customization for Application Documents
-.doc-list .cell {
-  &.publish-actions {
-    @include flex(0 0 auto);
-    padding-right: 0;
-    overflow: visible;
-
-    .btn {
-      height: 2rem;
-      width: 5.5rem;
-      font-size: 0.75rem;
-  
-      &.active {
-        box-shadow: none;
-      }
-
-      // TODO: remove when we the toggle buttons here to a radio group
-      &:disabled {
-        opacity: 1;
-      }
-    }
-  }
-}
-
 // Document List Actions
 .actions {
   [class^="btn"] {
