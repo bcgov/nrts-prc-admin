@@ -174,11 +174,11 @@
                 <span class="name">Status:</span>
                 <span class="value">Comment Period Status</span>
               </li>
-              <li>
+              <li *ngIf="application.currentPeriod">
                 <span class="name">Start Date:</span>
                 <span class="value">{{application.currentPeriod.startDate | date:'longDate'}}</span>
               </li>
-              <li>
+              <li *ngIf="application.currentPeriod">
                 <span class="name">End Date:</span>
                 <span class="value">{{application.currentPeriod.endDate | date:'longDate'}}</span>
               </li>
@@ -190,7 +190,7 @@
         </div>
         <div class="aside-card">
           <h3 class="title">Application Decision</h3>
-          <div class="body">
+          <div class="body" *ngIf="application.decision">
             <div>{{application.decision.description | newlines}}</div>
             <ul class="doc-list">
               <li *ngFor="let document of application.decision.documents | published">
