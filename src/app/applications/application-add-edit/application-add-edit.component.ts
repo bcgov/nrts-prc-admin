@@ -27,6 +27,7 @@ import { DocumentService } from 'app/services/document.service';
   templateUrl: './application-add-edit.component.html',
   styleUrls: ['./application-add-edit.component.scss']
 })
+
 export class ApplicationAddEditComponent implements OnInit, OnDestroy {
   @ViewChild('applicationForm') applicationForm: NgForm;
   @ViewChild('decisionForm') decisionForm: NgForm;
@@ -234,11 +235,6 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
       );
   }
 
-  private isDispositionValid() {
-    return (this.application.features && this.application.features.length > 0
-      && this.application.features[0].properties.DISPOSITION_TRANSACTION_SID === this.application.tantalisID);
-  }
-
   private reloadData(id: string) {
     // force-reload cached app data
     this.applicationService.getById(id, true)
@@ -267,16 +263,6 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
         {
           title: 'Cannot Create Application',
           message: 'Please check for required fields or errors.',
-          okOnly: true
-        }, {
-          backdropColor: 'rgba(0, 0, 0, 0.5)'
-        })
-        .takeUntil(this.ngUnsubscribe);
-    } else if (!this.isDispositionValid()) {
-      this.dialogService.addDialog(ConfirmComponent,
-        {
-          title: 'Cannot Create Application',
-          message: 'Please check that disposition data (basic information) has been successfully loaded.',
           okOnly: true
         }, {
           backdropColor: 'rgba(0, 0, 0, 0.5)'
@@ -316,16 +302,6 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
         {
           title: 'Cannot Save Application',
           message: 'Please check for required fields or errors.',
-          okOnly: true
-        }, {
-          backdropColor: 'rgba(0, 0, 0, 0.5)'
-        })
-        .takeUntil(this.ngUnsubscribe);
-    } else if (!this.isDispositionValid()) {
-      this.dialogService.addDialog(ConfirmComponent,
-        {
-          title: 'Cannot Save Application',
-          message: 'Please check that disposition data (basic information) has been successfully loaded.',
           okOnly: true
         }, {
           backdropColor: 'rgba(0, 0, 0, 0.5)'

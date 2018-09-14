@@ -24,6 +24,7 @@ import { DocumentService } from 'app/services/document.service';
   templateUrl: './application-decision.component.html',
   styleUrls: ['./application-decision.component.scss']
 })
+
 export class ApplicationDecisionComponent implements OnInit, OnDestroy {
   @ViewChild('decisionForm') decisionForm: NgForm;
 

@@ -1,37 +1,41 @@
 <div class="top-container">
   <div class="container">
     <div class="title-container">
-      <h1 class="title-container__title"><span class="text-muted">{{application._id === '0' ? 'Create' : 'Edit Public Review'}} &nbsp;&rsaquo;&nbsp; </span>Crown Land File: {{application.cl_file}}</h1>
+      <h1 class="title-container__title">
+        <span class="text-muted">{{!application._id ? 'Create' : 'Edit Public Review'}} &nbsp;&rsaquo;&nbsp; </span>
+        Crown Land File: {{application.cl_file}}
+      </h1>
       <div class="title-container__actions">
         <!--
         <button class="btn btn-light" type="button" title="Cancel changes and return to previous page" 
-          [routerLink]="application._id === '0' ? ['../'] : ['/search']">
+          [routerLink]="!application._id ? ['../'] : ['/search']">
           Cancel
         </button>
         -->
-        <button class="btn btn-light" type="button"  (click)="cancelChanges()">
+        <button class="btn btn-light" type="button" title="Cancel changes" (click)="cancelChanges()">
           Cancel
         </button>
-        <button class="btn btn-primary" type="button" title="Save application"
-          *ngIf="application._id !== '0'" 
-          (click)="saveApplication()">
+        <button class="btn btn-primary" type="button" title="Save application" *ngIf="!application._id" (click)="createApplication()">
+          Create
+        </button>
+        <button class="btn btn-primary" type="button" title="Save application" *ngIf="application._id" (click)="saveApplication()">
           Save
         </button>
-        <!--
+          <!--
         <button class="btn btn-primary" type="button" title="Publish application"
-          *ngIf="application._id !== '0' && !application.isPublished"
+          *ngIf="application._id && !application.isPublished"
           (click)="publishApplication()">
           Publish
         </button>
         <button class="btn btn-danger" type="button" title="Un-publish application"
-          *ngIf="application._id !== '0' && application.isPublished"
+          *ngIf="application._id && application.isPublished"
           (click)="unPublishApplication()">
           Unpublish
         </button>
         -->
         <!--
         <button class="btn btn-danger" type="button" title="Delete application"
-          *ngIf="application._id !== '0' && !application.isPublished"
+          *ngIf="application._id && !application.isPublished"
           (click)="deleteApplication()">
           Delete
         </button>
@@ -40,7 +44,7 @@
       
       <!--
       <div class="title-container__actions">
-        <button type="button" class="btn btn-light slide-l-btn" [routerLink]="['/a', application._id]" [disabled]="application._id === '0'">
+        <button type="button" class="btn btn-light slide-l-btn" [routerLink]="['/a', application._id]" [disabled]="!application._id">
           <i class="material-icons">info_outline</i>
           <span>Application Details</span>
         </button>
@@ -145,7 +149,7 @@
               </li>
           </ul>
           <div class="file-upload">
-            <input type="file" name="fileInput1" size="5000000" (change)="uploadFiles($event.target.files, application.documents)" multiple [disabled]="application._id === '0'">
+            <input type="file" name="fileInput1" size="5000000" (change)="uploadFiles($event.target.files, application.documents)" multiple [disabled]="!application._id">
             <div class="file-upload__target">
               <span class="file-upload__prompt">
                 <i class="file-upload__prompt-icon material-icons">file_upload</i>
@@ -172,7 +176,7 @@
                 <div>{{application.purpose || '-'}} / {{application.subpurpose || '-'}}</div>
               </div>
               <div class="title-container__actions">
-                <button type="button" class="btn btn-light" (click)="selectClient()" [disabled]="application._id === '0'">
+                <button type="button" class="btn btn-light" (click)="selectClient()" [disabled]="!application._id">
                   <span>{{application.client ? 'Change Client' : 'Select Client'}}</span>
                 </button>
               </div>
@@ -204,31 +208,31 @@
 
           <!-- APPLICATION FORM BUTTONS -->
           <div class="section-form-btns mt-3 mb-3">
-            <button type="button" class="btn btn-success" *ngIf="application._id === '0'" (click)="createApplication()" title="Create application">
+            <button type="button" class="btn btn-success" *ngIf="!application._id" (click)="createApplication()" title="Create application">
               <i class="material-icons">save</i>
               <span>Create</span>
             </button>
-            <button type="button" class="btn btn-success" *ngIf="application._id !== '0'" (click)="saveApplication()" title="Save application">
+            <button type="button" class="btn btn-success" *ngIf="application._id" (click)="saveApplication()" title="Save application">
               <i class="material-icons">save</i>
               <span>Save</span>
             </button>
-            <button type="button" class="btn btn-primary" *ngIf="application._id !== '0' && !application.isPublished" (click)="publishApplication()" title="Publish application">
+            <button type="button" class="btn btn-primary" *ngIf="application._id && !application.isPublished" (click)="publishApplication()" title="Publish application">
               <i class="material-icons">play_arrow</i>
               <span>Publish</span>
             </button>
-            <button type="button" class="btn btn-danger" *ngIf="application._id !== '0' && application.isPublished" (click)="unPublishApplication()" title="Un-publish application">
+            <button type="button" class="btn btn-danger" *ngIf="application._id && application.isPublished" (click)="unPublishApplication()" title="Un-publish application">
               <i class="material-icons">pause</i>
               <span>Unpublish</span>
             </button>
-            <button type="button" class="btn btn-danger" *ngIf="application._id !== '0' && !application.isPublished" (click)="deleteApplication()" title="Delete application">
+            <button type="button" class="btn btn-danger" *ngIf="application._id && !application.isPublished" (click)="deleteApplication()" title="Delete application">
               <i class="material-icons">delete</i>
               <span>Delete</span>
             </button>
-            <button type="button" class="btn btn-danger" *ngIf="application._id === '0'" [routerLink]="['/search']" title="Ignore changes and return to search">
+            <button type="button" class="btn btn-danger" *ngIf="!application._id" [routerLink]="['/search']" title="Ignore changes and return to search">
               <i class="material-icons">cancel</i>
               <span>Cancel</span>
             </button>
-            <button type="button" class="btn btn-danger" *ngIf="application._id !== '0'" [disabled]="applicationForm.form.pristine" (click)="resetApplication()" title="Reset application fields to original values">
+            <button type="button" class="btn btn-danger" *ngIf="application._id" [disabled]="applicationForm.form.pristine" (click)="resetApplication()" title="Reset application fields to original values">
               <i class="material-icons">cancel</i>
               <span>Reset</span>
             </button>
@@ -339,7 +343,7 @@
 
               <!-- Upload Application Documents -->
               <div class="file-upload">
-                <input type="file" name="fileInput1" size="5000000" (change)="uploadFiles($event.target.files, application.documents)" multiple [disabled]="application._id === '0'">
+                <input type="file" name="fileInput1" size="5000000" (change)="uploadFiles($event.target.files, application.documents)" multiple [disabled]="!application._id">
                 <div class="file-upload__target">
                   <span class="file-upload__prompt">
                     <i class="file-upload__prompt-icon material-icons">file_upload</i>
@@ -371,11 +375,11 @@
 <div class="application-edit" style="display: none;">
   <div class="container" *ngIf="application">
     <div class="title-container mb-4">
-      <h1 class="title-container__title" *ngIf="application._id === '0'">Create New Application</h1>
-      <h1 class="title-container__title" *ngIf="application._id !== '0'">Edit Application</h1>
+      <h1 class="title-container__title" *ngIf="!application._id">Create New Application</h1>
+      <h1 class="title-container__title" *ngIf="application._id">Edit Application</h1>
       <div class="title-container__actions">
         <!-- to navigate to details, application must have been created -->
-        <button type="button" class="btn btn-light slide-l-btn" [routerLink]="['/a', application._id]" [disabled]="application._id === '0'">
+        <button type="button" class="btn btn-light slide-l-btn" [routerLink]="['/a', application._id]" [disabled]="!application._id">
           <i class="material-icons">info_outline</i>
           <span>Application Details</span>
         </button>
@@ -388,7 +392,7 @@
             <h3 for="decisionDesc">Decision</h3>
 
             <section *ngIf="!application.decision">
-              <button type="button" class="btn btn-success" (click)="addDecision()" title="Add decision" [disabled]="application._id === '0'">
+              <button type="button" class="btn btn-success" (click)="addDecision()" title="Add decision" [disabled]="!application._id">
                 <i class="material-icons">add</i>
                 <span>Add Decision</span>
               </button>

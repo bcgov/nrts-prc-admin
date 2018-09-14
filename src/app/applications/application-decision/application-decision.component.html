@@ -1,38 +1,30 @@
 <div class="top-container">
   <div class="container">
     <div class="title-container">
-      <h1 class="title-container__title"><span class="text-muted">Crown Land File: #{{application.cl_file}} &nbsp;&rsaquo;&nbsp;</span> {{application._id === '0' ? 'Create' : 'Edit Decision'}}</h1>
+      <h1 class="title-container__title"><span class="text-muted">Crown Land File: #{{application.cl_file}} &nbsp;&rsaquo;&nbsp;</span> {{!application._id ? 'Create' : 'Edit Decision'}}</h1>
       <div class="title-container__actions">
         <!--
         <button class="btn btn-light" type="button" title="Cancel changes and return to previous page" 
-          [routerLink]="application._id === '0' ? ['../'] : ['/search']">
+          [routerLink]="!application._id ? ['../'] : ['/search']">
           Cancel
         </button>
         -->
         <button class="btn btn-light" type="button"  (click)="cancelChanges()">
           Cancel
         </button>
-        <button class="btn btn-primary" type="button" title="Save Decision"
-          *ngIf="application._id !== '0'" 
-          (click)="saveDecision()">
+        <button class="btn btn-primary" type="button" title="Save Decision" *ngIf="application._id" (click)="saveDecision()">
           Save
         </button>
         <!--
-        <button class="btn btn-primary" type="button" title="Publish application"
-          *ngIf="application._id !== '0' && !application.isPublished"
-          (click)="publishApplication()">
+        <button class="btn btn-primary" type="button" title="Publish application" *ngIf="application._id && !application.isPublished" (click)="publishApplication()">
           Publish
         </button>
-        <button class="btn btn-danger" type="button" title="Un-publish application"
-          *ngIf="application._id !== '0' && application.isPublished"
-          (click)="unPublishApplication()">
+        <button class="btn btn-danger" type="button" title="Unpublish application" *ngIf="application._id && application.isPublished" (click)="unPublishApplication()">
           Unpublish
         </button>
         -->
         <!--
-        <button class="btn btn-danger" type="button" title="Delete application"
-          *ngIf="application._id !== '0' && !application.isPublished"
-          (click)="deleteApplication()">
+        <button class="btn btn-danger" type="button" title="Delete application" *ngIf="application._id && !application.isPublished" (click)="deleteApplication()">
           Delete
         </button>
         -->
@@ -40,7 +32,7 @@
       
       <!--
       <div class="title-container__actions">
-        <button type="button" class="btn btn-light slide-l-btn" [routerLink]="['/a', application._id]" [disabled]="application._id === '0'">
+        <button type="button" class="btn btn-light slide-l-btn" [routerLink]="['/a', application._id]" [disabled]="!application._id">
           <i class="material-icons">info_outline</i>
           <span>Application Details</span>
         </button>
@@ -125,7 +117,7 @@
     <h3 for="decisionDesc">Decision</h3>
 
     <section *ngIf="!application.decision">
-      <button type="button" class="btn btn-success" (click)="addDecision()" title="Add decision" [disabled]="application._id === '0'">
+      <button type="button" class="btn btn-success" (click)="addDecision()" title="Add decision" [disabled]="!application._id">
         <i class="material-icons">add</i>
         <span>Add Decision</span>
       </button>

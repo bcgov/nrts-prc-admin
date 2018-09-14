@@ -53,9 +53,7 @@
             {{item.properties.TENURE_STATUS | titlecase}}
           </td>
           <td class="actions">
-            <button class="btn btn-sm btn-primary" type="button" 
-              *ngIf="!item.app" 
-              (click)="importProject(item)">
+            <button class="btn btn-sm btn-primary" type="button" *ngIf="!item.app" (click)="importProject(item)">
               <i class="material-icons">add</i>
               Create
             </button>
@@ -64,18 +62,15 @@
                 Actions
               </button>
               <div class="dropdown-menu" ngbDropdownMenu>
-                <button class="list-group-item list-group-item-action" type="button"
-                  [routerLink]="['/a', item.app._id]">
+                <button class="list-group-item list-group-item-action" type="button" [routerLink]="['/a', item.app._id]">
                   <i class="material-icons">insert_drive_file</i>
                   View Application
                 </button>
-                <button class="list-group-item list-group-item-action" type="button"
-                  [routerLink]="['/a', item.app._id, 'edit']">
+                <button class="list-group-item list-group-item-action" type="button" [routerLink]="['/a', item.app._id, 'edit']">
                   <i class="material-icons">edit</i>
                   Edit Details
                 </button>
-                <button class="list-group-item list-group-item-action" type="button"
-                  [routerLink]="['/comments', item.app._id]">
+                <button class="list-group-item list-group-item-action" type="button" [routerLink]="['/comments', item.app._id]">
                   <i class="material-icons">mode_comment</i>
                   Review Comments
                 </button>

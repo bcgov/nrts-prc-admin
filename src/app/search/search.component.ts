@@ -103,6 +103,7 @@ export class SearchComponent implements OnInit, OnDestroy {
                         }
                       },
                       error => {
+                        console.log('error =', error);
                         self.snackBarRef = self.snackBar.open('Error retrieving application ...', null, { duration: 3000 });
                       }
                     );
@@ -115,6 +116,8 @@ export class SearchComponent implements OnInit, OnDestroy {
           }
         },
         error => {
+          console.log('error =', error);
+
           // update variables on error
           this.searching = false;
           this.ranSearch = true;
@@ -149,29 +152,28 @@ export class SearchComponent implements OnInit, OnDestroy {
   }
 
   public importProject(item: any) {
-    // save application properties from search results
     if (item.properties) {
-      // cached data
-      item.purpose = item.properties.TENURE_PURPOSE;
-      item.subpurpose = item.properties.TENURE_SUBPURPOSE;
-      item.type = item.properties.TENURE_TYPE;
-      item.subtype = item.properties.TENURE_SUBTYPE;
-      item.status = this.applicationService.getStatusCode(item.properties.TENURE_STATUS);
-      item.tenureStage = item.properties.TENURE_STAGE;
-      item.location = item.properties.TENURE_LOCATION;
-      item.businessUnit = item.properties.RESPONSIBLE_BUSINESS_UNIT;
-      item.region = this.applicationService.getRegionCode(item.businessUnit);
-      // these are special - we will persist them to db as search keys
-      item.cl_file = +item.properties.CROWN_LANDS_FILE; // NOTE: unary operator
-      item.tantalisID = item.properties.DISPOSITION_TRANSACTION_SID;
+      // save application properties from search results
+      const params = {
+        // initial cached data
+        purpose: item.properties.TENURE_PURPOSE,
+        subpurpose: item.properties.TENURE_SUBPURPOSE,
+        type: item.properties.TENURE_TYPE,
+        subtype: item.properties.TENURE_SUBTYPE,
+        status: item.properties.TENURE_STATUS,
+        tenureStage: item.properties.TENURE_STAGE,
+        location: item.properties.TENURE_LOCATION,
+        businessUnit: item.properties.RESPONSIBLE_BUSINESS_UNIT,
+        // these are special - we will persist them to db as search keys
+        cl_file: +item.properties.CROWN_LANDS_FILE, // NOTE: unary operator
+        tantalisID: item.properties.DISPOSITION_TRANSACTION_SID,
+      };
+      // go to add-edit page
+      this.router.navigate(['/a', 0, 'edit'], { queryParams: params });
+    } else {
+      console.log('error, invalid item =', item);
+      this.snackBarRef = this.snackBar.open('Error creating application ...', null, { duration: 3000 });
     }
-
-    // add the application
-    // on success go to edit page
-    this.applicationService.add(item)
-      .takeUntil(this.ngUnsubscribe)
-      .subscribe(application => {
-        this.router.navigate(['/a', application._id, 'edit']);
-      });
   }
+
 }
