@@ -2,7 +2,7 @@
   <div class="container">
     <div class="title-container">
       <h1 class="title-container__title">
-        <span class="text-muted">{{!application._id ? 'Create' : 'Edit Public Review'}} &nbsp;&rsaquo;&nbsp; </span>
+        <span class="text-muted">{{!application._id ? 'Create Public Review' : 'Edit Public Review'}} &nbsp;&rsaquo;&nbsp; </span>
         Crown Land File: {{application.cl_file}}
       </h1>
       <div class="title-container__actions">
@@ -15,8 +15,8 @@
         <button class="btn btn-light" type="button" title="Cancel changes" (click)="cancelChanges()">
           Cancel
         </button>
-        <button class="btn btn-primary" type="button" title="Save application" *ngIf="!application._id" (click)="createApplication()">
-          Create
+        <button class="btn btn-primary" type="button" title="Submit new application" *ngIf="!application._id" (click)="createApplication()">
+          Submit
         </button>
         <button class="btn btn-primary" type="button" title="Save application" *ngIf="application._id" (click)="saveApplication()">
           Save
@@ -63,17 +63,17 @@
         <div class="review-dates">
           <div class="form-group mb-0">
             <label>Start Date</label>
-            <input class="form-control" type="date"/>
+            <input class="form-control" type="date" name="startDate" [ngModel]="startDate" (ngModelChange)="onDate1Chg($event)" />
           </div>
           <span class="spacer">+</span>
           <div class="form-group mb-0">
             <label>Days</label>
-            <input class="form-control" type="number"/>
+            <input class="form-control" type="number" name="delta" [ngModel]="delta" (ngModelChange)="onDeltaChg($event)" />
           </div>
           <span class="spacer">=</span>
           <div class="form-group mb-0">
             <label>End Date</label>
-            <input class="form-control" type="date"/>
+            <input class="form-control" type="date" name="endDate" [ngModel]="endDate" (ngModelChange)="onDate2Chg($event)" />
           </div>
         </div>
         <!--
