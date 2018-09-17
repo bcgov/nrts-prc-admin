@@ -15,7 +15,7 @@
         <button class="btn btn-light" type="button" title="Cancel changes" (click)="cancelChanges()">
           Cancel
         </button>
-        <button class="btn btn-primary" type="button" title="Submit new application" *ngIf="!application._id" (click)="createApplication()">
+        <button class="btn btn-primary" type="button" title="Submit new application" *ngIf="!application._id" (click)="addApplication()">
           Submit
         </button>
         <button class="btn btn-primary" type="button" title="Save application" *ngIf="application._id" (click)="saveApplication()">
@@ -121,11 +121,11 @@
                 <span class="cell publish-actions">
                   <span class="btn-group">
                     <button class="btn btn-sm" [ngClass]="file.isPublished ? 'btn-success':'btn-light'" [disabled]="file.isPublished" title="Publish this document"
-                      (click)="publishDocument(file, application.documents)">
+                      (click)="publishDocument(file)">
                       Published
                     </button>
                     <button class="btn btn-sm" [ngClass]="!file.isPublished ? 'btn-dark active':'btn-light'" [disabled]="!file.isPublished" title="Unpublish this document"
-                      (click)="unPublishDocument(file, application.documents)">
+                      (click)="unPublishDocument(file)">
                       Unpublished
                     </button>
                   </span>
@@ -150,7 +150,7 @@
           </ul>
           <div class="file-upload">
             <input type="file" name="fileInput1" size="5000000" (change)="uploadFiles($event.target.files, application.documents)" multiple [disabled]="!application._id">
-            <div class="file-upload__target">
+              <div class="file-upload__target">
               <span class="file-upload__prompt">
                 <i class="file-upload__prompt-icon material-icons">file_upload</i>
                 <span class="file-upload__prompt-msg">Drop files to attach, or <strong>browse</strong>.</span>
@@ -208,7 +208,7 @@
 
           <!-- APPLICATION FORM BUTTONS -->
           <div class="section-form-btns mt-3 mb-3">
-            <button type="button" class="btn btn-success" *ngIf="!application._id" (click)="createApplication()" title="Create application">
+            <button type="button" class="btn btn-success" *ngIf="!application._id" (click)="addApplication()" title="Create application">
               <i class="material-icons">save</i>
               <span>Create</span>
             </button>
@@ -316,11 +316,11 @@
                   <span class="cell publish-actions">
                     <span class="btn-group">
                       <button class="btn btn-sm" [ngClass]="file.isPublished ? 'btn-success':'btn-light'" [disabled]="file.isPublished" title="Publish this document"
-                        (click)="publishDocument(file, application.documents)">
+                        (click)="publishDocument(file)">
                         Published
                       </button>
                       <button class="btn btn-sm" [ngClass]="!file.isPublished ? 'btn-dark active':'btn-light'" [disabled]="!file.isPublished" title="Unpublish this document"
-                        (click)="unPublishDocument(file, application.documents)">
+                        (click)="unPublishDocument(file)">
                         Unpublished
                       </button>
                     </span>
@@ -426,11 +426,11 @@
                     <span class="cell publish-actions">
                       <span class="btn-group">
                         <button class="btn btn-sm" [ngClass]="file.isPublished ? 'btn-success':'btn-light'" [disabled]="file.isPublished" type="button" title="Publish this document"
-                          (click)="publishDocument(file, application.decision.documents)">
+                          (click)="publishDocument(file)">
                           Published
                         </button>
                         <button class="btn btn-sm" [ngClass]="!file.isPublished ? 'btn-dark active':'btn-light'" [disabled]="!file.isPublished" type="button" title="Unpublish this document"
-                          (click)="unPublishDocument(file, application.decision.documents)">
+                          (click)="unPublishDocument(file)">
                           Unpublished
                         </button>
                       </span>

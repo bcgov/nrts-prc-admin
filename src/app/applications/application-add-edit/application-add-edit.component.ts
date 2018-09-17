@@ -7,6 +7,7 @@ import { DialogService } from 'ng2-bootstrap-modal';
 import { Subject } from 'rxjs/Subject';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/takeUntil';
+import 'rxjs/add/operator/concat';
 import * as moment from 'moment-timezone';
 import * as _ from 'lodash';
 
@@ -35,7 +36,6 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
   @ViewChild(ApplicationAsideComponent) applicationAside: ApplicationAsideComponent;
 
   public application: Application = null;
-  public commentPeriod: CommentPeriod = null;
   public startDate: string = null;
   public endDate: string = null;
   public delta = 30; // # days including today
@@ -65,7 +65,7 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Check for unsaved changes before navigating away from current route (ie, this page)
+  // check for unsaved changes before navigating away from current route (ie, this page)
   canDeactivate(): Observable<boolean> | boolean {
     // allow synchronous navigation if everything is OK
     if (this.allowDeactivate || (this.applicationForm.pristine && this.decisionForm.pristine)) {
@@ -95,46 +95,7 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
       .subscribe(
         (data: { application: Application }) => {
           if (data.application) {
-            // make a local copy of the in-memory (cached) application so we don't change it
-            // this allows us to abort editing
-            // but forces us to reload cached application properties for certain changes
-            this.application = _.cloneDeep(data.application);
-
-            // set publish date
-            if (!this.application.publishDate) {
-              this.application.publishDate = new Date();
-            }
-            // TODO: why do we need to do this on an existing application?
-            this.application.publishDate = moment(this.application.publishDate).format();
-
-            // create new comment period and set initial start date (which also sets end date)
-            this.commentPeriod = new CommentPeriod({ _application: this.application._id });
-            this.onDate1Chg(this.formatDate(new Date())); // today
-
-            // TODO: handle new vs existing comment period
-            // if (!this.application.commentPeriod) {
-            //   this.isNew = true;
-            //   // create new comment period
-            //   this.cp = new CommentPeriod();
-            //   this.cp._application = this.appId;
-
-            //   // set initial start date and duration
-            //   const n = new Date();
-            //   this.onDate1Chg({ 'year': n.getFullYear(), 'month': n.getMonth() + 1, 'day': n.getDate() });
-            //   this.onDeltaChg(this.delta);
-            // } else {
-            //   this.isNew = false;
-            //   // make a **deep copy** of the passed-in comment period so we don't change it
-            //   this.cp = _.cloneDeep(this.commentPeriod);
-            //   this.cp._application = this.appId;
-
-            //   // set start and end dates
-            //   const s = new Date(this.cp.startDate);
-            //   const e = new Date(this.cp.endDate); // NB: must save e before setting s
-            //   this.onDate1Chg({ 'year': s.getFullYear(), 'month': s.getMonth() + 1, 'day': s.getDate() });
-            //   this.onDate2Chg({ 'year': e.getFullYear(), 'month': e.getMonth() + 1, 'day': e.getDate() });
-            // }
-
+            this.internalLoadData(data.application);
           } else {
             // application not found --> navigate back to search
             alert('Uh-oh, couldn\'t load application');
@@ -142,6 +103,68 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
           }
         }
       );
+  }
+
+  private reloadData(id: string) {
+    // force-reload cached app data
+    this.applicationService.getById(id, true)
+      .takeUntil(this.ngUnsubscribe)
+      .subscribe(
+        application => {
+          this.internalLoadData(application);
+        },
+        error => {
+          console.log('error =', error);
+          // application not found --> navigate back to search
+          alert('Uh-oh, couldn\'t load application');
+          this.router.navigate(['/search']);
+        }
+      );
+  }
+
+  private internalLoadData(application: Application) {
+    // make a local copy of the in-memory (cached) application so we don't change it
+    // this allows us to abort editing
+    // but forces us to reload cached application properties for certain changes
+    this.application = _.cloneDeep(application);
+
+    // set publish date
+    if (!this.application.publishDate) {
+      this.application.publishDate = new Date();
+    }
+    // TODO: why do we need to do this on an existing application?
+    this.application.publishDate = moment(this.application.publishDate).format();
+
+    // create new comment period and set initial start date (which also sets end date)
+    this.application.currentPeriod = new CommentPeriod({ _application: this.application._id });
+    this.onDate1Chg(this.formatDate(new Date())); // today
+
+    // TODO: handle new vs existing comment period
+    // TODO: create comment period if there isn't one already
+    //       (not just on create but also on edit)
+
+    // if (!this.application.currentPeriod) {
+    //   this.isNew = true;
+    //   // create new comment period
+    //   this.cp = new CommentPeriod();
+    //   this.cp._application = this.appId;
+
+    //   // set initial start date and duration
+    //   const n = new Date();
+    //   this.onDate1Chg({ 'year': n.getFullYear(), 'month': n.getMonth() + 1, 'day': n.getDate() });
+    //   this.onDeltaChg(this.delta);
+    // } else {
+    //   this.isNew = false;
+    //   // make a **deep copy** of the passed-in comment period so we don't change it
+    //   this.cp = _.cloneDeep(this.application.currentPeriod);
+    //   this.cp._application = this.appId;
+
+    //   // set start and end dates
+    //   const s = new Date(this.cp.startDate);
+    //   const e = new Date(this.cp.endDate); // NB: must save e before setting s
+    //   this.onDate1Chg({ 'year': s.getFullYear(), 'month': s.getMonth() + 1, 'day': s.getDate() });
+    //   this.onDate2Chg({ 'year': e.getFullYear(), 'month': e.getMonth() + 1, 'day': e.getDate() });
+    // }
   }
 
   ngOnDestroy() {
@@ -152,13 +175,19 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
     this.ngUnsubscribe.complete();
   }
 
+  // cancel
+  // see 'canDeactivate' for the UI notification / form reset functionality
+  public cancelChanges() {
+    this._location.back();
+  }
+
   // returns yyyy-mm-dd for use by date input
   private formatDate(date: Date): string {
     return date ? `${date.getUTCFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}` : null;
   }
 
   public onDate1Chg(startDate: string) {
-    this.commentPeriod.startDate = moment(startDate).toDate();
+    this.application.currentPeriod.startDate = moment(startDate).toDate();
     this.setDates(true, false, false);
   }
 
@@ -168,30 +197,30 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
   }
 
   public onDate2Chg(endDate: string) {
-    this.commentPeriod.endDate = moment(endDate).toDate();
+    this.application.currentPeriod.endDate = moment(endDate).toDate();
     this.setDates(false, false, true);
   }
 
   private setDates(start?: boolean, delta?: boolean, end?: boolean) {
     if (start) {
       // when start changes, adjust end accordingly
-      this.commentPeriod.endDate = new Date(this.commentPeriod.startDate);
-      this.commentPeriod.endDate.setDate(this.commentPeriod.startDate.getDate() + this.delta - 1);
+      this.application.currentPeriod.endDate = new Date(this.application.currentPeriod.startDate);
+      this.application.currentPeriod.endDate.setDate(this.application.currentPeriod.startDate.getDate() + this.delta - 1);
 
     } else if (delta) {
       // when delta changes, adjust end accordingly
-      this.commentPeriod.endDate = new Date(this.commentPeriod.startDate);
-      this.commentPeriod.endDate.setDate(this.commentPeriod.startDate.getDate() + this.delta - 1);
+      this.application.currentPeriod.endDate = new Date(this.application.currentPeriod.startDate);
+      this.application.currentPeriod.endDate.setDate(this.application.currentPeriod.startDate.getDate() + this.delta - 1);
 
     } else if (end) {
       // when end changes, adjust delta accordingly
       // use moment to handle Daylight Saving Time changes
-      this.delta = moment(this.commentPeriod.endDate).diff(moment(this.commentPeriod.startDate), 'days') + 1;
+      this.delta = moment(this.application.currentPeriod.endDate).diff(moment(this.application.currentPeriod.startDate), 'days') + 1;
     }
 
-    // update date pickers
-    this.startDate = this.formatDate(this.commentPeriod.startDate);
-    this.endDate = this.formatDate(this.commentPeriod.endDate);
+    // update date inputs
+    this.startDate = this.formatDate(this.application.currentPeriod.startDate);
+    this.endDate = this.formatDate(this.application.currentPeriod.endDate);
   }
 
   public selectClient() {
@@ -223,36 +252,7 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
       );
   }
 
-  // Cancel
-  // See 'canDeactivate' for the UI notification / form reset functionality
-  public cancelChanges() {
-    this._location.back();
-  }
-
-  private reloadData(id: string) {
-    // force-reload cached app data
-    this.applicationService.getById(id, true)
-      .takeUntil(this.ngUnsubscribe)
-      .subscribe(
-        application => {
-          // make a local copy of the in-memory (cached) application so we don't change it
-          // this allows us to abort editing
-          // but forces us to reload cached application properties for certain changes
-          this.application = _.cloneDeep(application);
-
-          if (!this.application.publishDate) {
-            this.application.publishDate = new Date();
-          }
-          this.application.publishDate = moment(this.application.publishDate).format();
-
-          this.applicationForm.form.markAsPristine();
-          this.decisionForm.form.markAsPristine();
-        }
-      );
-  }
-
-  // Create New Application
-  public createApplication() {
+  public addApplication() {
     if (this.applicationForm.invalid) {
       this.dialogService.addDialog(ConfirmComponent,
         {
@@ -267,7 +267,10 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
       // adjust for current tz
       this.application.publishDate = moment(this.application.publishDate).format();
 
+      // first add application
+      // then add commentperiod
       this.applicationService.add(this.application)
+        .concat(this.commentPeriodService.add(this.application.currentPeriod))
         .takeUntil(this.ngUnsubscribe)
         .subscribe(
           application => {
@@ -275,20 +278,6 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
             // reload cached app and local copy
             this.reloadData(application._id);
             this.snackBarRef = this.snackBar.open('Application created...', null, { duration: 3000 });
-
-            // also create comment period
-            // TODO: also need to publish it
-            // TODO: these adds should all succeed or all fail
-            this.commentPeriodService.add(this.commentPeriod)
-              .subscribe(
-                value => {
-                  this.snackBarRef = this.snackBar.open('Comment period created...', null, { duration: 3000 });
-                },
-                error => {
-                  console.log('error =', error);
-                  this.snackBarRef = this.snackBar.open('Error creating comment period...', null, { duration: 3000 });
-                }
-              );
           },
           error => {
             console.log('error =', error);
@@ -298,7 +287,6 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Save Changes to Application
   public saveApplication() {
     if (this.applicationForm.invalid) {
       this.dialogService.addDialog(ConfirmComponent,
@@ -314,27 +302,17 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
       // adjust for current tz
       this.application.publishDate = moment(this.application.publishDate).format();
 
+      // first save application
+      // then save commentperiod
       this.applicationService.save(this.application)
+        .concat(this.commentPeriodService.save(this.application.currentPeriod))
         .takeUntil(this.ngUnsubscribe)
         .subscribe(
-          application => {
+          () => {
             // reload cached app only so we don't lose other local data
             this.applicationService.getById(this.application._id, true).takeUntil(this.ngUnsubscribe).subscribe();
             this.applicationForm.form.markAsPristine();
             this.snackBarRef = this.snackBar.open('Application saved...', null, { duration: 3000 });
-
-            // also save comment period
-            // TODO: these saves should all succeed or all fail
-            this.commentPeriodService.save(this.commentPeriod)
-              .subscribe(
-                value => {
-                  this.snackBarRef = this.snackBar.open('Comment period saved...', null, { duration: 3000 });
-                },
-                error => {
-                  console.log('error =', error);
-                  this.snackBarRef = this.snackBar.open('Error saving comment period...', null, { duration: 3000 });
-                }
-              );
           },
           error => {
             console.log('error =', error);
@@ -344,40 +322,18 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
     }
   }
 
-  private publishCommentPeriod(commentPeriod: CommentPeriod) {
-    return this.commentPeriodService.publish(commentPeriod)
-      .toPromise()
-      .then(
-        value => {
-          this.snackBarRef = this.snackBar.open('Comment period published...', null, { duration: 3000 });
-        },
-        error => {
-          console.log('error =', error);
-          this.snackBarRef = this.snackBar.open('Error publishing comment period...', null, { duration: 3000 });
-        }
-      );
-  }
-
-  private unPublishCommentPeriod(commentPeriod: CommentPeriod) {
-    return this.commentPeriodService.unPublish(commentPeriod)
-      .toPromise()
-      .then(
-        value => {
-          this.snackBarRef = this.snackBar.open('Comment period unpublished...', null, { duration: 3000 });
-        },
-        error => {
-          console.log('error =', error);
-          this.snackBarRef = this.snackBar.open('Error unpublishing comment period...', null, { duration: 3000 });
-        }
-      );
-  }
-
-  // Upload Application Documents
+  // upload documents
   public uploadFiles(fileList: FileList, documents: Document[]) {
     for (let i = 0; i < fileList.length; i++) {
       if (fileList[i]) {
         const formData = new FormData();
-        formData.append('_application', this.application._id);
+        if (documents === this.application.documents) {
+          formData.append('_application', this.application._id);
+        } else if (documents === this.application.decision.documents) {
+          formData.append('_decision', this.application.decision._id);
+        } else {
+          break; // error
+        }
         formData.append('displayName', fileList[i].name);
         formData.append('upfile', fileList[i]);
         this.documentService.add(formData)
@@ -419,7 +375,7 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
       );
   }
 
-  public publishDocument(document: Document, documents: Document[]) {
+  public publishDocument(document: Document) {
     this.documentService.publish(document)
       .takeUntil(this.ngUnsubscribe)
       .subscribe(
@@ -437,7 +393,7 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
       );
   }
 
-  public unPublishDocument(document: Document, documents: Document[]) {
+  public unPublishDocument(document: Document) {
     this.documentService.unPublish(document)
       .takeUntil(this.ngUnsubscribe)
       .subscribe(
@@ -455,7 +411,7 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
       );
   }
 
-  addDecision() {
+  public addDecision() {
     const decision = new Decision();
     decision._application = this.application._id;
 
@@ -477,7 +433,10 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
   }
 
   saveDecision() {
+    // first save decision
+    // then publish decision
     this.decisionService.save(this.application.decision)
+      .concat(this.decisionService.publish(this.application.decision))
       .takeUntil(this.ngUnsubscribe)
       .subscribe(
         () => {
@@ -494,84 +453,40 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
       );
   }
 
-  deleteDecision() {
-    this.dialogService.addDialog(ConfirmComponent,
-      {
-        title: 'Confirm Deletion',
-        message: 'Do you really want to delete this decision?'
-      }, {
-        backdropColor: 'rgba(0, 0, 0, 0.5)'
-      })
-      .takeUntil(this.ngUnsubscribe)
-      .subscribe(
-        isConfirmed => {
-          if (isConfirmed) {
-            this.decisionService.delete(this.application.decision)
-              .takeUntil(this.ngUnsubscribe)
-              .subscribe(
-                () => {
-                  // delete succeeded
-                  // reload cached app and update local data separately so we don't lose other local data
-                  this.applicationService.getById(this.application._id, true).takeUntil(this.ngUnsubscribe).subscribe();
-                  this.application.decision = null;
-                  this.snackBarRef = this.snackBar.open('Decision deleted...', null, { duration: 3000 });
-                },
-                error => {
-                  console.log('error =', error);
-                  this.snackBarRef = this.snackBar.open('Error deleting decision...', null, { duration: 3000 });
-                }
-              );
-          }
-        }
-      );
-  }
-
-  publishDecision() {
-    if (this.decisionForm.dirty) {
-      this.dialogService.addDialog(ConfirmComponent,
-        {
-          title: 'Cannot Publish Decision',
-          message: 'Please save pending decision changes first.',
-          okOnly: true
-        }, {
-          backdropColor: 'rgba(0, 0, 0, 0.5)'
-        })
-        .takeUntil(this.ngUnsubscribe);
-    } else {
-      this.decisionService.publish(this.application.decision)
-        .takeUntil(this.ngUnsubscribe)
-        .subscribe(
-          () => {
-            // publish succeeded
-            // reload cached app and update local data separately so we don't lose other local data
-            this.applicationService.getById(this.application._id, true).takeUntil(this.ngUnsubscribe).subscribe();
-            this.application.decision.isPublished = true;
-            this.snackBarRef = this.snackBar.open('Decision published...', null, { duration: 3000 });
-          },
-          error => {
-            console.log('error =', error);
-            this.snackBarRef = this.snackBar.open('Error publishing decision...', null, { duration: 3000 });
-          }
-        );
-    }
-  }
-
-  unPublishDecision() {
-    this.decisionService.unPublish(this.application.decision)
-      .takeUntil(this.ngUnsubscribe)
-      .subscribe(
-        () => {
-          // unpublish succeeded
-          // reload cached app and update local data separately so we don't lose other local data
-          this.applicationService.getById(this.application._id, true).takeUntil(this.ngUnsubscribe).subscribe();
-          this.application.decision.isPublished = false;
-          this.snackBarRef = this.snackBar.open('Decision unpublished...', null, { duration: 3000 });
-        },
-        error => {
-          console.log('error =', error);
-          this.snackBarRef = this.snackBar.open('Error unpublishing decision...', null, { duration: 3000 });
-        }
-      );
-  }
+  // SAVE FOR FUTURE
+  // deleteDecision() {
+  //   this.dialogService.addDialog(ConfirmComponent,
+  //     {
+  //       title: 'Confirm Deletion',
+  //       message: 'Do you really want to delete this decision?'
+  //     }, {
+  //       backdropColor: 'rgba(0, 0, 0, 0.5)'
+  //     })
+  //     .takeUntil(this.ngUnsubscribe)
+  //     .subscribe(
+  //       isConfirmed => {
+  //         if (isConfirmed) {
+  //           // first unpublish decision
+  //           // then delete decision
+  //           this.decisionService.unpublish(this.application.decision)
+  //             .concat(this.decisionService.delete(this.application.decision))
+  //             .takeUntil(this.ngUnsubscribe)
+  //             .subscribe(
+  //               () => {
+  //                 // delete succeeded
+  //                 // reload cached app and update local data separately so we don't lose other local data
+  //                 this.applicationService.getById(this.application._id, true).takeUntil(this.ngUnsubscribe).subscribe();
+  //                 this.application.decision = null;
+  //                 this.snackBarRef = this.snackBar.open('Decision deleted...', null, { duration: 3000 });
+  //               },
+  //               error => {
+  //                 console.log('error =', error);
+  //                 this.snackBarRef = this.snackBar.open('Error deleting decision...', null, { duration: 3000 });
+  //               }
+  //             );
+  //         }
+  //       }
+  //     );
+  // }
 
 }

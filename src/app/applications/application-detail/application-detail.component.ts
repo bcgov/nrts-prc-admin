@@ -4,11 +4,13 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { DialogService } from 'ng2-bootstrap-modal';
 import { Subject } from 'rxjs/Subject';
 import 'rxjs/add/operator/takeUntil';
+import 'rxjs/add/operator/concat';
 
 import { ConfirmComponent } from 'app/confirm/confirm.component';
 import { Application } from 'app/models/application';
 import { ApiService } from 'app/services/api';
 import { ApplicationService } from 'app/services/application.service';
+import { CommentPeriodService } from 'app/services/commentperiod.service';
 
 @Component({
   selector: 'app-application-detail',
@@ -27,7 +29,8 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
     public snackBar: MatSnackBar,
     public api: ApiService, // also used in template
     private dialogService: DialogService,
-    public applicationService: ApplicationService // used in template
+    public applicationService: ApplicationService, // also used in template
+    public commentPeriodService: CommentPeriodService
   ) { }
 
   ngOnInit() {
@@ -93,10 +96,16 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
         .subscribe(
           isConfirmed => {
             if (isConfirmed) {
-              this.applicationService.delete(this.application)
+              // first delete comment period
+              // TODO: then delete decision documents (if any)
+              // then delete decision (if any)
+              // TODO: then delete application documents (if any)
+              // then delete application
+              this.commentPeriodService.delete(this.application.currentPeriod)
+                .concat(this.applicationService.delete(this.application))
                 .takeUntil(this.ngUnsubscribe)
                 .subscribe(
-                  application => {
+                  () => {
                     // delete succeeded --> navigate back to search
                     this.application = null;
                     this.router.navigate(['/search']);
@@ -113,10 +122,14 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
   }
 
   publishApplication() {
+    // first publish application
+    // then publish decision (if any)
+    // then publish comment period
     this.applicationService.publish(this.application)
+      .concat(this.commentPeriodService.publish(this.application.currentPeriod))
       .takeUntil(this.ngUnsubscribe)
       .subscribe(
-        application => {
+        () => {
           // publish succeeded
           // reload cached app and update local data separately so we don't lose other local data
           this.applicationService.getById(this.application._id, true).takeUntil(this.ngUnsubscribe).subscribe();
@@ -131,10 +144,14 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
   }
 
   unPublishApplication() {
-    this.applicationService.unPublish(this.application)
+    // first unpublish comment period
+    // then unpublish decision (if any)
+    // then unpublish application
+    this.commentPeriodService.unPublish(this.application.currentPeriod)
+      .concat(this.applicationService.unPublish(this.application))
       .takeUntil(this.ngUnsubscribe)
       .subscribe(
-        application => {
+        () => {
           // unpublish succeeded
           // reload cached app and update local data separately so we don't lose other local data
           this.applicationService.getById(this.application._id, true).takeUntil(this.ngUnsubscribe).subscribe();
