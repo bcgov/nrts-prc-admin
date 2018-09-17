@@ -2,6 +2,7 @@
   border-radius: 0.25rem;
   font-weight: 400;
   transition: all linear 0.2s;
+  cursor: pointer;
 
   &.inverted {
     color: $white;
@@ -205,12 +206,15 @@ main {
 
 .btn-icon {
   min-width: 2.5rem !important;
-  padding-left: 0;
+  padding-top: 0.35rem;
   padding-right: 0;
+  padding-bottom: 0.35rem;
+  padding-left: 0;
   overflow: hidden;
   color: #777;
   background: transparent;
   transition: all ease-out 0.2s;
+  cursor: pointer;
 
   i {
     margin-top: -0.2rem;
