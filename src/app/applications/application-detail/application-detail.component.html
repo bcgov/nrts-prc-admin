@@ -49,46 +49,49 @@
           <ngb-tabset>
             <ngb-tab>
               <ng-template ngbTabTitle>
+                <i class="material-icons">
+                  info
+                </i>
                 Application Information
               </ng-template>
               <ng-template ngbTabContent>
                 <section>
                   <h2>Description</h2>
-                  {{application.description}}
+                  <p class="mb-0">{{application.description}}</p>
                 </section>
                 <section>
                   <h2>Details</h2>
                   <ul class="nv-list">
                     <li>
-                      <span class="name">Type / Subtype</span>
+                      <span class="name">Type / Subtype:</span>
                       <span class="value">{{application.type || '-'}} / {{application.subtype || '-'}}</span>
                     </li>
                     <li>
-                      <span class="name">Status</span>
+                      <span class="name">Status:</span>
                       <span class="value">{{application.appStatus || '-'}}</span>
                     </li>
                     <li>
-                      <span class="name">Stage</span>
+                      <span class="name">Stage:</span>
                       <span class="value">{{application.tenureStage || '-'}}</span>
                     </li>
                     <li>
-                      <span class="name">Agency</span>
+                      <span class="name">Agency:</span>
                       <span class="value">{{application.agency || '-'}}</span>
                     </li>
                     <li>
-                      <span class="name">Business Unit</span>
+                      <span class="name">Business Unit:</span>
                       <span class="value">{{application.businessUnit || '-'}}</span>
                     </li>
                     <li>
-                      <span class="name">Region</span>
+                      <span class="name">Region:</span>
                       <span class="value">{{applicationService.getRegionString(applicationService.getRegionCode(application.businessUnit)) || '-'}}</span>
                     </li>
                     <li>
-                      <span class="name">Location</span>
+                      <span class="name">Location:</span>
                       <span class="value">{{application.location || '-'}}</span>
                     </li>
                     <li>
-                      <span class="name">Total Area (hectares)</span>
+                      <span class="name">Total Area (hectares):</span>
                       <span class="value">{{application.areaHectares ? (application.areaHectares | number:'1.2-2') : '-'}}</span>
                     </li>
                     <!--
@@ -131,6 +134,9 @@
             </ngb-tab>
             <ngb-tab>
               <ng-template ngbTabTitle>
+                <i class="material-icons">
+                  pin_drop
+                </i>
                 Location
               </ng-template>
               <ng-template ngbTabContent>
@@ -144,17 +150,17 @@
                       <span class="title">Interest ID: {{shape.properties.INTRID_SID}}</span>
                       <ul class="nv-list">
                         <li>
-                          <span class="name">Type / Subtype</span>
+                          <span class="name">Type / Subtype:</span>
                           <span class="value">{{shape.properties.TENURE_TYPE || '-'}} / {{shape.properties.TENURE_SUBTYPE || '-'}}</span>
                         </li>
                         <li>
-                          <span class="name">Area (ha)</span>
+                          <span class="name">Area (hectares):</span>
                           <span class="value">
                             {{shape.properties.TENURE_AREA_IN_HECTARES ? (shape.properties.TENURE_AREA_IN_HECTARES | number:'1.2-2') : '-'}}
                           </span>
                         </li>
                         <li>
-                          <span class="name">Legal Description</span>
+                          <span class="name">Legal Description:</span>
                           <span class="value" [innerHTML]="(shape.properties.TENURE_LEGAL_DESCRIPTION | newlines) || '-'"></span>
                         </li>
                       </ul>
@@ -193,30 +199,35 @@
         </div>
         <div class="aside-card">
           <h3 class="title">Application Decision</h3>
-          <div class="body" *ngIf="application.decision">
-            <div>{{application.decision.description | newlines}}</div>
-            <ul class="doc-list">
-              <li *ngFor="let document of application.decision.documents | published">
-                <span class="cell icon">
-                  <i class="material-icons link" (click)="api.openDocument(document)">insert_drive_file</i>
-                </span>
-                <span class="cell name" [title]="document.displayName || ''">
-                    <span class="cell__txt-content">
-                      <a (click)="api.openDocument(document)">
-                        {{document.documentFileName}}
-                      </a>
-                    </span>
-                </span>
-                <span class="cell actions">
-                  <button class="btn btn-light btn-sm" (click)="api.downloadDocument(document)" title="Download this document">
-                    <i class="material-icons">file_download</i>
-                  </button>
-                </span>
-              </li>
-              <li class="no-results" *ngIf="!application.decision.documents || (application.decision.documents | published).length === 0">
-                  This decision has no documents.
-              </li>
-            </ul>
+          <div class="body">
+            <div *ngIf="!application.decision || !application.decision.isPublished">
+              <p class="mb-0">No decisions have been made for this application at this time.</p>
+            </div>
+            <div *ngIf="application.decision && application.decision.isPublished">
+              <div>{{application.decision.description | newlines}}</div>
+              <ul class="doc-list">
+                <li *ngFor="let document of application.decision.documents | published">
+                  <span class="cell icon">
+                    <i class="material-icons link" (click)="api.openDocument(document)">insert_drive_file</i>
+                  </span>
+                  <span class="cell name" [title]="document.displayName || ''">
+                      <span class="cell__txt-content">
+                        <a (click)="api.openDocument(document)">
+                          {{document.documentFileName}}
+                        </a>
+                      </span>
+                  </span>
+                  <span class="cell actions">
+                    <button class="btn btn-light btn-sm" (click)="api.downloadDocument(document)" title="Download this document">
+                      <i class="material-icons">file_download</i>
+                    </button>
+                  </span>
+                </li>
+                <li class="no-results" *ngIf="!application.decision.documents || (application.decision.documents | published).length === 0">
+                    This decision has no documents.
+                </li>
+              </ul>
+            </div>
             <button class="btn content-btn-alt" type="button" [routerLink]="['/a', application._id, 'decision']">
               <i class="material-icons">
                 add

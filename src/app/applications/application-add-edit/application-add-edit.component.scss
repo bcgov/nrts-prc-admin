@@ -13,8 +13,8 @@ form {
   padding-right: 6rem;
   padding-bottom: 4.25rem;
   padding-left: 6rem;
-  max-width: 55rem;
-  border: 1px solid #eee;
+  //max-width: 55rem;
+  //border: 1px solid #eee;
   border-radius: 0.4rem;
   background: #fff;
 }
@@ -154,10 +154,12 @@ form {
 
 .geo-shape-data {
   margin-top: 2rem;
+  
   .btn {
     border: none;
     background: $lightgray;
   }
+  
   &__list {
     section {
       margin-top: 1.5rem;

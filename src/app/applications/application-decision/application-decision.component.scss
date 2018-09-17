@@ -1,0 +1,24 @@
+@import "~assets/styles/base/base.scss";
+
+:host {
+  @include flex-box();
+  @include flex-direction(column);
+  @include flex(1 1 auto);
+  overflow: hidden;
+}
+
+form {
+  margin: 0 auto;
+  padding-top: 3rem;
+  padding-right: 6rem;
+  padding-bottom: 4.25rem;
+  padding-left: 6rem;
+  //max-width: 55rem;
+  //border: 1px solid #eee;
+  //border-radius: 0.4rem;
+  background: #fff;
+}
+  
+.form-group {
+  margin-bottom: 2rem;
+}
