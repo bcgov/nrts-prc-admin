@@ -12,17 +12,25 @@
         <button class="btn btn-light" type="button"  (click)="cancelChanges()">
           Cancel
         </button>
-        <button class="btn btn-primary" type="button" title="Save Decision" *ngIf="application._id" (click)="saveDecision()">
+        <button class="btn btn-primary" type="button" title="Save Decision" 
+          *ngIf="application._id" 
+          (click)="saveDecision()">
           Save
         </button>
+        
         <!--
-        <button class="btn btn-primary" type="button" title="Publish application" *ngIf="application._id && !application.isPublished" (click)="publishApplication()">
+        <button class="btn btn-primary" type="button" title="Publish application" 
+          *ngIf="application._id && !application.isPublished" 
+          (click)="publishApplication()">
           Publish
         </button>
-        <button class="btn btn-danger" type="button" title="Unpublish application" *ngIf="application._id && application.isPublished" (click)="unPublishApplication()">
+        <button class="btn btn-danger" type="button" title="Unpublish application" 
+          *ngIf="application._id && application.isPublished" 
+          (click)="unPublishApplication()">
           Unpublish
         </button>
         -->
+        
         <!--
         <button class="btn btn-danger" type="button" title="Delete application" *ngIf="application._id && !application.isPublished" (click)="deleteApplication()">
           Delete

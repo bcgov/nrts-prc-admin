@@ -9,7 +9,7 @@
 
 .aside-card {
   background: #fff;
-  //box-shadow: 0.05rem 0.05rem 0.2rem rgba(#000, 0.2);
+  box-shadow: 0.05rem 0.05rem 0.2rem rgba(#000, 0.2);
 
   + .aside-card {
     margin-top: 1.5rem;
@@ -18,7 +18,7 @@
   .title {
     margin-bottom: 0;
     padding: 1rem 1.5rem;
-    background: #f1f1f1;
+    background: #ebedef;
     font-size: 0.9375rem;
     font-weight: 700;
   }
@@ -75,21 +75,12 @@ section {
   }
 }
 
-.doc-list {
-  //border-bottom: 1px solid #ddd;
-
-  li {
-    //border-top: 1px solid #ddd;
-    //background: #fff;
-  }
-}
-
 .nv-list {
   border-bottom: 1px solid #ddd;
 
   li {
     @include flex-box();
-    padding: 0.4rem 0.75rem;
+    padding: 0.5rem 0;
     border-top: 1px solid #ddd;
     background: #fff;
   }
@@ -110,12 +101,10 @@ section {
   list-style-type: none;
 
   .interest-id {
-    background: #f7f8fa;
-
     .title {
       display: block;
-      padding: 0.5rem 0.75rem;
-      font-size: 0.9375rem;
+      padding: 0.5rem 0;
+      font-size: 1rem;
       font-weight: 600;
     }
   }
