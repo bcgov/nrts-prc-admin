@@ -118,7 +118,7 @@
                   <span class="cell__txt-content">{{file.documentFileName}}</span>
                 </span>
                 
-                <span class="cell publish-actions">
+                <!-- <span class="cell publish-actions">
                   <span class="btn-group">
                     <button class="btn btn-sm" [ngClass]="file.isPublished ? 'btn-success':'btn-light'" [disabled]="file.isPublished" title="Publish this document"
                       (click)="publishDocument(file)">
@@ -129,19 +129,20 @@
                       Unpublished
                     </button>
                   </span>
-                </span>
+                </span> -->
                 
                 <span class="cell actions">
-                  <!--
-                  <button class="btn btn-light btn-sm" type="button" (click)="api.downloadDocument(file)" title="Download this document">
+                  <!-- file must exist in db (ie, have an id) to be able to download it -->
+                  <button class="btn btn-light btn-sm" type="button" title="Download this document" [disabled]="!file._id" (click)="api.downloadDocument(file)">
                     <i class="material-icons">file_download</i>
                   </button>
-                  <button class="btn btn-light btn-sm" type="button" (click)="api.openDocument(file)" title="Open this document" [hidden]="api.isMS">
+                  <!-- file must exist in db (ie, have an id) to be able to open it -->
+                  <button class="btn btn-light btn-sm" type="button" title="Open this document" [disabled]="!file._id" [hidden]="api.isMS" (click)="api.openDocument(file)">
                     <i class="material-icons">open_in_new</i>
                   </button>
-                  -->
-                  <span placement="top" title="{{file.isPublished ? 'Documents must be unpublished before they can be deleted':'Delete this document'}}">
-                    <button class="btn btn-light btn-sm" type="button" [disabled]="file.isPublished" (click)="deleteDocument(file, application.documents)">
+                  <span placement="top" title="Delete this document">
+                    <!-- TODO: if file exists in db, delete it; otherwise just remove it from list -->
+                    <button class="btn btn-light btn-sm" type="button" (click)="deleteDocument(file, application.decision.documents)">
                       <i class="material-icons">delete</i>
                     </button>
                   </span>
@@ -196,7 +197,7 @@
                   </span>
                 </span>
 
-                <span class="cell publish-actions">
+                <!-- <span class="cell publish-actions">
                   <span class="btn-group">
                     <button class="btn btn-sm" [ngClass]="file.isPublished ? 'btn-success':'btn-light'" type="button" title="Publish this document"
                       (click)="publishDocument(file, application.decision.documents)">
@@ -207,19 +208,20 @@
                       Unpublished
                     </button>
                   </span>
-                </span>
+                </span> -->
 
                 <span class="cell actions">
-                  <!--
-                  <button type="button" class="btn btn-light btn-sm" (click)="api.downloadDocument(file)" title="Download this document">
+                  <!-- file must exist in db (ie, have an id) to be able to download it -->
+                  <button class="btn btn-light btn-sm" type="button" title="Download this document" [disabled]="!file._id" (click)="api.downloadDocument(file)">
                     <i class="material-icons">file_download</i>
                   </button>
-                  <button type="button" class="btn btn-light btn-sm" (click)="api.openDocument(file)" title="Open this document" [hidden]="api.isMS">
+                  <!-- file must exist in db (ie, have an id) to be able to open it -->
+                  <button class="btn btn-light btn-sm" type="button" title="Open this document" [disabled]="!file._id" [hidden]="api.isMS" (click)="api.openDocument(file)">
                     <i class="material-icons">open_in_new</i>
                   </button>
-                  -->
-                  <span placement="top" title="{{file.isPublished ? 'Documents must be unpublished before they can be deleted':'Remove this document'}}">
-                    <button type="button" class="btn btn-light btn-sm" [disabled]="file.isPublished" (click)="deleteDocument(file, application.decision.documents)">
+                  <span placement="top" title="Delete this document">
+                    <!-- TODO: if file exists in db, delete it; otherwise just remove it from list -->
+                    <button class="btn btn-light btn-sm" type="button" (click)="deleteDocument(file, application.decision.documents)">
                       <i class="material-icons">delete</i>
                     </button>
                   </span>
@@ -397,7 +399,7 @@
                       </button>
                     </span>
                   </span> -->
-                  <span class="cell actions">
+                  <!-- <span class="cell actions">
                     <button class="btn btn-light btn-sm" type="button" (click)="api.downloadDocument(file)" title="Download this document">
                       <i class="material-icons">file_download</i>
                     </button>
@@ -409,12 +411,12 @@
                         <i class="material-icons">delete</i>
                       </button>
                     </span>
-                  </span>
+                  </span> -->
                 </li>
               </ul>
 
               <!-- Upload Application Documents -->
-              <div class="file-upload">
+              <!-- <div class="file-upload">
                 <input type="file" name="fileInput1" size="5000000" (change)="uploadFiles($event.target.files, application.documents)" multiple [disabled]="!application._id">
                 <div class="file-upload__target">
                   <span class="file-upload__prompt">
@@ -422,7 +424,7 @@
                     <span class="file-upload__prompt-msg">Drop files to attach, or <strong>browse</strong>.</span>
                   </span>
                 </div>
-              </div>
+              </div> -->
             </section>
 
             <!-- Internal Notes -->
@@ -459,7 +461,11 @@
     </div>
     <div class="row">
       <main class="col-lg-8">
+
+
         <!-- HEY JER - THIS FORM IS NOW OBSOLETE -->
+
+
         <form class="mt-3" #decisionForm="ngForm">
           <section class="card bg-light">
             <h3 for="decisionDesc">Decision</h3>
@@ -507,8 +513,8 @@
                           Unpublished
                         </button>
                       </span>
-                    </span>          -->
-                    <span class="cell actions">
+                    </span> -->
+                    <!-- <span class="cell actions">
                       <button type="button" class="btn btn-light btn-sm" (click)="api.downloadDocument(file)" title="Download this document">
                         <i class="material-icons">file_download</i>
                       </button>
@@ -520,12 +526,12 @@
                           <i class="material-icons">delete</i>
                         </button>
                       </span>
-                    </span>
+                    </span> -->
                   </li>
                 </ul>
 
                 <!-- Upload Decision Documents -->
-                <div class="file-upload">
+                <!-- <div class="file-upload">
                   <input type="file" name="fileInput2" size="5000000" (change)="uploadFiles($event.target.files, application.decision.documents)" multiple>
                   <div class="file-upload__target">
                     <span class="file-upload__prompt">
@@ -533,7 +539,7 @@
                       <span class="file-upload__prompt-msg">Drop files to attach, or <strong>browse</strong>.</span>
                     </span>
                   </div>
-                </div>
+                </div> -->
               </section>
 
               <!-- DECISION FORM BUTTONS -->

@@ -52,8 +52,8 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
           if (data.application) {
             this.application = data.application;
           } else {
-            // application not found --> navigate back to search
             alert('Uh-oh, couldn\'t load application');
+            // application not found --> navigate back to search
             this.router.navigate(['/search']);
           }
         }
@@ -123,14 +123,16 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
 
               observables.takeUntil(this.ngUnsubscribe)
                 .subscribe(
-                  () => {
-                    // delete succeeded --> navigate back to search
-                    this.application = null; // TODO: is this needed?
-                    setTimeout(() => this.router.navigate(['/search']), 0);
+                  () => { // onNext
+                    // do nothing here - see onCompleted() function below
                   },
                   error => {
                     console.log('error =', error);
-                    this.snackBarRef = this.snackBar.open('Error deleting application...', null, { duration: 3000 });
+                    alert('Uh-oh, couldn\'t delete application');
+                  },
+                  () => { // onCompleted
+                    // delete succeeded --> navigate back to search
+                    this.router.navigate(['/search']);
                   }
                 );
             }
@@ -147,10 +149,14 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
       observables = observables.concat(this.commentPeriodService.publish(this.application.currentPeriod));
     }
 
+    // TODO: publish decision documents (if any)
+
     // then publish decision (if any)
     if (this.application.decision) {
       observables = observables.concat(this.decisionService.publish(this.application.decision));
     }
+
+    // TODO: publish application documents (if any)
 
     // finally publish application
     // do this last in case of prior failures
@@ -158,15 +164,18 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
 
     observables.takeUntil(this.ngUnsubscribe)
       .subscribe(
-        () => {
-          // reload cached app and update local data separately so we don't lose other local data
-          this.applicationService.getById(this.application._id, true).takeUntil(this.ngUnsubscribe).subscribe();
-          this.application.isPublished = true;
-          this.snackBarRef = this.snackBar.open('Application published...', null, { duration: 3000 });
+        () => { // onNext
+          // do nothing here - see onCompleted() function below
         },
         error => {
           console.log('error =', error);
-          this.snackBarRef = this.snackBar.open('Error publishing application...', null, { duration: 3000 });
+          alert('Uh-oh, couldn\'t publish application');
+        },
+        () => { // onCompleted
+          // reload cached app and update local data separately so we don't lose other local data
+          this.applicationService.getById(this.application._id, true).takeUntil(this.ngUnsubscribe).subscribe();
+          this.application.isPublished = true;
+          this.snackBarRef = this.snackBar.open('Application published...', null, { duration: 2000 });
         }
       );
   }
@@ -179,10 +188,14 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
       observables = observables.concat(this.commentPeriodService.unPublish(this.application.currentPeriod));
     }
 
+    // TODO: unpublish decision documents (if any)
+
     // then unpublish decision (if any)
     if (this.application.decision) {
       observables = observables.concat(this.decisionService.unPublish(this.application.decision))
     }
+
+    // TODO: unpublish application documents (if any)
 
     // finally unpublish application
     // do this last in case of prior failures
@@ -190,15 +203,18 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
 
     observables.takeUntil(this.ngUnsubscribe)
       .subscribe(
-        () => {
-          // reload cached app and update local data separately so we don't lose other local data
-          this.applicationService.getById(this.application._id, true).takeUntil(this.ngUnsubscribe).subscribe();
-          this.application.isPublished = false;
-          this.snackBarRef = this.snackBar.open('Application unpublished...', null, { duration: 3000 });
+        () => { // onNext
+          // do nothing here - see onCompleted() function below
         },
         error => {
           console.log('error =', error);
-          this.snackBarRef = this.snackBar.open('Error unpublishing application...', null, { duration: 3000 });
+          alert('Uh-oh, couldn\'t unpublish application');
+        },
+        () => { // onCompleted
+          // reload cached app and update local data separately so we don't lose other local data
+          this.applicationService.getById(this.application._id, true).takeUntil(this.ngUnsubscribe).subscribe();
+          this.application.isPublished = false;
+          this.snackBarRef = this.snackBar.open('Application unpublished...', null, { duration: 2000 });
         }
       );
   }
