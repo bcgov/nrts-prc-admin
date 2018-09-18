@@ -40,7 +40,6 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
   public delta = 30; // default # days (including today)
   private snackBarRef: MatSnackBarRef<SimpleSnackBar> = null;
   private ngUnsubscribe: Subject<boolean> = new Subject<boolean>();
-  private allowDeactivate = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -73,7 +72,7 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
   @HostListener('window:beforeunload', ['$event'])
   handleBeforeUnload(event) {
     // display browser alert if needed
-    if (!this.allowDeactivate && (this.applicationForm.dirty)) {
+    if (this.applicationForm.dirty) {
       event.returnValue = true;
     }
   }
@@ -81,7 +80,7 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
   // check for unsaved changes before navigating away from current route (ie, this page)
   canDeactivate(): Observable<boolean> | boolean {
     // allow synchronous navigation if everything is OK
-    if (this.allowDeactivate || this.applicationForm.pristine) {
+    if (this.applicationForm.pristine) {
       return true;
     }
 
@@ -108,7 +107,19 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
       .subscribe(
         (data: { application: Application }) => {
           if (data.application) {
-            this.internalLoadData(data.application);
+            this.application = data.application;
+
+            // add comment period if there isn't one already
+            // (not just on create but also on edit -- this will fix the situation where existing
+            //  applications don't have a comment period)
+            if (!this.application.currentPeriod) {
+              this.application.currentPeriod = new CommentPeriod();
+            } else {
+              // set date inputs
+              this.startDate = this.formatDate(new Date(this.application.currentPeriod.startDate));
+              this.endDate = this.formatDate(new Date(this.application.currentPeriod.endDate));
+              this.delta = moment(this.application.currentPeriod.endDate).diff(moment(this.application.currentPeriod.startDate), 'days') + 1;
+            }
           } else {
             alert('Uh-oh, couldn\'t load application');
             // application not found --> navigate back to search
@@ -116,26 +127,6 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
           }
         }
       );
-  }
-
-  private internalLoadData(application: Application) {
-    // make a local copy of the in-memory (cached) application so we don't change it
-    // this allows us to abort editing
-    // but forces us to reload cached application properties for certain changes
-    this.application = _.cloneDeep(application);
-
-    // add comment period if there isn't one already
-    // (not just on create but also on edit -- this will fix the situation where existing
-    //  applications don't have a comment period)
-
-    if (!this.application.currentPeriod) {
-      this.application.currentPeriod = new CommentPeriod();
-    } else {
-      // set date inputs
-      this.startDate = this.formatDate(new Date(this.application.currentPeriod.startDate));
-      this.endDate = this.formatDate(new Date(this.application.currentPeriod.endDate));
-      this.delta = moment(this.application.currentPeriod.endDate).diff(moment(this.application.currentPeriod.startDate), 'days') + 1;
-    }
   }
 
   ngOnDestroy() {
@@ -296,21 +287,8 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
           },
           () => { // onCompleted
             this.applicationForm.form.markAsPristine();
-
-            // finally force-reload all app data
-            this.applicationService.getById(this.application._id, true)
-              .takeUntil(this.ngUnsubscribe)
-              .subscribe(
-                application2 => {
-                  this.internalLoadData(application2);
-                },
-                error => {
-                  console.log('error =', error);
-                  alert('Uh-oh, couldn\'t reload application');
-                  // application not found --> navigate back to search
-                  this.router.navigate(['/search']);
-                }
-              );
+            // add succeeded --> navigate to details page
+            this.router.navigate(['/a', this.application._id]);
           }
         );
     }
@@ -381,13 +359,9 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
             alert('Uh-oh, couldn\'t save application');
           },
           () => { // onCompleted
-            // reload cached app only so we don't lose other local data
-            // TODO: verify that this reloads new comment period and new decision -- IT DOESN'T // TO FIX
-            // TODO: redirect to reload this page?
-            // this.applicationService.getById(this.application._id, true).takeUntil(this.ngUnsubscribe).subscribe();
             this.applicationForm.form.markAsPristine();
-            this.snackBarRef = this.snackBar.open('Application saved...', null, { duration: 2000 });
-            this.router.navigate(['/a', this.application._id, 'edit']);
+            // save succeeded --> navigate to details page
+            this.router.navigate(['/a', this.application._id]);
           }
         );
     }

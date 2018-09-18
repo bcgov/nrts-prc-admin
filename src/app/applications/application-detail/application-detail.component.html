@@ -207,7 +207,7 @@
               <p class="mb-0">No decisions have been made for this application at this time.</p>
             </div>
             <div *ngIf="application.decision">
-              <div>{{application.decision.description | newlines}}</div>
+              <div>{{(application.decision.description | newlines) || '-'}}</div>
               <ul class="doc-list">
                 <li *ngFor="let document of application.decision.documents">
                   <span class="cell icon">
