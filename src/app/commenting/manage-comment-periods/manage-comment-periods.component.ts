@@ -89,8 +89,8 @@ export class ManageCommentPeriodsComponent implements OnInit, OnDestroy {
                 }
               );
           } else {
-            // application not found --> navigate back to search
             alert('Uh-oh, couldn\'t load application');
+            // application not found --> navigate back to search
             this.router.navigate(['/search']);
           }
         }

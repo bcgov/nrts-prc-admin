@@ -385,7 +385,7 @@
                   <span class="cell name" [title]="file.displayName || ''">
                     <span class="cell__txt-content">{{file.documentFileName}}</span>
                   </span>
-                  <span class="cell publish-actions">
+                  <!-- <span class="cell publish-actions">
                     <span class="btn-group">
                       <button class="btn btn-sm" [ngClass]="file.isPublished ? 'btn-success':'btn-light'" [disabled]="file.isPublished" title="Publish this document"
                         (click)="publishDocument(file)">
@@ -396,7 +396,7 @@
                         Unpublished
                       </button>
                     </span>
-                  </span>
+                  </span> -->
                   <span class="cell actions">
                     <button class="btn btn-light btn-sm" type="button" (click)="api.downloadDocument(file)" title="Download this document">
                       <i class="material-icons">file_download</i>
@@ -496,7 +496,7 @@
                         {{file.documentFileName}}
                       </span>
                     </span>
-                    <span class="cell publish-actions">
+                    <!-- <span class="cell publish-actions">
                       <span class="btn-group">
                         <button class="btn btn-sm" [ngClass]="file.isPublished ? 'btn-success':'btn-light'" [disabled]="file.isPublished" type="button" title="Publish this document"
                           (click)="publishDocument(file)">
@@ -507,7 +507,7 @@
                           Unpublished
                         </button>
                       </span>
-                    </span>         
+                    </span>          -->
                     <span class="cell actions">
                       <button type="button" class="btn btn-light btn-sm" (click)="api.downloadDocument(file)" title="Download this document">
                         <i class="material-icons">file_download</i>
