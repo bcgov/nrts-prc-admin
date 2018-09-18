@@ -160,7 +160,7 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
 
     // finally publish application
     // do this last in case of prior failures
-    observables.concat(this.applicationService.publish(this.application));
+    observables = observables.concat(this.applicationService.publish(this.application));
 
     observables.takeUntil(this.ngUnsubscribe)
       .subscribe(
@@ -172,10 +172,19 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
           alert('Uh-oh, couldn\'t publish application');
         },
         () => { // onCompleted
-          // reload cached app and update local data separately so we don't lose other local data
-          this.applicationService.getById(this.application._id, true).takeUntil(this.ngUnsubscribe).subscribe();
-          this.application.isPublished = true;
           this.snackBarRef = this.snackBar.open('Application published...', null, { duration: 2000 });
+          // reload data
+          this.applicationService.getById(this.application._id, true)
+            .takeUntil(this.ngUnsubscribe)
+            .subscribe(
+              application => {
+                this.application = application;
+              },
+              error => {
+                console.log('error =', error);
+                alert('Uh-oh, couldn\'t reload application');
+              }
+            );
         }
       );
   }
@@ -199,7 +208,7 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
 
     // finally unpublish application
     // do this last in case of prior failures
-    observables.concat(this.applicationService.unPublish(this.application));
+    observables = observables.concat(this.applicationService.unPublish(this.application));
 
     observables.takeUntil(this.ngUnsubscribe)
       .subscribe(
@@ -211,10 +220,19 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
           alert('Uh-oh, couldn\'t unpublish application');
         },
         () => { // onCompleted
-          // reload cached app and update local data separately so we don't lose other local data
-          this.applicationService.getById(this.application._id, true).takeUntil(this.ngUnsubscribe).subscribe();
-          this.application.isPublished = false;
           this.snackBarRef = this.snackBar.open('Application unpublished...', null, { duration: 2000 });
+          // reload data
+          this.applicationService.getById(this.application._id, true)
+            .takeUntil(this.ngUnsubscribe)
+            .subscribe(
+              application => {
+                this.application = application;
+              },
+              error => {
+                console.log('error =', error);
+                alert('Uh-oh, couldn\'t reload application');
+              }
+            );
         }
       );
   }
