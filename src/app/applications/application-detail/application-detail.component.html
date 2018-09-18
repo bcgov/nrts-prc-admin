@@ -105,7 +105,7 @@
                 <section>
                   <h2>Documents</h2>
                   <ul class="doc-list">
-                    <li *ngFor="let document of application.documents | published">
+                    <li *ngFor="let document of application.documents">
                       <span class="cell icon">
                         <i class="material-icons link" 
                           (click)="api.openDocument(document)">
@@ -125,8 +125,8 @@
                         </button>
                       </span>
                     </li>
-                    <li class="no-results" *ngIf="!application.documents || (application.documents | published).length === 0">
-                      No documents available
+                    <li class="no-results" *ngIf="!application.documents?.length > 0">
+                      This application has no documents.
                     </li>
                   </ul>
                 </section>
@@ -203,13 +203,13 @@
         <div class="aside-card">
           <h3 class="title">Application Decision</h3>
           <div class="body">
-            <div *ngIf="!application.decision || !application.decision.isPublished">
+            <div *ngIf="!application.decision">
               <p class="mb-0">No decisions have been made for this application at this time.</p>
             </div>
-            <div *ngIf="application.decision && application.decision.isPublished">
+            <div *ngIf="application.decision">
               <div>{{application.decision.description | newlines}}</div>
               <ul class="doc-list">
-                <li *ngFor="let document of application.decision.documents | published">
+                <li *ngFor="let document of application.decision.documents">
                   <span class="cell icon">
                     <i class="material-icons link" (click)="api.openDocument(document)">insert_drive_file</i>
                   </span>
@@ -226,8 +226,8 @@
                     </button>
                   </span>
                 </li>
-                <li class="no-results" *ngIf="!application.decision.documents || (application.decision.documents | published).length === 0">
-                    This decision has no documents.
+                <li class="no-results" *ngIf="!application.decision?.documents > 0">
+                  This decision has no documents.
                 </li>
               </ul>
             </div>
@@ -235,7 +235,7 @@
               <i class="material-icons">
                 add
               </i>
-              Add Decision
+              Add/Edit Decision
             </button>
           </div>
         </div>
@@ -327,7 +327,7 @@
 
             <!-- Application Document List -->
             <ul class="doc-list">
-              <li *ngFor="let document of application.documents | published">
+                <li *ngFor="let document of application.documents | published">
                 <span class="cell icon">
                   <i class="material-icons">insert_drive_file</i>
                 </span>
@@ -372,9 +372,9 @@
                 <em>This decision has no documents.</em>
               </div>
 
-               <!-- Decision Document List -->
+                <!-- Decision Document List -->
               <ul class="doc-list">
-                <li *ngFor="let document of application.decision.documents | published">
+                  <li *ngFor="let document of application.decision.documents | published">
                   <span class="cell icon">
                     <i class="material-icons">insert_drive_file</i>
                   </span>
