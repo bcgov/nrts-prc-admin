@@ -1,5 +1,5 @@
 <div class="top-container">
-  <div class="container" *ngIf="application">
+  <div class="container">
     <div class="title-container">
       <h1 class="title-container__title">
         <span class="text-muted">Crown Land File: {{application.cl_file}}  &nbsp;&rsaquo;&nbsp; </span> {{!application._id ? 'Create Public Review' : 'Edit Public Review'}}
@@ -55,24 +55,24 @@
 </div>
   
 <div class="bottom-container">
-  <div class="container" *ngIf="application">
+  <div class="container">
     <form class="mb-3" #applicationForm="ngForm">
       <fieldset>
         <legend>Public Review</legend>
         <div class="review-dates">
           <div class="form-group mb-0">
-            <label>Start Date</label>
-            <input class="form-control" type="date" name="startDate" [ngModel]="startDate" (ngModelChange)="onDate1Chg($event)" />
+            <label>Start Date (required)</label>
+            <input class="form-control" type="date" name="startDate" required aria-required="true" [ngModel]="startDate" (ngModelChange)="onDate1Chg($event)" />
           </div>
           <span class="spacer">+</span>
           <div class="form-group mb-0">
-            <label>Days</label>
-            <input class="form-control" type="number" name="delta" [ngModel]="delta" (ngModelChange)="onDeltaChg($event)" />
+            <label>Days (required)</label>
+            <input class="form-control" type="number" name="delta" required aria-required="true" [ngModel]="delta" (ngModelChange)="onDeltaChg($event)" />
           </div>
           <span class="spacer">=</span>
           <div class="form-group mb-0">
-            <label>End Date</label>
-            <input class="form-control" type="date" name="endDate" [ngModel]="endDate" (ngModelChange)="onDate2Chg($event)" />
+            <label>End Date (required)</label>
+            <input class="form-control" type="date" name="endDate" required aria-required="true" [ngModel]="endDate" (ngModelChange)="onDate2Chg($event)" />
           </div>
         </div>
         <!--
@@ -240,7 +240,7 @@
       </fieldset>
 
       <!-- Old Stuff -->
-      <div class="old-stuff" style="display: none;">
+      <div class="old-stuff" style="display: none;" *ngIf="false">
           <section class="card bg-dark">
             <div class="title-container">
               <div class="title-container__title">
@@ -444,7 +444,7 @@
 </div>
 
 <!-- More Old Stuff -->
-<div class="application-edit" style="display: none;">
+<div class="application-edit" style="display: none;" *ngIf="false">
   <div class="container" *ngIf="application">
     <div class="title-container mb-4">
       <h1 class="title-container__title" *ngIf="!application._id">Create New Application</h1>
@@ -459,6 +459,7 @@
     </div>
     <div class="row">
       <main class="col-lg-8">
+        <!-- HEY JER - THIS FORM IS NOW OBSOLETE -->
         <form class="mt-3" #decisionForm="ngForm">
           <section class="card bg-light">
             <h3 for="decisionDesc">Decision</h3>
