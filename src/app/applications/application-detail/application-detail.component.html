@@ -184,7 +184,7 @@
             <ul class="nv-list">
               <li>
                 <span class="name">Status:</span>
-                <span class="value">Comment Period Status</span>
+                <span class="value">{{application['cpStatus']}}</span>
               </li>
               <li>
                 <span class="name">Start Date:</span>
@@ -196,7 +196,7 @@
               </li>
             </ul>
             <button class="btn btn-sm content-btn-alt" type="button" [routerLink]="['/comments', application._id]">
-              Review Comments
+              Review Comments ({{application['numComments']}})
             </button>
           </div>
         </div>
@@ -231,7 +231,7 @@
                 </li>
               </ul>
             </div>
-            <button class="btn content-btn-alt" type="button" [routerLink]="['/a', application._id, 'decision']">
+            <button class="btn content-btn-alt" type="button" [routerLink]="['/a', application._id, 'edit']" fragment="appDecision">
               <i class="material-icons">
                 add
               </i>

@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, ViewChild, HostListener } from '@angular/
 import { NgForm } from '@angular/forms';
 import { Location } from '@angular/common';
 import { MatSnackBarRef, SimpleSnackBar, MatSnackBar } from '@angular/material';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, NavigationEnd } from '@angular/router';
 import { DialogService } from 'ng2-bootstrap-modal';
 import { Subject } from 'rxjs/Subject';
 import { Observable } from 'rxjs/Observable';
@@ -53,7 +53,21 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
     private dialogService: DialogService,
     private decisionService: DecisionService,
     private documentService: DocumentService
-  ) { }
+  ) {
+    // if we have URL fragment, scroll to specified section
+    router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        const url = router.parseUrl(router.url);
+        if (url.fragment) {
+          // ensure element exists
+          const element = document.querySelector('#' + url.fragment);
+          if (element) {
+            document.getElementById(url.fragment).scrollIntoView();
+          }
+        }
+      }
+    });
+  }
 
   // check for unsaved changes before closing (or reloading) current tab/window
   @HostListener('window:beforeunload', ['$event'])
@@ -176,12 +190,12 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
   private setDates(start?: boolean, delta?: boolean, end?: boolean) {
     if (start) {
       // when start changes, adjust end accordingly
-      this.application.currentPeriod.endDate = new Date(this.application.currentPeriod.startDate); // TODO: why is this needed?
+      this.application.currentPeriod.endDate = new Date(this.application.currentPeriod.startDate);
       this.application.currentPeriod.endDate.setDate(this.application.currentPeriod.startDate.getDate() + this.delta - 1);
 
     } else if (delta) {
       // when delta changes, adjust end accordingly
-      this.application.currentPeriod.endDate = new Date(this.application.currentPeriod.startDate); // TODO: why is this needed?
+      this.application.currentPeriod.endDate = new Date(this.application.currentPeriod.startDate);
       this.application.currentPeriod.endDate.setDate(this.application.currentPeriod.startDate.getDate() + this.delta - 1);
 
     } else if (end) {
