@@ -1,5 +1,5 @@
 <div class="top-container">
-  <div class="container">
+  <div class="container" *ngIf="application">
     <div class="title-container">
       <h1 class="title-container__title">Crown Land File: {{application.cl_file}}</h1>
       <div class="title-container__actions">
@@ -40,7 +40,7 @@
 </div>
 
 <div class="bottom-container">
-  <div class="container">
+  <div class="container" *ngIf="application">
     <div class="row">
       <div class="col-md-8">
         
@@ -57,7 +57,7 @@
               <ng-template ngbTabContent>
                 <section>
                   <h2>Description</h2>
-                  <p class="mb-0">{{application.description}}</p>
+                  <p class="mb-0">{{application.description || '-'}}</p>
                 </section>
                 <section>
                   <h2>Details</h2>
@@ -177,17 +177,20 @@
       <div class="col-md-4">
         <div class="aside-card">
           <h3 class="title">Public Review Details</h3>
-          <div class="body">
+          <div class="body" *ngIf="!application.currentPeriod">
+            Not Open For Commenting
+          </div>
+          <div class="body" *ngIf="application.currentPeriod">
             <ul class="nv-list">
               <li>
                 <span class="name">Status:</span>
                 <span class="value">{{application.cpStatus}}</span>
               </li>
-              <li *ngIf="application.currentPeriod">
+              <li>
                 <span class="name">Start Date:</span>
                 <span class="value">{{application.currentPeriod.startDate | date:'longDate'}}</span>
               </li>
-              <li *ngIf="application.currentPeriod">
+              <li>
                 <span class="name">End Date:</span>
                 <span class="value">{{application.currentPeriod.endDate | date:'longDate'}}</span>
               </li>
