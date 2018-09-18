@@ -1,5 +1,5 @@
 <div class="top-container">
-  <div class="container">
+  <div class="container" *ngIf="application">
     <div class="title-container">
       <h1 class="title-container__title">
         <span class="text-muted">Crown Land File: {{application.cl_file}}  &nbsp;&rsaquo;&nbsp; </span> {{!application._id ? 'Create Public Review' : 'Edit Public Review'}}
@@ -55,7 +55,7 @@
 </div>
   
 <div class="bottom-container">
-  <div class="container">
+  <div class="container" *ngIf="application">
     <form class="mb-3" #applicationForm="ngForm">
       <fieldset>
         <legend>Public Review</legend>
@@ -86,6 +86,7 @@
         </div>
         -->
       </fieldset>
+
       <fieldset>
         <legend>Application Details</legend>
         <div class="form-group">
@@ -165,78 +166,77 @@
           </textarea>
         </div>
       </fieldset>
+
       <fieldset name="decisionForm">
         <legend class="mb-3">Application Decision</legend>
-        <button class="btn content-btn-alt" type="button">
-          <i class="material-icons">
-            add
-          </i>
+        <button class="btn content-btn-alt" type="button" *ngIf="!application.decision" title="Add decision" (click)="addDecision()">
+          <i class="material-icons">add</i>
           Add Decision
         </button>
         
-        <!-- This Decision Form should be hidden by default -->
         <!-- Clicking the ADD DECISION button from the details page should add the form to this page AND validate on the SAVE button click event -->
-        <div class="form-group">
-          <label>Description</label>
-          <textarea class="form-control" rows="3" name="decisionDesc" id="decisionDesc" #decisionDesc="ngModel"
-            [(ngModel)]="application.decision.description">
-          </textarea>
-        </div>
-        
-        <div class="form-group mb-0">
-          <label>Decision Documents</label>
-          <ul class="doc-list mb-3" *ngIf="application.decision.documents.length > 0">
-            <li *ngFor="let file of application.decision.documents">
-              <span class="cell icon">
-                <i class="material-icons">insert_drive_file</i>
-              </span>
-              <span class="cell name" [title]="file.displayName || ''">
-                <span class="cell__txt-content">
-                  {{file.documentFileName}}
+        <div *ngIf="application.decision">
+          <div class="form-group">
+            <label>Description</label>
+            <textarea class="form-control" rows="3" name="decisionDesc" id="decisionDesc" #decisionDesc="ngModel"
+              [(ngModel)]="application.decision.description">
+            </textarea>
+          </div>
+
+          <div class="form-group mb-0">
+            <label>Decision Documents</label>
+            <ul class="doc-list mb-3" *ngIf="application.decision.documents.length > 0">
+              <li *ngFor="let file of application.decision.documents">
+                <span class="cell icon">
+                  <i class="material-icons">insert_drive_file</i>
                 </span>
-              </span>
-              
-              <span class="cell publish-actions">
-                <span class="btn-group">
-                  <button class="btn btn-sm" [ngClass]="file.isPublished ? 'btn-success':'btn-light'" type="button" title="Publish this document"
-                    (click)="publishDocument(file, application.decision.documents)">
-                    Published
-                  </button>
-                  <button class="btn btn-sm" [ngClass]="!file.isPublished ? 'btn-dark active':'btn-light'" type="button" title="Unpublish this document"
-                    (click)="unPublishDocument(file, application.decision.documents)">
-                    Unpublished
-                  </button>
+                <span class="cell name" [title]="file.displayName || ''">
+                  <span class="cell__txt-content">
+                    {{file.documentFileName}}
+                  </span>
                 </span>
-              </span>   
-                  
-              <span class="cell actions">
-                <!--
-                <button type="button" class="btn btn-light btn-sm" (click)="api.downloadDocument(file)" title="Download this document">
-                  <i class="material-icons">file_download</i>
-                </button>
-                <button type="button" class="btn btn-light btn-sm" (click)="api.openDocument(file)" title="Open this document" [hidden]="api.isMS">
-                  <i class="material-icons">open_in_new</i>
-                </button>
-                -->
-                <span placement="top" title="{{file.isPublished ? 'Documents must be unpublished before they can be deleted':'Remove this document'}}">
-                  <button type="button" class="btn btn-light btn-sm" [disabled]="file.isPublished" (click)="deleteDocument(file, application.decision.documents)">
-                    <i class="material-icons">delete</i>
-                  </button>
+
+                <span class="cell publish-actions">
+                  <span class="btn-group">
+                    <button class="btn btn-sm" [ngClass]="file.isPublished ? 'btn-success':'btn-light'" type="button" title="Publish this document"
+                      (click)="publishDocument(file, application.decision.documents)">
+                      Published
+                    </button>
+                    <button class="btn btn-sm" [ngClass]="!file.isPublished ? 'btn-dark active':'btn-light'" type="button" title="Unpublish this document"
+                      (click)="unPublishDocument(file, application.decision.documents)">
+                      Unpublished
+                    </button>
+                  </span>
                 </span>
-              </span>
-            </li>
-          </ul>
-          <div class="file-upload">
-            <input type="file" name="fileInput2" size="5000000" (change)="uploadFiles($event.target.files, application.decision.documents)" multiple>
-            <div class="file-upload__target">
-              <span class="file-upload__prompt">
-                <i class="file-upload__prompt-icon material-icons">file_upload</i>
-                <span class="file-upload__prompt-msg">Drop files to attach, or <em>browse</em>.</span>
-              </span>
+
+                <span class="cell actions">
+                  <!--
+                  <button type="button" class="btn btn-light btn-sm" (click)="api.downloadDocument(file)" title="Download this document">
+                    <i class="material-icons">file_download</i>
+                  </button>
+                  <button type="button" class="btn btn-light btn-sm" (click)="api.openDocument(file)" title="Open this document" [hidden]="api.isMS">
+                    <i class="material-icons">open_in_new</i>
+                  </button>
+                  -->
+                  <span placement="top" title="{{file.isPublished ? 'Documents must be unpublished before they can be deleted':'Remove this document'}}">
+                    <button type="button" class="btn btn-light btn-sm" [disabled]="file.isPublished" (click)="deleteDocument(file, application.decision.documents)">
+                      <i class="material-icons">delete</i>
+                    </button>
+                  </span>
+                </span>
+              </li>
+            </ul>
+            <div class="file-upload">
+              <input type="file" name="fileInput2" size="5000000" (change)="uploadFiles($event.target.files, application.decision.documents)" multiple>
+              <div class="file-upload__target">
+                <span class="file-upload__prompt">
+                  <i class="file-upload__prompt-icon material-icons">file_upload</i>
+                  <span class="file-upload__prompt-msg">Drop files to attach, or <em>browse</em>.</span>
+                </span>
+              </div>
             </div>
           </div>
         </div>
-
       </fieldset>
 
       <!-- Old Stuff -->

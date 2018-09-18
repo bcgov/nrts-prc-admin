@@ -3,6 +3,7 @@ import { MatSnackBarRef, SimpleSnackBar, MatSnackBar } from '@angular/material';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DialogService } from 'ng2-bootstrap-modal';
 import { Subject } from 'rxjs/Subject';
+import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/takeUntil';
 import 'rxjs/add/operator/concat';
 
@@ -11,6 +12,8 @@ import { Application } from 'app/models/application';
 import { ApiService } from 'app/services/api';
 import { ApplicationService } from 'app/services/application.service';
 import { CommentPeriodService } from 'app/services/commentperiod.service';
+import { DecisionService } from 'app/services/decision.service';
+import { DocumentService } from 'app/services/document.service';
 
 @Component({
   selector: 'app-application-detail',
@@ -30,7 +33,9 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
     public api: ApiService, // also used in template
     private dialogService: DialogService,
     public applicationService: ApplicationService, // also used in template
-    public commentPeriodService: CommentPeriodService
+    public commentPeriodService: CommentPeriodService,
+    public decisionService: DecisionService,
+    public documentService: DocumentService
   ) { }
 
   ngOnInit() {
@@ -74,16 +79,6 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
           backdropColor: 'rgba(0, 0, 0, 0.5)'
         })
         .takeUntil(this.ngUnsubscribe);
-    } else if (this.application.documents && this.application.documents.length > 0) {
-      this.dialogService.addDialog(ConfirmComponent,
-        {
-          title: 'Cannot Delete Application',
-          message: 'Please delete all documents first.',
-          okOnly: true
-        }, {
-          backdropColor: 'rgba(0, 0, 0, 0.5)'
-        })
-        .takeUntil(this.ngUnsubscribe);
     } else {
       this.dialogService.addDialog(ConfirmComponent,
         {
@@ -96,19 +91,42 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
         .subscribe(
           isConfirmed => {
             if (isConfirmed) {
-              // first delete comment period
-              // TODO: then delete decision documents (if any)
+              let observables = Observable.of(null);
+
+              // first delete comment period (if any)
+              if (this.application.currentPeriod) {
+                observables = observables.concat(this.commentPeriodService.delete(this.application.currentPeriod));
+              }
+
+              // then delete decision documents (if any)
+              if (this.application.decision && this.application.decision.documents) {
+                for (const doc of this.application.decision.documents) {
+                  observables = observables.concat(this.documentService.delete(doc));
+                }
+              }
+
               // then delete decision (if any)
-              // TODO: then delete application documents (if any)
-              // then delete application
-              this.commentPeriodService.delete(this.application.currentPeriod)
-                .concat(this.applicationService.delete(this.application))
-                .takeUntil(this.ngUnsubscribe)
+              if (this.application.decision) {
+                observables = observables.concat(this.decisionService.delete(this.application.decision));
+              }
+
+              // then delete application documents (if any)
+              if (this.application.documents) {
+                for (const doc of this.application.documents) {
+                  observables = observables.concat(this.documentService.delete(doc));
+                }
+              }
+
+              // finally delete application
+              // do this last in case of prior failures
+              observables = observables.concat(this.applicationService.delete(this.application));
+
+              observables.takeUntil(this.ngUnsubscribe)
                 .subscribe(
                   () => {
                     // delete succeeded --> navigate back to search
-                    this.application = null;
-                    this.router.navigate(['/search']);
+                    this.application = null; // TODO: is this needed?
+                    setTimeout(() => this.router.navigate(['/search']), 0);
                   },
                   error => {
                     console.log('error =', error);
@@ -122,15 +140,25 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
   }
 
   publishApplication() {
-    // first publish application
+    let observables = Observable.of(null);
+
+    // first publish comment period (if any)
+    if (this.application.currentPeriod) {
+      observables = observables.concat(this.commentPeriodService.publish(this.application.currentPeriod));
+    }
+
     // then publish decision (if any)
-    // then publish comment period
-    this.applicationService.publish(this.application)
-      .concat(this.commentPeriodService.publish(this.application.currentPeriod))
-      .takeUntil(this.ngUnsubscribe)
+    if (this.application.decision) {
+      observables = observables.concat(this.decisionService.publish(this.application.decision));
+    }
+
+    // finally publish application
+    // do this last in case of prior failures
+    observables.concat(this.applicationService.publish(this.application));
+
+    observables.takeUntil(this.ngUnsubscribe)
       .subscribe(
         () => {
-          // publish succeeded
           // reload cached app and update local data separately so we don't lose other local data
           this.applicationService.getById(this.application._id, true).takeUntil(this.ngUnsubscribe).subscribe();
           this.application.isPublished = true;
@@ -144,15 +172,25 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
   }
 
   unPublishApplication() {
-    // first unpublish comment period
+    let observables = Observable.of(null);
+
+    // first unpublish comment period (if any)
+    if (this.application.currentPeriod) {
+      observables = observables.concat(this.commentPeriodService.unPublish(this.application.currentPeriod));
+    }
+
     // then unpublish decision (if any)
-    // then unpublish application
-    this.commentPeriodService.unPublish(this.application.currentPeriod)
-      .concat(this.applicationService.unPublish(this.application))
-      .takeUntil(this.ngUnsubscribe)
+    if (this.application.decision) {
+      observables = observables.concat(this.decisionService.unPublish(this.application.decision))
+    }
+
+    // finally unpublish application
+    // do this last in case of prior failures
+    observables.concat(this.applicationService.unPublish(this.application));
+
+    observables.takeUntil(this.ngUnsubscribe)
       .subscribe(
         () => {
-          // unpublish succeeded
           // reload cached app and update local data separately so we don't lose other local data
           this.applicationService.getById(this.application._id, true).takeUntil(this.ngUnsubscribe).subscribe();
           this.application.isPublished = false;
