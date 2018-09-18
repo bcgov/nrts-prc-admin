@@ -1,8 +1,8 @@
-import { Component, OnInit, OnDestroy, ViewChild, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, HostListener, AfterViewInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Location } from '@angular/common';
 import { MatSnackBarRef, SimpleSnackBar, MatSnackBar } from '@angular/material';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, NavigationEnd } from '@angular/router';
 import { DialogService } from 'ng2-bootstrap-modal';
 import { Subject } from 'rxjs/Subject';
 import { Observable } from 'rxjs/Observable';
@@ -30,7 +30,7 @@ import { DocumentService } from 'app/services/document.service';
   styleUrls: ['./application-add-edit.component.scss']
 })
 
-export class ApplicationAddEditComponent implements OnInit, OnDestroy {
+export class ApplicationAddEditComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('applicationForm') applicationForm: NgForm;
   @ViewChild('decisionForm') decisionForm: NgForm;
   @ViewChild(ApplicationAsideComponent) applicationAside: ApplicationAsideComponent;
@@ -54,7 +54,19 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
     private dialogService: DialogService,
     private decisionService: DecisionService,
     private documentService: DocumentService
-  ) { }
+  ) { 
+    router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+          const url = router.parseUrl(router.url);
+          if (url.fragment) {
+            const element = document.querySelector('#' + url.fragment);
+            if (element) {
+              document.getElementById("appDecision").scrollIntoView();
+            }
+          }
+        }
+    });
+  }
 
   // check for unsaved changes before closing (or reloading) current tab/window
   @HostListener('window:beforeunload', ['$event'])
@@ -103,6 +115,9 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
           }
         }
       );
+  }
+
+  ngAfterViewInit() {
   }
 
   private reloadData(id: string) {
