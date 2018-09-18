@@ -68,7 +68,7 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
     this.ngUnsubscribe.complete();
   }
 
-  deleteApplication() {
+  public deleteApplication() {
     if (this.application.isPublished) {
       this.dialogService.addDialog(ConfirmComponent,
         {
@@ -93,31 +93,31 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
             if (isConfirmed) {
               let observables = Observable.of(null);
 
-              // first delete comment period (if any)
-              if (this.application.currentPeriod) {
+              // delete comment period
+              if (this.application.currentPeriod) { // safety check
                 observables = observables.concat(this.commentPeriodService.delete(this.application.currentPeriod));
               }
 
-              // then delete decision documents (if any)
+              // delete decision documents (if any)
               if (this.application.decision && this.application.decision.documents) {
                 for (const doc of this.application.decision.documents) {
                   observables = observables.concat(this.documentService.delete(doc));
                 }
               }
 
-              // then delete decision (if any)
+              // delete decision (if any)
               if (this.application.decision) {
                 observables = observables.concat(this.decisionService.delete(this.application.decision));
               }
 
-              // then delete application documents (if any)
+              // delete application documents (if any)
               if (this.application.documents) {
                 for (const doc of this.application.documents) {
                   observables = observables.concat(this.documentService.delete(doc));
                 }
               }
 
-              // finally delete application
+              // delete application
               // do this last in case of prior failures
               observables = observables.concat(this.applicationService.delete(this.application));
 
@@ -141,24 +141,34 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
     }
   }
 
-  publishApplication() {
+  public publishApplication() {
     let observables = Observable.of(null);
 
-    // first publish comment period (if any)
-    if (this.application.currentPeriod) {
+    // publish comment period
+    if (this.application.currentPeriod) { // safety check
       observables = observables.concat(this.commentPeriodService.publish(this.application.currentPeriod));
     }
 
-    // TODO: publish decision documents (if any)
+    // publish decision documents (if any)
+    if (this.application.decision && this.application.decision.documents) {
+      for (const doc of this.application.decision.documents) {
+        observables = observables.concat(this.documentService.publish(doc));
+      }
+    }
 
-    // then publish decision (if any)
+    // publish decision (if any)
     if (this.application.decision) {
       observables = observables.concat(this.decisionService.publish(this.application.decision));
     }
 
-    // TODO: publish application documents (if any)
+    // publish application documents (if any)
+    if (this.application.documents) {
+      for (const doc of this.application.documents) {
+        observables = observables.concat(this.documentService.publish(doc));
+      }
+    }
 
-    // finally publish application
+    // publish application
     // do this last in case of prior failures
     observables = observables.concat(this.applicationService.publish(this.application));
 
@@ -189,24 +199,34 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
       );
   }
 
-  unPublishApplication() {
+  public unPublishApplication() {
     let observables = Observable.of(null);
 
-    // first unpublish comment period (if any)
-    if (this.application.currentPeriod) {
+    // unpublish comment period
+    if (this.application.currentPeriod) { // safety check
       observables = observables.concat(this.commentPeriodService.unPublish(this.application.currentPeriod));
     }
 
-    // TODO: unpublish decision documents (if any)
+    // unpublish decision documents (if any)
+    if (this.application.decision && this.application.decision.documents) {
+      for (const doc of this.application.decision.documents) {
+        observables = observables.concat(this.documentService.unPublish(doc));
+      }
+    }
 
-    // then unpublish decision (if any)
+    // unpublish decision (if any)
     if (this.application.decision) {
       observables = observables.concat(this.decisionService.unPublish(this.application.decision))
     }
 
-    // TODO: unpublish application documents (if any)
+    // unpublish application documents (if any)
+    if (this.application.documents) {
+      for (const doc of this.application.documents) {
+        observables = observables.concat(this.documentService.unPublish(doc));
+      }
+    }
 
-    // finally unpublish application
+    // unpublish application
     // do this last in case of prior failures
     observables = observables.concat(this.applicationService.unPublish(this.application));
 
