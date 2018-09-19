@@ -68,17 +68,17 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
 
   // check for unsaved changes before closing (or reloading) current tab/window
   @HostListener('window:beforeunload', ['$event'])
-  handleBeforeUnload(event) {
+  public handleBeforeUnload(event) {
     // display browser alert if needed
-    if (this.applicationForm.dirty) {
+    if (this.applicationForm.dirty || this.isUnsavedDocuments()) {
       event.returnValue = true;
     }
   }
 
   // check for unsaved changes before navigating away from current route (ie, this page)
-  canDeactivate(): Observable<boolean> | boolean {
+  public canDeactivate(): Observable<boolean> | boolean {
     // allow synchronous navigation if everything is OK
-    if (this.applicationForm.pristine) {
+    if (!this.applicationForm.dirty && !this.isUnsavedDocuments()) {
       return true;
     }
 
@@ -91,6 +91,31 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
         backdropColor: 'rgba(0, 0, 0, 0.5)'
       })
       .takeUntil(this.ngUnsubscribe);
+  }
+
+  // this is needed because we don't have a form control that is marked as dirty
+  private isUnsavedDocuments(): boolean {
+    if (this.application.documents) {
+      for (const doc of this.application.documents) {
+        if (!doc._id) {
+          return true;
+        }
+      }
+    }
+
+    if (this.application.decision && this.application.decision.documents) {
+      for (const doc of this.application.decision.documents) {
+        if (!doc._id) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  public cancelChanges() {
+    this._location.back();
   }
 
   ngOnInit() {
@@ -132,11 +157,6 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
 
     this.ngUnsubscribe.next();
     this.ngUnsubscribe.complete();
-  }
-
-  // see 'canDeactivate' for the UI notification / form reset functionality
-  public cancelChanges() {
-    this._location.back();
   }
 
   // returns yyyy-mm-dd for use by date input
@@ -214,6 +234,10 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
           }
         }
       );
+  }
+
+  public addDecision() {
+    this.application.decision = new Decision();
   }
 
   // submit new application
@@ -302,10 +326,6 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
           }
         );
     }
-  }
-
-  public addDecision() {
-    this.application.decision = new Decision();
   }
 
   public saveApplication() {
@@ -406,40 +426,43 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
   // add application or decision documents
   // NB: they will be uploaded to db when application is added or saved
   // TODO: ensure pristine/dirty works for documents
-  public addDocuments(fileList: FileList, documents: Document[]) {
-    for (let i = 0; i < fileList.length; i++) {
-      if (fileList[i]) {
-        console.log('fileList =', fileList[i]);
+  public addDocuments(files: FileList, documents: Document[]) {
+    for (let i = 0; i < files.length; i++) {
+      if (files[i]) {
+        // ensure file is not already in the list
+        if (_.find(documents, doc => (doc.documentFileName === files[i].name))) {
+          this.snackBarRef = this.snackBar.open('Can\'t add duplicate file', null, { duration: 2000 });
+          continue;
+        }
 
         const formData = new FormData();
-        formData.append('displayName', fileList[i].name);
-        formData.append('upfile', fileList[i]);
+        formData.append('displayName', files[i].name);
+        formData.append('upfile', files[i]);
 
         const document = new Document();
         document['formData'] = formData; // temporary (for later use)
-        document.documentFileName = fileList[i].name;
-
+        document.documentFileName = files[i].name;
         documents.push(document);
       }
     }
   }
 
-  private internalAddDocument(document: Document) {
-    this.documentService.add(document['formData'])
+  private internalAddDocument(doc: Document) {
+    this.documentService.add(doc['formData'])
       .takeUntil(this.ngUnsubscribe)
       .subscribe(
-        addedDocument => {
+        addedDoc => {
           this.snackBarRef = this.snackBar.open('Document added...', null, { duration: 2000 }); // not displayed due to forthcoming navigate
-          document = addedDocument; // save updated document
+          doc = addedDoc; // save updated document
 
           // auto-publish
           if (this.application.isPublished) {
-            this.documentService.publish(document).
+            this.documentService.publish(doc).
               takeUntil(this.ngUnsubscribe)
               .subscribe(
-                publishedDocument => {
+                publishedDoc => {
                   this.snackBarRef = this.snackBar.open('Document published...', null, { duration: 2000 }); // not displayed due to forthcoming navigate
-                  document = publishedDocument; // save updated document
+                  doc = publishedDoc; // save updated document
                 },
                 error => {
                   console.log('error =', error);
@@ -458,26 +481,23 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
   // delete application or decision documents
   // NB: they will be removed from db when application is saved
   // TODO: ensure pristine/dirty works for documents
-  public deleteDocument(document: Document, documents: Document[]) {
-    // TODO: if no document id (ie, not yet uploaded to db), just remove doc from list
-    if (!document._id) {
-      console.log('delete document =', document);
-
-      // remove the first document with the same name (not perfect)
-      // TODO: test whether this removes all documents with the same name
-      documents = _.remove(documents, item => (item.documentFileName === document.documentFileName));
-    } else {
-      // TODO: stage it for deletion from db
+  public deleteDocument(doc: Document, documents: Document[]) {
+    // if doc doesn't exist in db (ie, no id) then just remove it from the list
+    if (!doc._id) {
+      documents = _.remove(documents, item => (item.documentFileName === doc.documentFileName));
+      return;
     }
+
+    // TODO: stage it for deletion from db
   }
 
-  private internalDeleteDocument(document: Document) {
-    this.documentService.delete(document)
+  private internalDeleteDocument(doc: Document) {
+    this.documentService.delete(doc)
       .takeUntil(this.ngUnsubscribe)
       .subscribe(
         () => {
           this.snackBarRef = this.snackBar.open('File deleted...', null, { duration: 2000 }); // not displayed due to forthcoming navigate
-          document = null;
+          doc = null;
         },
         error => {
           console.log('error =', error);

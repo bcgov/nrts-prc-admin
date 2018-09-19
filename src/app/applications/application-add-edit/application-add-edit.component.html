@@ -110,45 +110,46 @@
         <div class="form-group">
           <label>Application Documents</label>
           <ul class="doc-list mb-3" *ngIf="application.documents.length > 0">
-              <li *ngFor="let file of application.documents">
+              <li *ngFor="let doc of application.documents">
                 <span class="cell icon">
                   <i class="material-icons">insert_drive_file</i>
                 </span>
-                <span class="cell name" [title]="file.displayName || ''">
-                  <span class="cell__txt-content">{{file.documentFileName}}</span>
+                <span class="cell name" [title]="doc.displayName || ''">
+                  <span class="cell__txt-content">{{doc.documentFileName}}</span>
                 </span>
                 
                 <!-- <span class="cell publish-actions">
                   <span class="btn-group">
-                    <button class="btn btn-sm" [ngClass]="file.isPublished ? 'btn-success':'btn-light'" [disabled]="file.isPublished" title="Publish this document"
-                      (click)="publishDocument(file)">
+                    <button class="btn btn-sm" [ngClass]="doc.isPublished ? 'btn-success':'btn-light'" [disabled]="doc.isPublished" title="Publish this document"
+                      (click)="publishDocument(doc)">
                       Published
                     </button>
-                    <button class="btn btn-sm" [ngClass]="!file.isPublished ? 'btn-dark active':'btn-light'" [disabled]="!file.isPublished" title="Unpublish this document"
-                      (click)="unPublishDocument(file)">
+                    <button class="btn btn-sm" [ngClass]="!doc.isPublished ? 'btn-dark active':'btn-light'" [disabled]="!doc.isPublished" title="Unpublish this document"
+                      (click)="unPublishDocument(doc)">
                       Unpublished
                     </button>
                   </span>
                 </span> -->
                 
                 <span class="cell actions">
-                  <!-- file must exist in db (ie, have an id) to be able to download it -->
-                  <!-- <button class="btn btn-light btn-sm" type="button" title="Download this document" [disabled]="!file._id" (click)="api.downloadDocument(file)">
+                  <!-- doc must exist in db (ie, have an id) to be able to download it -->
+                  <!-- <button class="btn btn-light btn-sm" type="button" title="Download this document" [disabled]="!doc._id" (click)="api.downloadDocument(doc)">
                     <i class="material-icons">file_download</i>
                   </button> -->
-                  <!-- file must exist in db (ie, have an id) to be able to open it -->
-                  <!-- <button class="btn btn-light btn-sm" type="button" title="Open this document" [disabled]="!file._id" [hidden]="api.isMS" (click)="api.openDocument(file)">
+                  <!-- doc must exist in db (ie, have an id) to be able to open it -->
+                  <!-- <button class="btn btn-light btn-sm" type="button" title="Open this document" [disabled]="!doc._id" [hidden]="api.isMS" (click)="api.openDocument(doc)">
                     <i class="material-icons">open_in_new</i>
                   </button> -->
-                  <button class="btn btn-icon" type="button" title="Delete this document" (click)="deleteDocument(file, application.documents)">
+                  <button class="btn btn-icon" type="button" title="Delete this document" (click)="deleteDocument(doc, application.documents)">
                     <i class="material-icons">delete</i>
                   </button>
                 </span>
               </li>
           </ul>
           <div class="file-upload">
-            <input type="file" name="fileInput1" size="5000000" (change)="addDocuments($event.target.files, application.documents)" multiple>
-              <div class="file-upload__target">
+            <input type="file" name="fileInput1" size="5000000" multiple #fileInput1
+              (change)="addDocuments($event.target.files, application.documents);fileInput1.value=null">
+            <div class="file-upload__target">
               <span class="file-upload__prompt">
                 <i class="file-upload__prompt-icon material-icons">file_upload</i>
                 <span class="file-upload__prompt-msg">Drop files to attach, or <strong>browse</strong>.</span>
@@ -167,8 +168,8 @@
 
       <fieldset name="decisionForm" id="appDecision">
         <legend class="mb-3">Application Decision</legend>
-        <button class="btn content-btn-alt" type="button" title="Add decision" 
-          *ngIf="!application.decision" 
+        <button class="btn content-btn-alt" type="button" title="Add decision"
+          *ngIf="!application.decision"
           (click)="addDecision()">
           <i class="material-icons">add</i>
           Add Decision
@@ -186,46 +187,47 @@
           <div class="form-group mb-0">
             <label>Decision Documents</label>
             <ul class="doc-list mb-3" *ngIf="application.decision.documents.length > 0">
-              <li *ngFor="let file of application.decision.documents">
+              <li *ngFor="let doc of application.decision.documents">
                 <span class="cell icon">
                   <i class="material-icons">insert_drive_file</i>
                 </span>
-                <span class="cell name" [title]="file.displayName || ''">
+                <span class="cell name" [title]="doc.displayName || ''">
                   <span class="cell__txt-content">
-                    {{file.documentFileName}}
+                    {{doc.documentFileName}}
                   </span>
                 </span>
 
                 <!-- <span class="cell publish-actions">
                   <span class="btn-group">
-                    <button class="btn btn-sm" [ngClass]="file.isPublished ? 'btn-success':'btn-light'" type="button" title="Publish this document"
-                      (click)="publishDocument(file, application.decision.documents)">
+                    <button class="btn btn-sm" [ngClass]="doc.isPublished ? 'btn-success':'btn-light'" type="button" title="Publish this document"
+                      (click)="publishDocument(doc, application.decision.documents)">
                       Published
                     </button>
-                    <button class="btn btn-sm" [ngClass]="!file.isPublished ? 'btn-dark active':'btn-light'" type="button" title="Unpublish this document"
-                      (click)="unPublishDocument(file, application.decision.documents)">
+                    <button class="btn btn-sm" [ngClass]="!doc.isPublished ? 'btn-dark active':'btn-light'" type="button" title="Unpublish this document"
+                      (click)="unPublishDocument(doc, application.decision.documents)">
                       Unpublished
                     </button>
                   </span>
                 </span> -->
 
                 <span class="cell actions">
-                  <!-- file must exist in db (ie, have an id) to be able to download it -->
-                  <!-- <button class="btn btn-light btn-sm" type="button" title="Download this document" [disabled]="!file._id" (click)="api.downloadDocument(file)">
+                  <!-- doc must exist in db (ie, have an id) to be able to download it -->
+                  <!-- <button class="btn btn-light btn-sm" type="button" title="Download this document" [disabled]="!doc._id" (click)="api.downloadDocument(doc)">
                     <i class="material-icons">file_download</i>
                   </button> -->
-                  <!-- file must exist in db (ie, have an id) to be able to open it -->
-                  <!-- <button class="btn btn-light btn-sm" type="button" title="Open this document" [disabled]="!file._id" [hidden]="api.isMS" (click)="api.openDocument(file)">
+                  <!-- doc must exist in db (ie, have an id) to be able to open it -->
+                  <!-- <button class="btn btn-light btn-sm" type="button" title="Open this document" [disabled]="!doc._id" [hidden]="api.isMS" (click)="api.openDocument(doc)">
                     <i class="material-icons">open_in_new</i>
                   </button> -->
-                  <button class="btn btn-icon" type="button" title="Delete this document" (click)="deleteDocument(file, application.decision.documents)">
+                  <button class="btn btn-icon" type="button" title="Delete this document" (click)="deleteDocument(doc, application.decision.documents)">
                     <i class="material-icons">delete</i>
                   </button>
                 </span>
               </li>
             </ul>
             <div class="file-upload">
-              <input type="file" name="fileInput2" size="5000000" (change)="addDocuments($event.target.files, application.decision.documents)" multiple>
+              <input type="file" name="fileInput2" size="5000000" multiple #fileInput2
+                (change)="addDocuments($event.target.files, application.decision.documents);fileInput2.value=null">
               <div class="file-upload__target">
                 <span class="file-upload__prompt">
                   <i class="file-upload__prompt-icon material-icons">file_upload</i>
