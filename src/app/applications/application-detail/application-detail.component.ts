@@ -145,32 +145,38 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
     let observables = Observable.of(null);
 
     // publish comment period
-    if (this.application.currentPeriod) { // safety check
+    if (this.application.currentPeriod && !this.application.currentPeriod.isPublished) { // safety check
       observables = observables.concat(this.commentPeriodService.publish(this.application.currentPeriod));
     }
 
     // publish decision documents (if any)
     if (this.application.decision && this.application.decision.documents) {
       for (const doc of this.application.decision.documents) {
-        observables = observables.concat(this.documentService.publish(doc));
+        if (!doc.isPublished) {
+          observables = observables.concat(this.documentService.publish(doc));
+        }
       }
     }
 
     // publish decision (if any)
-    if (this.application.decision) {
+    if (this.application.decision && !this.application.decision.isPublished) {
       observables = observables.concat(this.decisionService.publish(this.application.decision));
     }
 
     // publish application documents (if any)
     if (this.application.documents) {
       for (const doc of this.application.documents) {
-        observables = observables.concat(this.documentService.publish(doc));
+        if (!doc.isPublished) {
+          observables = observables.concat(this.documentService.publish(doc));
+        }
       }
     }
 
     // publish application
     // do this last in case of prior failures
-    observables = observables.concat(this.applicationService.publish(this.application));
+    if (!this.application.isPublished) {
+      observables = observables.concat(this.applicationService.publish(this.application));
+    }
 
     observables.takeUntil(this.ngUnsubscribe)
       .subscribe(
@@ -203,32 +209,38 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
     let observables = Observable.of(null);
 
     // unpublish comment period
-    if (this.application.currentPeriod) { // safety check
+    if (this.application.currentPeriod && this.application.currentPeriod.isPublished) { // safety check
       observables = observables.concat(this.commentPeriodService.unPublish(this.application.currentPeriod));
     }
 
     // unpublish decision documents (if any)
     if (this.application.decision && this.application.decision.documents) {
       for (const doc of this.application.decision.documents) {
-        observables = observables.concat(this.documentService.unPublish(doc));
+        if (doc.isPublished) {
+          observables = observables.concat(this.documentService.unPublish(doc));
+        }
       }
     }
 
     // unpublish decision (if any)
-    if (this.application.decision) {
+    if (this.application.decision && this.application.decision.isPublished) {
       observables = observables.concat(this.decisionService.unPublish(this.application.decision))
     }
 
     // unpublish application documents (if any)
     if (this.application.documents) {
       for (const doc of this.application.documents) {
-        observables = observables.concat(this.documentService.unPublish(doc));
+        if (doc.isPublished) {
+          observables = observables.concat(this.documentService.unPublish(doc));
+        }
       }
     }
 
     // unpublish application
     // do this last in case of prior failures
-    observables = observables.concat(this.applicationService.unPublish(this.application));
+    if (this.application.isPublished) {
+      observables = observables.concat(this.applicationService.unPublish(this.application));
+    }
 
     observables.takeUntil(this.ngUnsubscribe)
       .subscribe(
