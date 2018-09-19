@@ -1,13 +1,13 @@
 $nav-tab-border-width: 0;
 $nav-tab-border-color: #fff;
-$nav-tab-bg: #fff;
+$nav-tab-bg: #f7f8fa;
 $nav-tab-pane-bg: #fff;
 $nav-tab-bg-active: #fff;
 
 .nav-tabs {
   border-color: $nav-tab-border-color;
   border-width: $nav-tab-border-width;
-  background: #ebedef;
+  background: $nav-tab-bg;
   text-transform: normal;
 
   .nav-item {
@@ -23,7 +23,7 @@ $nav-tab-bg-active: #fff;
     border-bottom-width: 0;
     border-radius: 0;
     text-align: center;
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
     font-weight: 700;
 
     &:focus,

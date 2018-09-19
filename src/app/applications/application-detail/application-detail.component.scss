@@ -1,5 +1,9 @@
 @import "~assets/styles/base/base.scss";
 
+$card-bg: #fff;
+$card-title-bg: #f7f8fa;
+$card-shadow: 0.02rem 0 0.2rem rgba(#000, 0.15);
+
 :host {
   @include flex-box();
   @include flex-direction(column);
@@ -7,9 +11,16 @@
   overflow: hidden;
 }
 
+.main-card {
+  //border: 1px solid #e7e7e7;
+  background: $card-bg;
+  box-shadow: $card-shadow;
+}
+
 .aside-card {
-  background: #fff;
-  box-shadow: 0.05rem 0.05rem 0.2rem rgba(#000, 0.2);
+  //border: 1px solid #e7e7e7;
+  background: $card-bg;
+  box-shadow: $card-shadow;
 
   + .aside-card {
     margin-top: 1.5rem;
@@ -18,28 +29,38 @@
   .title {
     margin-bottom: 0;
     padding: 1.1rem 1.5rem;
-    background: #ebedef;
+    background: $card-title-bg;
     font-size: 0.9375rem;
     font-weight: 700;
   }
 
   .body {
-    padding: 1rem 1.5rem;
+    padding: 1.5rem;
   }
 
-  .content-btn-alt {
-    display: inline-block;
-    margin-top: 1.25rem;
-    margin-right: auto;
-    margin-left: auto;
-    min-width: 10rem;
+  .btn-container {
+    margin-top: 1.5rem;
+    text-align: center;
+  }
+
+  .cta-btn {
+    min-width: 12rem;
+    border-width: 2px;
+    font-weight: 700;
+
+    i {
+      margin-top: -0.2rem;
+      margin-left: -0.2rem;
+    }
   }
 
   .doc-list {
-    margin-top: 1rem;
+    margin-top: 1.5rem;
   }
 
   .nv-list {
+    margin-top: -0.5rem;
+    margin-bottom: -0.5rem;
     border: none;
 
     li {
@@ -48,7 +69,7 @@
     }
 
     span.name {
-      flex: 0 0 6rem;
+      flex: 0 0 8rem;
     }
   }
 }
@@ -65,8 +86,8 @@
 h2 {
   margin-bottom: 1rem;
   letter-spacing: -0.02rem;
-  font-size: 1.4rem;
-  font-weight: 400;
+  font-size: 1.2rem;
+  font-weight: 600;
 }
 
 section {
@@ -76,12 +97,12 @@ section {
 }
 
 .nv-list {
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px dotted #ccc;
 
   li {
     @include flex-box();
     padding: 0.5rem 0;
-    border-top: 1px solid #ddd;
+    border-top: 1px dotted #ccc;
     background: #fff;
   }
 

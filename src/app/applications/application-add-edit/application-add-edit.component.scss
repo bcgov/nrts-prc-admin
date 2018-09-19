@@ -15,8 +15,8 @@ form {
   padding-left: 6rem;
   //max-width: 55rem;
   //border: 1px solid #eee;
-  border-radius: 0.4rem;
   background: #fff;
+  box-shadow: 0.02rem 0 0.2rem rgba(#000, 0.15);
 }
   
 .form-group {
@@ -118,24 +118,6 @@ form {
 
 .application-buttons {
   margin: 2rem 0;
-}
-
-// Document List Actions
-.actions {
-  [class^="btn"] {
-    height: 2rem;
-    padding-right: 0.25rem;
-    padding-left: 0.25rem;
-    border: transparent;
-
-    &:not(:hover) {
-      background: transparent;
-    }
-
-    &:disabled {
-      opacity: 0.2;
-    }
-  }
 }
 
 // Disposition Input
