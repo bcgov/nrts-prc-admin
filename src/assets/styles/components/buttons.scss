@@ -211,13 +211,13 @@ main {
   padding-bottom: 0.35rem;
   padding-left: 0;
   overflow: hidden;
-  color: #777;
+  color: #808080;
   background: transparent;
   transition: all ease-out 0.2s;
   cursor: pointer;
 
   i {
-    margin-top: -0.2rem;
+    margin-top: -0.1rem;
   }
   
   .btn-txt {
@@ -228,6 +228,6 @@ main {
   &:focus,
   &:hover {
     color: #000;
-    background: #f1f1f1;
+    background: #eee;
   }
 }
