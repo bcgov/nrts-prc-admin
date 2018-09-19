@@ -94,23 +94,23 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
               let observables = Observable.of(null);
 
               // delete comment period
-              if (this.application.currentPeriod) { // safety check
+              if (this.application.currentPeriod) {
                 observables = observables.concat(this.commentPeriodService.delete(this.application.currentPeriod));
               }
 
-              // delete decision documents (if any)
+              // delete decision documents
               if (this.application.decision && this.application.decision.documents) {
                 for (const doc of this.application.decision.documents) {
                   observables = observables.concat(this.documentService.delete(doc));
                 }
               }
 
-              // delete decision (if any)
+              // delete decision
               if (this.application.decision) {
                 observables = observables.concat(this.decisionService.delete(this.application.decision));
               }
 
-              // delete application documents (if any)
+              // delete application documents
               if (this.application.documents) {
                 for (const doc of this.application.documents) {
                   observables = observables.concat(this.documentService.delete(doc));
@@ -145,11 +145,11 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
     let observables = Observable.of(null);
 
     // publish comment period
-    if (this.application.currentPeriod && !this.application.currentPeriod.isPublished) { // safety check
+    if (this.application.currentPeriod && !this.application.currentPeriod.isPublished) {
       observables = observables.concat(this.commentPeriodService.publish(this.application.currentPeriod));
     }
 
-    // publish decision documents (if any)
+    // publish decision documents
     if (this.application.decision && this.application.decision.documents) {
       for (const doc of this.application.decision.documents) {
         if (!doc.isPublished) {
@@ -158,12 +158,12 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
       }
     }
 
-    // publish decision (if any)
+    // publish decision
     if (this.application.decision && !this.application.decision.isPublished) {
       observables = observables.concat(this.decisionService.publish(this.application.decision));
     }
 
-    // publish application documents (if any)
+    // publish application documents
     if (this.application.documents) {
       for (const doc of this.application.documents) {
         if (!doc.isPublished) {
@@ -189,7 +189,7 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
         },
         () => { // onCompleted
           this.snackBarRef = this.snackBar.open('Application published...', null, { duration: 2000 });
-          // reload data
+          // reload all data
           this.applicationService.getById(this.application._id, true)
             .takeUntil(this.ngUnsubscribe)
             .subscribe(
@@ -209,11 +209,11 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
     let observables = Observable.of(null);
 
     // unpublish comment period
-    if (this.application.currentPeriod && this.application.currentPeriod.isPublished) { // safety check
+    if (this.application.currentPeriod && this.application.currentPeriod.isPublished) {
       observables = observables.concat(this.commentPeriodService.unPublish(this.application.currentPeriod));
     }
 
-    // unpublish decision documents (if any)
+    // unpublish decision documents
     if (this.application.decision && this.application.decision.documents) {
       for (const doc of this.application.decision.documents) {
         if (doc.isPublished) {
@@ -222,12 +222,12 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
       }
     }
 
-    // unpublish decision (if any)
+    // unpublish decision
     if (this.application.decision && this.application.decision.isPublished) {
       observables = observables.concat(this.decisionService.unPublish(this.application.decision))
     }
 
-    // unpublish application documents (if any)
+    // unpublish application documents
     if (this.application.documents) {
       for (const doc of this.application.documents) {
         if (doc.isPublished) {
@@ -253,7 +253,7 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
         },
         () => { // onCompleted
           this.snackBarRef = this.snackBar.open('Application unpublished...', null, { duration: 2000 });
-          // reload data
+          // reload all data
           this.applicationService.getById(this.application._id, true)
             .takeUntil(this.ngUnsubscribe)
             .subscribe(

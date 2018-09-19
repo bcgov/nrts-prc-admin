@@ -62,7 +62,7 @@
         <div class="review-dates">
           <div class="form-group mb-0">
             <label>Start Date (required)</label>
-            <input class="form-control" type="date" name="startDate" required aria-required="true" [ngModel]="startDate" (ngModelChange)="onDate1Chg($event)" />
+            <input class="form-control" type="date" name="startDate" required aria-required="true" [ngModel]="startDate" (ngModelChange)="onStartDateChg($event)" />
           </div>
           <span class="spacer">+</span>
           <div class="form-group mb-0">
@@ -72,7 +72,7 @@
           <span class="spacer">=</span>
           <div class="form-group mb-0">
             <label>End Date (required)</label>
-            <input class="form-control" type="date" name="endDate" required aria-required="true" [ngModel]="endDate" (ngModelChange)="onDate2Chg($event)" />
+            <input class="form-control" type="date" name="endDate" required aria-required="true" [ngModel]="endDate" (ngModelChange)="onEndDateChg($event)" />
           </div>
         </div>
         <!--
@@ -133,16 +133,15 @@
                 
                 <span class="cell actions">
                   <!-- file must exist in db (ie, have an id) to be able to download it -->
-                  <button class="btn btn-light btn-sm" type="button" title="Download this document" [disabled]="!file._id" (click)="api.downloadDocument(file)">
+                  <!-- <button class="btn btn-light btn-sm" type="button" title="Download this document" [disabled]="!file._id" (click)="api.downloadDocument(file)">
                     <i class="material-icons">file_download</i>
-                  </button>
+                  </button> -->
                   <!-- file must exist in db (ie, have an id) to be able to open it -->
-                  <button class="btn btn-light btn-sm" type="button" title="Open this document" [disabled]="!file._id" [hidden]="api.isMS" (click)="api.openDocument(file)">
+                  <!-- <button class="btn btn-light btn-sm" type="button" title="Open this document" [disabled]="!file._id" [hidden]="api.isMS" (click)="api.openDocument(file)">
                     <i class="material-icons">open_in_new</i>
-                  </button>
+                  </button> -->
                   <span placement="top" title="Delete this document">
-                    <!-- TODO: if file exists in db, delete it; otherwise just remove it from list -->
-                    <button class="btn btn-light btn-sm" type="button" (click)="deleteDocument(file, application.decision.documents)">
+                    <button class="btn btn-light btn-sm" type="button" (click)="deleteDocument(file, application.documents)">
                       <i class="material-icons">delete</i>
                     </button>
                   </span>
@@ -150,7 +149,7 @@
               </li>
           </ul>
           <div class="file-upload">
-            <input type="file" name="fileInput1" size="5000000" (change)="uploadFiles($event.target.files, application.documents)" multiple [disabled]="!application._id">
+            <input type="file" name="fileInput1" size="5000000" (change)="addDocuments($event.target.files, application.documents)" multiple>
               <div class="file-upload__target">
               <span class="file-upload__prompt">
                 <i class="file-upload__prompt-icon material-icons">file_upload</i>
@@ -212,15 +211,14 @@
 
                 <span class="cell actions">
                   <!-- file must exist in db (ie, have an id) to be able to download it -->
-                  <button class="btn btn-light btn-sm" type="button" title="Download this document" [disabled]="!file._id" (click)="api.downloadDocument(file)">
+                  <!-- <button class="btn btn-light btn-sm" type="button" title="Download this document" [disabled]="!file._id" (click)="api.downloadDocument(file)">
                     <i class="material-icons">file_download</i>
-                  </button>
+                  </button> -->
                   <!-- file must exist in db (ie, have an id) to be able to open it -->
-                  <button class="btn btn-light btn-sm" type="button" title="Open this document" [disabled]="!file._id" [hidden]="api.isMS" (click)="api.openDocument(file)">
+                  <!-- <button class="btn btn-light btn-sm" type="button" title="Open this document" [disabled]="!file._id" [hidden]="api.isMS" (click)="api.openDocument(file)">
                     <i class="material-icons">open_in_new</i>
-                  </button>
+                  </button> -->
                   <span placement="top" title="Delete this document">
-                    <!-- TODO: if file exists in db, delete it; otherwise just remove it from list -->
                     <button class="btn btn-light btn-sm" type="button" (click)="deleteDocument(file, application.decision.documents)">
                       <i class="material-icons">delete</i>
                     </button>
@@ -229,7 +227,7 @@
               </li>
             </ul>
             <div class="file-upload">
-              <input type="file" name="fileInput2" size="5000000" (change)="uploadFiles($event.target.files, application.decision.documents)" multiple>
+              <input type="file" name="fileInput2" size="5000000" (change)="addDocuments($event.target.files, application.decision.documents)" multiple>
               <div class="file-upload__target">
                 <span class="file-upload__prompt">
                   <i class="file-upload__prompt-icon material-icons">file_upload</i>
@@ -417,7 +415,7 @@
 
               <!-- Upload Application Documents -->
               <!-- <div class="file-upload">
-                <input type="file" name="fileInput1" size="5000000" (change)="uploadFiles($event.target.files, application.documents)" multiple [disabled]="!application._id">
+                <input type="file" name="fileInput1" size="5000000" (change)="addDocuments($event.target.files, application.documents)" multiple [disabled]="!application._id">
                 <div class="file-upload__target">
                   <span class="file-upload__prompt">
                     <i class="file-upload__prompt-icon material-icons">file_upload</i>
@@ -532,7 +530,7 @@
 
                 <!-- Upload Decision Documents -->
                 <!-- <div class="file-upload">
-                  <input type="file" name="fileInput2" size="5000000" (change)="uploadFiles($event.target.files, application.decision.documents)" multiple>
+                  <input type="file" name="fileInput2" size="5000000" (change)="addDocuments($event.target.files, application.decision.documents)" multiple>
                   <div class="file-upload__target">
                     <span class="file-upload__prompt">
                       <i class="file-upload__prompt-icon material-icons">file_upload</i>

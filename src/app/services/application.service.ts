@@ -268,6 +268,7 @@ export class ApplicationService {
         // derive days remaining for display
         // use moment to handle Daylight Saving Time changes
         if (cp && this.commentPeriodService.isOpen(cp)) {
+          // TODO: for consistent use of dynamic properties, change application.currentPeriod['daysRemaining'] -> application['daysRemaining']
           application.currentPeriod['daysRemaining'] = moment(cp.endDate).diff(moment(today), 'days') + 1; // including today
         }
       })
