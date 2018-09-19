@@ -22,7 +22,7 @@ $doc-list-link-color: #007bff;
 
     // Text Content
     &__txt-content {
-      margin-top: 0.3rem;
+      margin-top: 0.5rem;
       display: inline-block;
       white-space: nowrap;
 
@@ -43,7 +43,7 @@ $doc-list-link-color: #007bff;
       padding-right: 0;
   
       i {
-        margin-top: 0.3rem;
+        margin-top: 0.5rem;
         font-size: 1.35rem;
         color: #999;
         cursor: default;
@@ -64,21 +64,6 @@ $doc-list-link-color: #007bff;
     // Actions Column
     &.actions {
       @include flex(0 0 auto);
-
-      [class^="btn"] {
-        height: 2rem;
-        padding-right: 0.25rem;
-        padding-left: 0.25rem;
-        border: transparent;
-    
-        &:not(:hover) {
-          background: transparent;
-        }
-    
-        &:disabled {
-          opacity: 0.2;
-        }
-      }
     }
   }
 

@@ -133,19 +133,23 @@
                 
                 <span class="cell actions">
                   <!-- file must exist in db (ie, have an id) to be able to download it -->
-                  <button class="btn btn-light btn-sm" type="button" title="Download this document" [disabled]="!file._id" (click)="api.downloadDocument(file)">
+                  <button class="btn btn-icon" type="button" title="Download this document" 
+                    [disabled]="!file._id" 
+                    (click)="api.downloadDocument(file)">
                     <i class="material-icons">file_download</i>
                   </button>
                   <!-- file must exist in db (ie, have an id) to be able to open it -->
-                  <button class="btn btn-light btn-sm" type="button" title="Open this document" [disabled]="!file._id" [hidden]="api.isMS" (click)="api.openDocument(file)">
+                  <button class="btn btn-icon" type="button" title="Open this document" 
+                    [disabled]="!file._id" 
+                    [hidden]="api.isMS" 
+                    (click)="api.openDocument(file)">
                     <i class="material-icons">open_in_new</i>
                   </button>
-                  <span placement="top" title="Delete this document">
-                    <!-- TODO: if file exists in db, delete it; otherwise just remove it from list -->
-                    <button class="btn btn-light btn-sm" type="button" (click)="deleteDocument(file, application.decision.documents)">
-                      <i class="material-icons">delete</i>
-                    </button>
-                  </span>
+                  <!-- TODO: if file exists in db, delete it; otherwise just remove it from list -->
+                  <button class="btn btn-icon" type="button" title="Delete this document"
+                    (click)="deleteDocument(file, application.decision.documents)">
+                    <i class="material-icons">delete</i>
+                  </button>
                 </span>
               </li>
           </ul>
@@ -168,9 +172,11 @@
         </div>
       </fieldset>
 
-      <fieldset name="decisionForm">
+      <fieldset name="decisionForm" id="appDecision">
         <legend class="mb-3">Application Decision</legend>
-        <button class="btn content-btn-alt" type="button" *ngIf="!application.decision" title="Add decision" (click)="addDecision()">
+        <button class="btn content-btn-alt" type="button" title="Add decision" 
+          *ngIf="!application.decision" 
+          (click)="addDecision()">
           <i class="material-icons">add</i>
           Add Decision
         </button>
@@ -212,16 +218,16 @@
 
                 <span class="cell actions">
                   <!-- file must exist in db (ie, have an id) to be able to download it -->
-                  <button class="btn btn-light btn-sm" type="button" title="Download this document" [disabled]="!file._id" (click)="api.downloadDocument(file)">
+                  <button class="btn btn-icon" type="button" title="Download this document" [disabled]="!file._id" (click)="api.downloadDocument(file)">
                     <i class="material-icons">file_download</i>
                   </button>
                   <!-- file must exist in db (ie, have an id) to be able to open it -->
-                  <button class="btn btn-light btn-sm" type="button" title="Open this document" [disabled]="!file._id" [hidden]="api.isMS" (click)="api.openDocument(file)">
+                  <button class="btn btn-icon" type="button" title="Open this document" [disabled]="!file._id" [hidden]="api.isMS" (click)="api.openDocument(file)">
                     <i class="material-icons">open_in_new</i>
                   </button>
                   <span placement="top" title="Delete this document">
                     <!-- TODO: if file exists in db, delete it; otherwise just remove it from list -->
-                    <button class="btn btn-light btn-sm" type="button" (click)="deleteDocument(file, application.decision.documents)">
+                    <button class="btn btn-icon" type="button" (click)="deleteDocument(file, application.decision.documents)">
                       <i class="material-icons">delete</i>
                     </button>
                   </span>
@@ -311,55 +317,6 @@
               <span>Reset</span>
             </button>
           </div>
-
-          <!-- BASIC INFORMATION -->
-          <section class="card bg-light">
-            <h3>Basic Information</h3>
-
-            <div *ngIf="!application.features || application.features.length === 0">
-              <em>No features have been loaded.</em>
-            </div>
-
-            <div *ngIf="application.features?.length > 0">
-              <ul class="application-edit__list">
-                <li class="pt-0">
-                  <span class="name">Type / Subtype</span>
-                  <span class="value">{{application.type || '-'}} / {{application.subtype || '-'}}</span>
-                </li>
-                <li class="pt-0">
-                  <span class="name">Status</span>
-                  <span class="value">{{application.appStatus || '-'}}</span>
-                </li>
-                <li>
-                  <span class="name">Stage</span>
-                  <span class="value">{{application.tenureStage || '-'}}</span>
-                </li>
-                <li>
-                  <span class="name">Agency</span>
-                  <span class="value">{{application.agency || '-'}}</span>
-                </li>
-              </ul>
-              <hr>
-              <ul class="application-edit__list">
-                <li class="pt-0">
-                  <span class="name">Business Unit</span>
-                  <span class="value">{{application.businessUnit || '-'}}</span>
-                </li>
-                <li class="pt-0">
-                  <span class="name">Region</span>
-                  <span class="value">{{applicationService.getRegionString(applicationService.getRegionCode(application.businessUnit)) || '-'}}</span>
-                </li>
-                <li>
-                  <span class="name">Location</span>
-                  <span class="value">{{application.location || '-'}}</span>
-                </li>
-                <li>
-                  <span class="name">Total Area (hectares)</span>
-                  <span class="value">{{application.areaHectares ? (application.areaHectares | number:'1.2-2') : '-'}}</span>
-                </li>
-              </ul>
-            </div>
-          </section>
 
           <!-- APPLICATION -->
           <section class="card bg-light">

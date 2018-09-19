@@ -120,7 +120,8 @@
                         </span>
                       </span>
                       <span class="cell actions">
-                        <button type="button" class="btn btn-light btn-sm" (click)="api.downloadDocument(document)" title="Download this document">
+                        <button class="btn btn-icon" type="button" title="Download this document"
+                          (click)="api.downloadDocument(document)">
                           <i class="material-icons">file_download</i>
                         </button>
                       </span>
@@ -221,7 +222,7 @@
                       </span>
                   </span>
                   <span class="cell actions">
-                    <button class="btn btn-light btn-sm" (click)="api.downloadDocument(document)" title="Download this document">
+                    <button class="btn btn-icon" (click)="api.downloadDocument(document)" title="Download this document">
                       <i class="material-icons">file_download</i>
                     </button>
                   </span>
@@ -333,7 +334,7 @@
                 </span>
                 <span class="cell name" [title]="document.displayName || ''">
                   <span class="cell__txt-content">
-                      {{document.documentFileName}}
+                    {{document.documentFileName}}
                   </span>
                 </span>
                 <span class="cell actions">
@@ -384,10 +385,10 @@
                       </span>
                   </span>
                   <span class="cell actions">
-                    <button class="btn btn-light btn-sm" (click)="api.downloadDocument(document)" title="Download this document">
+                    <button class="btn btn-icon" (click)="api.downloadDocument(document)" title="Download this document">
                       <i class="material-icons">file_download</i>
                     </button>
-                    <button class="btn btn-light btn-sm" (click)="api.openDocument(document)" title="Open this document" [hidden]="api.isMS">
+                    <button class="btn btn-icon" (click)="api.openDocument(document)" title="Open this document" [hidden]="api.isMS">
                       <i class="material-icons">open_in_new</i>
                     </button>
                   </span>
@@ -404,7 +405,6 @@
         <section class="geo-shape-data card bg-light">
           <div class="title-container">
             <h3 class="title-container__title mb-0">Geographic Shape Data</h3>
-
             <div class="title-container__actions">
               <button type="button" class="btn btn-white slide-r-btn" disabled aria-disabled="true">
                 <span>See on map</span>
