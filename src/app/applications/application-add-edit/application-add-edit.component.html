@@ -133,18 +133,22 @@
                 
                 <span class="cell actions">
                   <!-- file must exist in db (ie, have an id) to be able to download it -->
+                  <!--
                   <button class="btn btn-icon" type="button" title="Download this document" 
                     [disabled]="!file._id" 
                     (click)="api.downloadDocument(file)">
                     <i class="material-icons">file_download</i>
                   </button>
+                  -->
                   <!-- file must exist in db (ie, have an id) to be able to open it -->
+                  <!--
                   <button class="btn btn-icon" type="button" title="Open this document" 
                     [disabled]="!file._id" 
                     [hidden]="api.isMS" 
                     (click)="api.openDocument(file)">
                     <i class="material-icons">open_in_new</i>
                   </button>
+                  -->
                   <!-- TODO: if file exists in db, delete it; otherwise just remove it from list -->
                   <button class="btn btn-icon" type="button" title="Delete this document"
                     (click)="deleteDocument(file, application.decision.documents)">
@@ -218,13 +222,17 @@
 
                 <span class="cell actions">
                   <!-- file must exist in db (ie, have an id) to be able to download it -->
+                  <!--
                   <button class="btn btn-icon" type="button" title="Download this document" [disabled]="!file._id" (click)="api.downloadDocument(file)">
                     <i class="material-icons">file_download</i>
                   </button>
+                  -->
                   <!-- file must exist in db (ie, have an id) to be able to open it -->
+                  <!--
                   <button class="btn btn-icon" type="button" title="Open this document" [disabled]="!file._id" [hidden]="api.isMS" (click)="api.openDocument(file)">
                     <i class="material-icons">open_in_new</i>
                   </button>
+                  -->
                   <span placement="top" title="Delete this document">
                     <!-- TODO: if file exists in db, delete it; otherwise just remove it from list -->
                     <button class="btn btn-icon" type="button" (click)="deleteDocument(file, application.decision.documents)">

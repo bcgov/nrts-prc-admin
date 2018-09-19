@@ -44,7 +44,7 @@
     <div class="row">
       <div class="col-md-8">
         
-        <section>
+        <section class="main-card">
           <!-- Tabs -->
           <ngb-tabset>
             <ngb-tab>
@@ -57,7 +57,7 @@
               <ng-template ngbTabContent>
                 <section>
                   <h2>Description</h2>
-                  <p class="mb-0">{{application.description || '-'}}</p>
+                  <p class="mb-0" [innerHTML]="application.description || '<em>No application description available</em>'"></p>
                 </section>
                 <section>
                   <h2>Details</h2>
@@ -195,9 +195,13 @@
                 <span class="name">End Date:</span>
                 <span class="value">{{application.currentPeriod.endDate | date:'longDate'}}</span>
               </li>
+              <li *ngIf="application.currentPeriod['daysRemaining']">
+                <span class="name">Days Remaining:</span>
+                <span class="value">{{application.currentPeriod['daysRemaining']}}</span>
+              </li>
             </ul>
             <button class="btn btn-sm content-btn-alt" type="button" [routerLink]="['/comments', application._id]">
-              Review Comments ({{application['numComments']}})
+              Review Comments &nbsp;({{application['numComments']}})
             </button>
           </div>
         </div>
@@ -205,10 +209,10 @@
           <h3 class="title">Application Decision</h3>
           <div class="body">
             <div *ngIf="!application.decision">
-              <p class="mb-0">No decisions have been made for this application at this time.</p>
+              <p class="mb-0"><em>No decisions have been made for this application at this time.</em></p>
             </div>
             <div *ngIf="application.decision">
-              <div>{{(application.decision.description | newlines) || '-'}}</div>
+              <div [innerHTML]="(application.decision.description | newlines) || '<em>No description available</em>'"></div>
               <ul class="doc-list">
                 <li *ngFor="let document of application.decision.documents">
                   <span class="cell icon">
