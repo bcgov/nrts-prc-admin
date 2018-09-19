@@ -126,7 +126,7 @@
                         </span>
                       </li>
                       <li class="no-results" *ngIf="!application.documents?.length > 0">
-                        <em>No Documents</em>
+                        <em>No application documents</em>
                       </li>
                     </ul>
                   </section>
@@ -210,7 +210,7 @@
                 <p class="mb-0">No decisions have been made for this application at this time.</p>
               </div>
               <div *ngIf="application.decision">
-                <div [innerHTML]="(application.decision.description | newlines) || '<em>No description available</em>'"></div>
+                <div [innerHTML]="(application.decision.description | newlines) || '<em>No decision description available</em>'"></div>
                 <ul class="doc-list">
                   <li *ngFor="let document of application.decision.documents">
                     <span class="cell icon">
@@ -234,7 +234,7 @@
                     </span>
                   </li>
                   <li class="no-results" *ngIf="!application.decision?.documents.length > 0">
-                    <em>No Documents</em>
+                    <em>No decision documents</em>
                   </li>
                 </ul>
               </div>
