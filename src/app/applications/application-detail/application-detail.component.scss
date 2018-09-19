@@ -2,7 +2,7 @@
 
 $card-bg: #fff;
 $card-title-bg: #f7f8fa;
-$card-shadow: 0.05rem 0.1rem 0.2rem rgba(#000, 0.1);
+$card-shadow: 0.02rem 0 0.2rem rgba(#000, 0.15);
 
 :host {
   @include flex-box();
@@ -12,13 +12,13 @@ $card-shadow: 0.05rem 0.1rem 0.2rem rgba(#000, 0.1);
 }
 
 .main-card {
-  border: 1px solid #e7e7e7;
+  //border: 1px solid #e7e7e7;
   background: $card-bg;
   box-shadow: $card-shadow;
 }
 
 .aside-card {
-  border: 1px solid #e7e7e7;
+  //border: 1px solid #e7e7e7;
   background: $card-bg;
   box-shadow: $card-shadow;
 
@@ -35,22 +35,32 @@ $card-shadow: 0.05rem 0.1rem 0.2rem rgba(#000, 0.1);
   }
 
   .body {
-    padding: 1rem 1.5rem;
+    padding: 1.5rem;
   }
 
-  .content-btn-alt {
-    display: inline-block;
-    margin-top: 1.25rem;
-    margin-right: auto;
-    margin-left: auto;
-    min-width: 10rem;
+  .btn-container {
+    margin-top: 1.5rem;
+    text-align: center;
+  }
+
+  .cta-btn {
+    min-width: 12rem;
+    border-width: 2px;
+    font-weight: 700;
+
+    i {
+      margin-top: -0.2rem;
+      margin-left: -0.2rem;
+    }
   }
 
   .doc-list {
-    margin-top: 1rem;
+    margin-top: 1.5rem;
   }
 
   .nv-list {
+    margin-top: -0.5rem;
+    margin-bottom: -0.5rem;
     border: none;
 
     li {
@@ -87,12 +97,12 @@ section {
 }
 
 .nv-list {
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px dotted #ccc;
 
   li {
     @include flex-box();
     padding: 0.5rem 0;
-    border-top: 1px solid #ddd;
+    border-top: 1px dotted #ccc;
     background: #fff;
   }
 
