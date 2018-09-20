@@ -12,14 +12,14 @@
           <button class="btn btn-light" type="button" [routerLink]="['/a', application._id, 'edit']">
             Edit
           </button>
-          <button class="btn btn-primary" type="button" *ngIf="application.isPublished === false" (click)="publishApplication()">
-            Publish
+          <button class="btn btn-primary" type="button" *ngIf="application.isPublished === false" (click)="publishApplication()" [disabled]="isPublishing">
+            {{isPublishing ? 'Publishing...' : 'Publish'}}
           </button>
-          <button class="btn btn-primary" type="button" *ngIf="application.isPublished === true" (click)="unPublishApplication()">
-            Unpublish
+          <button class="btn btn-primary" type="button" *ngIf="application.isPublished === true" (click)="unPublishApplication()" [disabled]="isUnpublishing">
+            {{isUnpublishing ? 'Unpublishing...' : 'Unpublish'}}
           </button>
           <span class="vert-pipe">&nbsp;</span>
-          <button class="btn btn-icon" title="Remove this application from PRC" (click)="deleteApplication()">
+          <button class="btn btn-icon" title="Remove this application from PRC" (click)="deleteApplication()" [disabled]="isDeleting">
             <i class="material-icons">
               delete
               </i>

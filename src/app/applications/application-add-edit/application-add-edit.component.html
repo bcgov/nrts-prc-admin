@@ -14,11 +14,11 @@
         <button class="btn btn-light" type="button" title="Cancel changes" (click)="cancelChanges()">
           Cancel
         </button>
-        <button class="btn btn-primary" type="button" title="Submit new application" *ngIf="!application._id" (click)="addApplication()">
-          Submit
+        <button class="btn btn-primary" type="button" title="Submit new application" *ngIf="!application._id" (click)="addApplication()" [disabled]="isSubmitting">
+          {{isSubmitting ? 'Submitting...' : 'Submit'}}
         </button>
-        <button class="btn btn-primary" type="button" title="Save application" *ngIf="application._id" (click)="saveApplication()">
-          Save
+        <button class="btn btn-primary" type="button" title="Save application" *ngIf="application._id" (click)="saveApplication()" [disabled]="isSaving">
+          {{isSaving ? 'Saving...' : 'Save'}}
         </button>
           <!--
         <button class="btn btn-primary" type="button" title="Publish application"

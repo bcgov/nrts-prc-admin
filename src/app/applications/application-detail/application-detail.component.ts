@@ -23,6 +23,10 @@ import { FeatureService } from 'app/services/feature.service';
 })
 
 export class ApplicationDetailComponent implements OnInit, OnDestroy {
+
+  public isPublishing = false;
+  public isUnpublishing = false;
+  public isDeleting = false;
   public application: Application = null;
   private snackBarRef: MatSnackBarRef<SimpleSnackBar> = null;
   private ngUnsubscribe: Subject<boolean> = new Subject<boolean>();
@@ -102,6 +106,8 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
   }
 
   private internalDeleteApplication() {
+    this.isDeleting = true;
+
     let observables = Observable.of(null);
 
     // delete comment period
@@ -142,10 +148,12 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
           // do nothing here - see onCompleted() function below
         },
         error => {
+          this.isDeleting = false;
           console.log('error =', error);
           alert('Uh-oh, couldn\'t delete application');
         },
         () => { // onCompleted
+          this.isDeleting = false;
           // delete succeeded --> navigate back to search
           this.router.navigate(['/search']);
         }
@@ -153,6 +161,8 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
   }
 
   public publishApplication() {
+    this.isPublishing = true;
+
     let observables = Observable.of(null);
 
     // publish comment period
@@ -196,6 +206,7 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
           // do nothing here - see onCompleted() function below
         },
         error => {
+          this.isPublishing = false;
           console.log('error =', error);
           alert('Uh-oh, couldn\'t publish application');
         },
@@ -206,9 +217,11 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
             .takeUntil(this.ngUnsubscribe)
             .subscribe(
               application => {
+                this.isPublishing = false;
                 this.application = application;
               },
               error => {
+                this.isPublishing = false;
                 console.log('error =', error);
                 alert('Uh-oh, couldn\'t reload application');
               }
@@ -218,6 +231,8 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
   }
 
   public unPublishApplication() {
+    this.isUnpublishing = true;
+
     let observables = Observable.of(null);
 
     // unpublish comment period
@@ -261,6 +276,7 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
           // do nothing here - see onCompleted() function below
         },
         error => {
+          this.isUnpublishing = false;
           console.log('error =', error);
           alert('Uh-oh, couldn\'t unpublish application');
         },
@@ -271,6 +287,7 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
             .takeUntil(this.ngUnsubscribe)
             .subscribe(
               application => {
+                this.isUnpublishing = false;
                 this.application = application;
               },
               error => {

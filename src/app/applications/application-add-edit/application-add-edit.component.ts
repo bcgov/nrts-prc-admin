@@ -32,6 +32,8 @@ import { DocumentService } from 'app/services/document.service';
 export class ApplicationAddEditComponent implements OnInit, OnDestroy {
   @ViewChild('applicationForm') applicationForm: NgForm;
 
+  public isSubmitting = false;
+  public isSaving = false;
   public application: Application = null;
   public startDate: string = null;
   public endDate: string = null;
@@ -303,6 +305,8 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
       return;
     }
 
+    this.isSubmitting = true;
+
     // add application
     this.application.publishDate = moment(new Date()).format(); // set publish date
     this.applicationService.add(this.application)
@@ -312,6 +316,7 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
           this.addApplication2(application2);
         },
         error => {
+          this.isSubmitting = false;
           console.log('error =', error);
           alert('Uh-oh, couldn\'t create application');
         }
@@ -350,6 +355,7 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
           // do nothing here - see onCompleted() function below
         },
         error => {
+          this.isSubmitting = false;
           console.log('error =', error);
           alert('Uh-oh, couldn\'t add application, part 2');
         },
@@ -362,6 +368,7 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
                 this.addApplication3(application3);
               },
               error => {
+                this.isSubmitting = false;
                 console.log('error =', error);
                 alert('Uh-oh, couldn\'t reload application, part 2');
               }
@@ -390,6 +397,7 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
           // do nothing here - see onCompleted() function below
         },
         error => {
+          this.isSubmitting = false;
           console.log('error =', error);
           alert('Uh-oh, couldn\'t save application, part 3');
         },
@@ -399,6 +407,7 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
             .takeUntil(this.ngUnsubscribe)
             .subscribe(
               application => {
+                this.isSubmitting = false;
                 this.snackBarRef = this.snackBar.open('Application created...', null, { duration: 2000 }); // not displayed due to navigate below
 
                 // get updated application
@@ -409,6 +418,7 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
                 this.router.navigate(['/a', this.application._id]);
               },
               error => {
+                this.isSubmitting = false;
                 console.log('error =', error);
                 alert('Uh-oh, couldn\'t reload application, part 3');
               }
@@ -432,6 +442,8 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
         .takeUntil(this.ngUnsubscribe);
       return;
     }
+
+    this.isSaving = true;
 
     let observables = Observable.of(null);
 
@@ -480,6 +492,7 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
           // do nothing here - see onCompleted() function below
         },
         error => {
+          this.isSaving = false;
           console.log('error =', error);
           alert('Uh-oh, couldn\'t save application, part 1');
         },
@@ -492,6 +505,7 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
                 this.saveApplication2(application2);
               },
               error => {
+                this.isSaving = false;
                 console.log('error =', error);
                 alert('Uh-oh, couldn\'t reload application, part 1');
               }
@@ -545,6 +559,7 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
           // do nothing here - see onCompleted() function below
         },
         error => {
+          this.isSaving = false;
           console.log('error =', error);
           alert('Uh-oh, couldn\'t save application, part 2');
         },
@@ -557,6 +572,7 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
                 this.saveApplication3(application3);
               },
               error => {
+                this.isSaving = false;
                 console.log('error =', error);
                 alert('Uh-oh, couldn\'t reload application, part 2');
               }
@@ -590,6 +606,7 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
           // do nothing here - see onCompleted() function below
         },
         error => {
+          this.isSaving = false;
           console.log('error =', error);
           alert('Uh-oh, couldn\'t save application, part 3');
         },
@@ -599,6 +616,7 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
             .takeUntil(this.ngUnsubscribe)
             .subscribe(
               application => {
+                this.isSaving = false;
                 this.snackBarRef = this.snackBar.open('Application saved...', null, { duration: 2000 }); // not displayed due to navigate below
 
                 // get updated application
@@ -609,11 +627,11 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
                 this.router.navigate(['/a', this.application._id]);
               },
               error => {
+                this.isSaving = false;
                 console.log('error =', error);
                 alert('Uh-oh, couldn\'t reload application, part 3');
               }
             );
-
         }
       );
   }
