@@ -6,17 +6,27 @@
         <button class="btn btn-light" type="button" [routerLink]="['/a', application._id, 'edit']">
           Edit
         </button>
-        <button class="btn btn-primary" type="button" *ngIf="application.isPublished === false" (click)="publishApplication()" [disabled]="isPublishing">
-          {{isPublishing ? 'Publishing...' : 'Publish'}}
+        <button class="btn btn-primary" type="button" 
+          *ngIf="application.isPublished === false" 
+          (click)="publishApplication()" 
+          [disabled]="isPublishing">
+          <i class="spinner rotating" [hidden]="!isPublishing"></i>
+          <span>{{isPublishing ? 'Publishing' : 'Publish'}}</span>
         </button>
-        <button class="btn btn-primary" type="button" *ngIf="application.isPublished === true" (click)="unPublishApplication()" [disabled]="isUnpublishing">
-          {{isUnpublishing ? 'Unpublishing...' : 'Unpublish'}}
+        <button class="btn btn-primary" type="button" 
+          *ngIf="application.isPublished === true" 
+          (click)="unPublishApplication()" 
+          [disabled]="isUnpublishing">
+          <i class="spinner rotating" [hidden]="!isUnpublishing"></i>
+          <span>{{isUnpublishing ? 'Unpublishing' : 'Unpublish'}}</span>
         </button>
         <span class="vert-pipe">&nbsp;</span>
-        <button class="btn btn-icon" title="Remove this application from PRC" (click)="deleteApplication()" [disabled]="isDeleting">
+        <button class="btn btn-icon" title="Remove this application from PRC" 
+          (click)="deleteApplication()" 
+          [disabled]="isDeleting">
           <i class="material-icons">
             delete
-            </i>
+          </i>
         </button>
       </div>  
     </div>
@@ -98,7 +108,8 @@
                         </span>
                       </span>
                       <span class="cell actions">
-                        <button type="button" class="btn btn-light btn-sm" (click)="api.downloadDocument(document)" title="Download this document">
+                        <button class="btn btn-icon" type="button" title="Download this document" 
+                          (click)="api.downloadDocument(document)">
                           <i class="material-icons">file_download</i>
                         </button>
                       </span>
@@ -171,6 +182,10 @@
               <li>
                 <span class="name">End Date:</span>
                 <span class="value">{{application.currentPeriod.endDate | date:'longDate'}}</span>
+              </li>
+              <li *ngIf="application.currentPeriod['daysRemaining']">
+                <span class="name">Days Remaining:</span>
+                <span class="value">{{application.currentPeriod['daysRemaining']}}</span>
               </li>
             </ul>
             <div class="btn-container">

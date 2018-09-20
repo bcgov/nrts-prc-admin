@@ -5,51 +5,20 @@
         <span class="text-muted">Crown Land File: {{application.cl_file}}  &nbsp;&rsaquo;&nbsp; </span> {{!application._id ? 'Create Public Review' : 'Edit Public Review'}}
       </h1>
       <div class="title-container__actions">
-        <!--
-        <button class="btn btn-light" type="button" title="Cancel changes and return to previous page" 
-          [routerLink]="!application._id ? ['../'] : ['/search']">
-          Cancel
-        </button>
-        -->
         <button class="btn btn-light" type="button" title="Cancel changes" (click)="cancelChanges()">
           Cancel
         </button>
-        <button class="btn btn-primary" type="button" title="Submit new application" *ngIf="!application._id" (click)="addApplication()" [disabled]="isSubmitting">
-          {{isSubmitting ? 'Submitting...' : 'Submit'}}
+        <button class="btn btn-primary" type="button" title="Submit new application" 
+          *ngIf="!application._id" (click)="addApplication()" [disabled]="isSubmitting">
+          <i class="spinner rotating" [hidden]="!isSubmitting"></i>
+          <span>{{isSubmitting ? 'Submitting' : 'Submit'}}</span>
         </button>
-        <button class="btn btn-primary" type="button" title="Save application" *ngIf="application._id" (click)="saveApplication()" [disabled]="isSaving">
-          {{isSaving ? 'Saving...' : 'Save'}}
-        </button>
-          <!--
-        <button class="btn btn-primary" type="button" title="Publish application"
-          *ngIf="application._id && !application.isPublished"
-          (click)="publishApplication()">
-          Publish
-        </button>
-        <button class="btn btn-danger" type="button" title="Un-publish application"
-          *ngIf="application._id && application.isPublished"
-          (click)="unPublishApplication()">
-          Unpublish
-        </button>
-        -->
-        <!--
-        <button class="btn btn-danger" type="button" title="Delete application"
-          *ngIf="application._id && !application.isPublished"
-          (click)="deleteApplication()">
-          Delete
-        </button>
-        -->
-      </div>
-      
-      <!--
-      <div class="title-container__actions">
-        <button type="button" class="btn btn-light slide-l-btn" [routerLink]="['/a', application._id]" [disabled]="!application._id">
-          <i class="material-icons">info_outline</i>
-          <span>Application Details</span>
+        <button class="btn btn-primary" type="button" title="Save application" 
+          *ngIf="application._id" (click)="saveApplication()" [disabled]="isSaving">
+          <i class="spinner rotating" [hidden]="!isSaving"></i>
+          <span>{{isSaving ? 'Saving' : 'Save'}}</span>
         </button>
       </div>
-      -->
-      
     </div>
   </div>
 </div>
@@ -75,6 +44,7 @@
             <input class="form-control" type="date" name="endDate" required aria-required="true" [ngModel]="endDate" (ngModelChange)="onEndDateChg($event)" />
           </div>
         </div>
+        <!-- Need decision from PO -->
         <!--
         <div class="form-group">
           <label>Description (Optional)</label>
@@ -117,29 +87,7 @@
                 <span class="cell name" [title]="doc.displayName || ''">
                   <span class="cell__txt-content">{{doc.documentFileName}}</span>
                 </span>
-                
-                <!-- <span class="cell publish-actions">
-                  <span class="btn-group">
-                    <button class="btn btn-sm" [ngClass]="doc.isPublished ? 'btn-success':'btn-light'" [disabled]="doc.isPublished" title="Publish this document"
-                      (click)="publishDocument(doc)">
-                      Published
-                    </button>
-                    <button class="btn btn-sm" [ngClass]="!doc.isPublished ? 'btn-dark active':'btn-light'" [disabled]="!doc.isPublished" title="Unpublish this document"
-                      (click)="unPublishDocument(doc)">
-                      Unpublished
-                    </button>
-                  </span>
-                </span> -->
-                
                 <span class="cell actions">
-                  <!-- doc must exist in db (ie, have an id) to be able to download it -->
-                  <!-- <button class="btn btn-light btn-sm" type="button" title="Download this document" [disabled]="!doc._id" (click)="api.downloadDocument(doc)">
-                    <i class="material-icons">file_download</i>
-                  </button> -->
-                  <!-- doc must exist in db (ie, have an id) to be able to open it -->
-                  <!-- <button class="btn btn-light btn-sm" type="button" title="Open this document" [disabled]="!doc._id" [hidden]="api.isMS" (click)="api.openDocument(doc)">
-                    <i class="material-icons">open_in_new</i>
-                  </button> -->
                   <button class="btn btn-icon" type="button" title="Delete this document" (click)="deleteDocument(doc, application.documents)">
                     <i class="material-icons">delete</i>
                   </button>
@@ -179,7 +127,7 @@
         <div *ngIf="application.decision">
           <div class="form-group">
             <label>Description</label>
-            <textarea class="form-control" rows="3" name="decisionDesc" id="decisionDesc" #decisionDesc="ngModel"
+            <textarea class="form-control" rows="3" name="decisionDesc" id="decisionDesc" required aria-required="true" #decisionDesc="ngModel"
               [(ngModel)]="application.decision.description">
             </textarea>
           </div>
@@ -196,29 +144,7 @@
                     {{doc.documentFileName}}
                   </span>
                 </span>
-
-                <!-- <span class="cell publish-actions">
-                  <span class="btn-group">
-                    <button class="btn btn-sm" [ngClass]="doc.isPublished ? 'btn-success':'btn-light'" type="button" title="Publish this document"
-                      (click)="publishDocument(doc, application.decision.documents)">
-                      Published
-                    </button>
-                    <button class="btn btn-sm" [ngClass]="!doc.isPublished ? 'btn-dark active':'btn-light'" type="button" title="Unpublish this document"
-                      (click)="unPublishDocument(doc, application.decision.documents)">
-                      Unpublished
-                    </button>
-                  </span>
-                </span> -->
-
                 <span class="cell actions">
-                  <!-- doc must exist in db (ie, have an id) to be able to download it -->
-                  <!-- <button class="btn btn-light btn-sm" type="button" title="Download this document" [disabled]="!doc._id" (click)="api.downloadDocument(doc)">
-                    <i class="material-icons">file_download</i>
-                  </button> -->
-                  <!-- doc must exist in db (ie, have an id) to be able to open it -->
-                  <!-- <button class="btn btn-light btn-sm" type="button" title="Open this document" [disabled]="!doc._id" [hidden]="api.isMS" (click)="api.openDocument(doc)">
-                    <i class="material-icons">open_in_new</i>
-                  </button> -->
                   <button class="btn btn-icon" type="button" title="Delete this document" (click)="deleteDocument(doc, application.decision.documents)">
                     <i class="material-icons">delete</i>
                   </button>
@@ -238,288 +164,6 @@
           </div>
         </div>
       </fieldset>
-
-      <!-- Old Stuff -->
-      <div class="old-stuff" style="display: none;" *ngIf="false">
-          <section class="card bg-dark">
-            <div class="title-container">
-              <div class="title-container__title">
-                <h2 class="mb-0">{{application.client || '-'}}</h2>
-                <div>{{application.purpose || '-'}} / {{application.subpurpose || '-'}}</div>
-              </div>
-              <div class="title-container__actions">
-                <button type="button" class="btn btn-light" (click)="selectClient()" [disabled]="!application._id">
-                  <span>{{application.client ? 'Change Client' : 'Select Client'}}</span>
-                </button>
-              </div>
-            </div>
-            <ul class="application-edit__list">
-              <li>CL File: {{application.cl_file || '-'}}</li>
-              <li>Disp ID: {{application.tantalisID || '-'}}</li>
-            </ul>
-          </section>
-
-          <!-- DISPOSITION -->
-          <section class="card bg-light">
-            <h3>Disposition</h3>
-
-            <div class="form-group">
-              <label class="h4 control-label mb-2" for="tantalisID">Disposition ID <em>(Required)</em></label>
-              <div class="disp-input" (keydown.enter)="false">
-                <input type="number" class="form-control" [ngClass]="{'is-invalid': tantalisID.invalid}" required aria-required="true" autofocus
-                  id="tantalisID" name="tantalisID" #tantalisID="ngModel" [(ngModel)]="application.tantalisID" (keyup.enter)="applyDisposition()"
-                  (keydown.arrowup)="$event.preventDefault()" (keydown.arrowdown)="$event.preventDefault()" (mousewheel)="$event.preventDefault()">
-                <button type="button" class="btn btn-primary float-left" (click)="applyDisposition()" title="Retrieve basic information / features from BCGW">
-                  <i class="material-icons">system_update_alt</i>
-                  <span>Fetch Disposition Data</span>
-                </button>
-                <div class="invalid-feedback">Disposition ID is required</div>
-              </div>
-            </div>
-          </section>
-
-          <!-- APPLICATION FORM BUTTONS -->
-          <div class="section-form-btns mt-3 mb-3">
-            <button type="button" class="btn btn-success" *ngIf="!application._id" (click)="addApplication()" title="Create application">
-              <i class="material-icons">save</i>
-              <span>Create</span>
-            </button>
-            <button type="button" class="btn btn-success" *ngIf="application._id" (click)="saveApplication()" title="Save application">
-              <i class="material-icons">save</i>
-              <span>Save</span>
-            </button>
-            <button type="button" class="btn btn-primary" *ngIf="application._id && !application.isPublished" (click)="publishApplication()" title="Publish application">
-              <i class="material-icons">play_arrow</i>
-              <span>Publish</span>
-            </button>
-            <button type="button" class="btn btn-danger" *ngIf="application._id && application.isPublished" (click)="unPublishApplication()" title="Un-publish application">
-              <i class="material-icons">pause</i>
-              <span>Unpublish</span>
-            </button>
-            <button type="button" class="btn btn-danger" *ngIf="application._id && !application.isPublished" (click)="deleteApplication()" title="Delete application">
-              <i class="material-icons">delete</i>
-              <span>Delete</span>
-            </button>
-            <button type="button" class="btn btn-danger" *ngIf="!application._id" [routerLink]="['/search']" title="Ignore changes and return to search">
-              <i class="material-icons">cancel</i>
-              <span>Cancel</span>
-            </button>
-            <button type="button" class="btn btn-danger" *ngIf="application._id" [disabled]="applicationForm.form.pristine" (click)="resetApplication()" title="Reset application fields to original values">
-              <i class="material-icons">cancel</i>
-              <span>Reset</span>
-            </button>
-          </div>
-
-          <!-- APPLICATION -->
-          <section class="card bg-light">
-            <h3>Application</h3>
-            <section>
-              <label class="h4 control-label mb-2" for="description">
-                Description
-                <span ngbTooltip="Description is displayed publicly" placement="top">
-                  <i class="material-icons md-18">help</i>
-                </span>
-              </label>
-              <textarea class="form-control app-desc" type="text" id="description" name="description" rows="5" #description="ngModel" [(ngModel)]="application.description"></textarea>
-            </section>
-
-            <!-- APPLICATION DOCUMENTS -->
-            <section class="application-detail__documents">
-              <h4 class="mb-2">Application Documents</h4>
-
-              <!-- Application Document List -->
-              <ul class="doc-list mb-3">
-                <li *ngFor="let file of application.documents">
-                  <span class="cell icon">
-                    <i class="material-icons">insert_drive_file</i>
-                  </span>
-                  <span class="cell name" [title]="file.displayName || ''">
-                    <span class="cell__txt-content">{{file.documentFileName}}</span>
-                  </span>
-                  <!-- <span class="cell publish-actions">
-                    <span class="btn-group">
-                      <button class="btn btn-sm" [ngClass]="file.isPublished ? 'btn-success':'btn-light'" [disabled]="file.isPublished" title="Publish this document"
-                        (click)="publishDocument(file)">
-                        Published
-                      </button>
-                      <button class="btn btn-sm" [ngClass]="!file.isPublished ? 'btn-dark active':'btn-light'" [disabled]="!file.isPublished" title="Unpublish this document"
-                        (click)="unPublishDocument(file)">
-                        Unpublished
-                      </button>
-                    </span>
-                  </span> -->
-                  <!-- <span class="cell actions">
-                    <button class="btn btn-light btn-sm" type="button" (click)="api.downloadDocument(file)" title="Download this document">
-                      <i class="material-icons">file_download</i>
-                    </button>
-                    <button class="btn btn-light btn-sm" type="button" (click)="api.openDocument(file)" title="Open this document" [hidden]="api.isMS">
-                      <i class="material-icons">open_in_new</i>
-                    </button>
-                    <span placement="top" title="{{file.isPublished ? 'Documents must be unpublished before they can be deleted':'Delete this document'}}">
-                      <button class="btn btn-light btn-sm" type="button" [disabled]="file.isPublished" (click)="deleteDocument(file, application.documents)">
-                        <i class="material-icons">delete</i>
-                      </button>
-                    </span>
-                  </span> -->
-                </li>
-              </ul>
-
-              <!-- Upload Application Documents -->
-              <!-- <div class="file-upload">
-                <input type="file" name="fileInput1" size="5000000" (change)="addDocuments($event.target.files, application.documents)" multiple [disabled]="!application._id">
-                <div class="file-upload__target">
-                  <span class="file-upload__prompt">
-                    <i class="file-upload__prompt-icon material-icons">file_upload</i>
-                    <span class="file-upload__prompt-msg">Drop files to attach, or <strong>browse</strong>.</span>
-                  </span>
-                </div>
-              </div> -->
-            </section>
-
-            <!-- Internal Notes -->
-            <section>
-              <label class="h4 control-label mb-2" for="internalNotes">
-                Internal Notes
-                <span ngbTooltip="Internal Notes are not displayed publicly" placement="top">
-                  <i class="material-icons md-18">help</i>
-                </span>
-              </label>
-              <textarea class="form-control app-notes" type="text" id="internalNotes" name="internalNotes" rows="5" #internalNotes="ngModel"
-                [(ngModel)]="application.internal.notes"></textarea>
-            </section>
-          </section>
-      </div>
-
     </form>
-  </div>
-</div>
-
-<!-- More Old Stuff -->
-<div class="application-edit" style="display: none;" *ngIf="false">
-  <div class="container" *ngIf="application">
-    <div class="title-container mb-4">
-      <h1 class="title-container__title" *ngIf="!application._id">Create New Application</h1>
-      <h1 class="title-container__title" *ngIf="application._id">Edit Application</h1>
-      <div class="title-container__actions">
-        <!-- to navigate to details, application must have been created -->
-        <button type="button" class="btn btn-light slide-l-btn" [routerLink]="['/a', application._id]" [disabled]="!application._id">
-          <i class="material-icons">info_outline</i>
-          <span>Application Details</span>
-        </button>
-      </div>
-    </div>
-    <div class="row">
-      <main class="col-lg-8">
-
-
-        <!-- HEY JER - THIS FORM IS NOW OBSOLETE -->
-
-
-        <form class="mt-3" #decisionForm="ngForm">
-          <section class="card bg-light">
-            <h3 for="decisionDesc">Decision</h3>
-
-            <section *ngIf="!application.decision">
-              <button type="button" class="btn btn-success" (click)="addDecision()" title="Add decision" [disabled]="!application._id">
-                <i class="material-icons">add</i>
-                <span>Add Decision</span>
-              </button>
-            </section>
-
-            <div *ngIf="application.decision">
-              <section>
-                <label class="h4 control-label mb-2" for="decisionDesc">Description <em>(Required)</em></label>
-                <textarea class="form-control app-decision-desc" [ngClass]="{'is-invalid': decisionDesc.invalid}" type="text" id="decisionDesc"
-                  name="decisionDesc" rows="5" #decisionDesc="ngModel" [(ngModel)]="application.decision.description" required
-                  aria-required="true">
-                  </textarea>
-                <div class="invalid-feedback">Description is required</div>
-              </section>
-
-              <!-- DECISION DOCUMENTS -->
-              <section>
-                <h4 class="mb-2">Decision Documents</h4>
-
-                <!-- Decision Document List -->
-                <ul class="doc-list mb-3" *ngIf="application.decision.documents.length > 0">
-                  <li *ngFor="let file of application.decision.documents">
-                    <span class="cell icon">
-                      <i class="material-icons">insert_drive_file</i>
-                    </span>
-                    <span class="cell name" [title]="file.displayName || ''">
-                      <span class="cell__txt-content">
-                        {{file.documentFileName}}
-                      </span>
-                    </span>
-                    <!-- <span class="cell publish-actions">
-                      <span class="btn-group">
-                        <button class="btn btn-sm" [ngClass]="file.isPublished ? 'btn-success':'btn-light'" [disabled]="file.isPublished" type="button" title="Publish this document"
-                          (click)="publishDocument(file)">
-                          Published
-                        </button>
-                        <button class="btn btn-sm" [ngClass]="!file.isPublished ? 'btn-dark active':'btn-light'" [disabled]="!file.isPublished" type="button" title="Unpublish this document"
-                          (click)="unPublishDocument(file)">
-                          Unpublished
-                        </button>
-                      </span>
-                    </span> -->
-                    <!-- <span class="cell actions">
-                      <button type="button" class="btn btn-light btn-sm" (click)="api.downloadDocument(file)" title="Download this document">
-                        <i class="material-icons">file_download</i>
-                      </button>
-                      <button type="button" class="btn btn-light btn-sm" (click)="api.openDocument(file)" title="Open this document" [hidden]="api.isMS">
-                        <i class="material-icons">open_in_new</i>
-                      </button>
-                      <span placement="top" title="{{file.isPublished ? 'Documents must be unpublished before they can be deleted':'Delete this document'}}">
-                        <button type="button" class="btn btn-light btn-sm" [disabled]="file.isPublished" (click)="deleteDocument(file, application.decision.documents)">
-                          <i class="material-icons">delete</i>
-                        </button>
-                      </span>
-                    </span> -->
-                  </li>
-                </ul>
-
-                <!-- Upload Decision Documents -->
-                <!-- <div class="file-upload">
-                  <input type="file" name="fileInput2" size="5000000" (change)="addDocuments($event.target.files, application.decision.documents)" multiple>
-                  <div class="file-upload__target">
-                    <span class="file-upload__prompt">
-                      <i class="file-upload__prompt-icon material-icons">file_upload</i>
-                      <span class="file-upload__prompt-msg">Drop files to attach, or <strong>browse</strong>.</span>
-                    </span>
-                  </div>
-                </div> -->
-              </section>
-
-              <!-- DECISION FORM BUTTONS -->
-              <div class="section-form-btns mt-4">
-                <!-- to save, decision form must be valid -->
-                <button type="button" class="btn btn-success" (click)="saveDecision()" [disabled]="decisionForm.form.invalid" title="Save decision">
-                  <i class="material-icons">save</i>
-                  <span>Save</span>
-                </button>
-                <!-- to publish, decision form must be valid -->
-                <button type="button" class="btn btn-primary" *ngIf="!application.decision.isPublished" (click)="publishDecision()"
-                  [disabled]="decisionForm.form.invalid" title="Publish decision">
-                  <i class="material-icons">play_arrow</i>
-                  <span>Publish</span>
-                </button>
-                <button type="button" class="btn btn-danger" *ngIf="application.decision.isPublished" (click)="unPublishDecision()"
-                  title="Unpublish decision">
-                  <i class="material-icons">pause</i>
-                  <span>Unpublish</span>
-                </button>
-                <!-- to delete, there must be no decision documents -->
-                <button type="button" class="btn btn-danger" *ngIf="!application.decision.isPublished" (click)="deleteDecision()"
-                  [disabled]="application.decision.documents?.length > 0" title="Delete decision">
-                  <i class="material-icons">delete</i>
-                  <span>Delete</span>
-                </button>
-              </div>
-            </div>
-          </section>
-        </form>
-      </main>
-    </div>
   </div>
 </div>
