@@ -57,6 +57,10 @@
                   <h2>Details</h2>
                   <ul class="nv-list">
                     <li>
+                      <span class="name">Applicant:</span>
+                      <span class="value">{{application.client || '-'}}</span>
+                    </li>
+                    <li>
                       <span class="name">Type / Subtype:</span>
                       <span class="value">{{application.type || '-'}} / {{application.subtype || '-'}}</span>
                     </li>
@@ -235,10 +239,7 @@
               <button class="cta-btn btn btn-sm btn-outline-primary" type="button" 
                 [routerLink]="['/a', application._id, 'edit']" 
                 fragment="appDecision">
-                <i class="material-icons">
-                  add
-                </i>
-                Add/Edit Decision
+                Edit Decision
               </button>
             </div>
           </div>
