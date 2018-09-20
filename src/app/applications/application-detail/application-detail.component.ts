@@ -14,6 +14,7 @@ import { ApplicationService } from 'app/services/application.service';
 import { CommentPeriodService } from 'app/services/commentperiod.service';
 import { DecisionService } from 'app/services/decision.service';
 import { DocumentService } from 'app/services/document.service';
+import { FeatureService } from 'app/services/feature.service';
 
 @Component({
   selector: 'app-application-detail',
@@ -35,7 +36,8 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
     public applicationService: ApplicationService, // also used in template
     public commentPeriodService: CommentPeriodService,
     public decisionService: DecisionService,
-    public documentService: DocumentService
+    public documentService: DocumentService,
+    public featureService: FeatureService
   ) { }
 
   ngOnInit() {
@@ -125,6 +127,9 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
         observables = observables.concat(this.documentService.delete(doc));
       }
     }
+
+    // delete features
+    observables = observables.concat(this.featureService.deleteByApplicationId(this.application._id));
 
     // delete application
     // do this last in case of prior failures
