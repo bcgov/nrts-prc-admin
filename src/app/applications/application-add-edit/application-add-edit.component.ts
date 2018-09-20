@@ -32,6 +32,7 @@ import { DocumentService } from 'app/services/document.service';
 export class ApplicationAddEditComponent implements OnInit, OnDestroy {
   @ViewChild('applicationForm') applicationForm: NgForm;
 
+  public isSubmitSaveClicked = false;
   public isSubmitting = false;
   public isSaving = false;
   public application: Application = null;
@@ -308,6 +309,8 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
   // this is part 1 of adding an application and all its objects
   // (multi-part due to dependencies)
   public addApplication() {
+    this.isSubmitSaveClicked = true;
+
     if (this.applicationForm.invalid) {
       this.dialogService.addDialog(ConfirmComponent,
         {
@@ -446,6 +449,8 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
   // this is part 1 of saving an application and all its objects
   // (multi-part due to dependencies)
   public saveApplication() {
+    this.isSubmitSaveClicked = true;
+
     if (this.applicationForm.invalid) {
       this.dialogService.addDialog(ConfirmComponent,
         {

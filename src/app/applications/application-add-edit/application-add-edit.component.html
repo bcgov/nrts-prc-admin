@@ -62,14 +62,18 @@
         <div class="form-group">
           <label>Applicant</label>
           <div class="input-group applicant-input">
-            <input class="form-control" type="text" readonly value="{{application.client | lowercase}}" />
+            <input class="form-control" type="text" name="applicant" readonly required aria-required="true" [ngModel]="application.client" #applicant="ngModel" />
             <span class="input-group-btn">
-            <button class="btn btn-light" type="button" (click)="selectClient()">
-              <span>{{application.client ? 'Change Applicant' : 'Select Applicant'}}</span>
-            </button>
+              <button class="btn btn-light" type="button" (click)="selectClient()">
+                <span>{{application.client ? 'Change Applicant' : 'Select Applicant'}}</span>
+              </button>
             </span>
           </div>
+          <div *ngIf="isSubmitSaveClicked" class="alert alert-danger">
+            <div *ngIf="applicant.invalid">Applicant is invalid</div>
+          </div>
         </div>
+
         <div class="form-group">
           <label>Description</label>
           <textarea class="form-control" rows="3" id="description" name="description"
