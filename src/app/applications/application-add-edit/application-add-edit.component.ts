@@ -125,6 +125,22 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
   }
 
   public cancelChanges() {
+    // reload all data
+    if (this.application._id) {
+      this.applicationService.getById(this.application._id, true)
+        .takeUntil(this.ngUnsubscribe)
+        .subscribe(
+          application => {
+            this.application = application;
+          },
+          error => {
+            this.isSubmitting = false;
+            console.log('error =', error);
+            alert('Uh-oh, couldn\'t reload application');
+          }
+        );
+    }
+
     this._location.back();
   }
 
@@ -279,7 +295,7 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
   // delete application or decision document
   public deleteDocument(doc: Document, documents: Document[]) {
     if (doc && documents) { // safety check
-      // remove doc from list
+      // remove doc from current list
       _.remove(documents, item => (item.documentFileName === doc.documentFileName));
 
       if (doc._id) {
