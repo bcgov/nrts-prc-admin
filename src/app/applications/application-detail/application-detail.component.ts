@@ -79,66 +79,72 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
           backdropColor: 'rgba(0, 0, 0, 0.5)'
         })
         .takeUntil(this.ngUnsubscribe);
-    } else {
-      this.dialogService.addDialog(ConfirmComponent,
-        {
-          title: 'Confirm Deletion',
-          message: 'Do you really want to delete this application?'
-        }, {
-          backdropColor: 'rgba(0, 0, 0, 0.5)'
-        })
-        .takeUntil(this.ngUnsubscribe)
-        .subscribe(
-          isConfirmed => {
-            if (isConfirmed) {
-              let observables = Observable.of(null);
-
-              // delete comment period
-              if (this.application.currentPeriod) {
-                observables = observables.concat(this.commentPeriodService.delete(this.application.currentPeriod));
-              }
-
-              // delete decision documents
-              if (this.application.decision && this.application.decision.documents) {
-                for (const doc of this.application.decision.documents) {
-                  observables = observables.concat(this.documentService.delete(doc));
-                }
-              }
-
-              // delete decision
-              if (this.application.decision) {
-                observables = observables.concat(this.decisionService.delete(this.application.decision));
-              }
-
-              // delete application documents
-              if (this.application.documents) {
-                for (const doc of this.application.documents) {
-                  observables = observables.concat(this.documentService.delete(doc));
-                }
-              }
-
-              // delete application
-              // do this last in case of prior failures
-              observables = observables.concat(this.applicationService.delete(this.application));
-
-              observables.takeUntil(this.ngUnsubscribe)
-                .subscribe(
-                  () => { // onNext
-                    // do nothing here - see onCompleted() function below
-                  },
-                  error => {
-                    console.log('error =', error);
-                    alert('Uh-oh, couldn\'t delete application');
-                  },
-                  () => { // onCompleted
-                    // delete succeeded --> navigate back to search
-                    this.router.navigate(['/search']);
-                  }
-                );
-            }
-          }
-        );
+      return;
     }
+
+    this.dialogService.addDialog(ConfirmComponent,
+      {
+        title: 'Confirm Deletion',
+        message: 'Do you really want to delete this application?'
+      }, {
+        backdropColor: 'rgba(0, 0, 0, 0.5)'
+      })
+      .takeUntil(this.ngUnsubscribe)
+      .subscribe(
+        isConfirmed => {
+          if (isConfirmed) {
+            this.internalDeleteApplication();
+          }
+        }
+      );
+  }
+
+  private internalDeleteApplication() {
+    let observables = Observable.of(null);
+
+    // delete comment period
+    if (this.application.currentPeriod) {
+      observables = observables.concat(this.commentPeriodService.delete(this.application.currentPeriod));
+    }
+
+    // delete decision documents
+    if (this.application.decision && this.application.decision.documents) {
+      for (const doc of this.application.decision.documents) {
+        observables = observables.concat(this.documentService.delete(doc));
+      }
+    }
+
+    // delete decision
+    if (this.application.decision) {
+      observables = observables.concat(this.decisionService.delete(this.application.decision));
+    }
+
+    // delete application documents
+    if (this.application.documents) {
+      for (const doc of this.application.documents) {
+        observables = observables.concat(this.documentService.delete(doc));
+      }
+    }
+
+    // delete application
+    // do this last in case of prior failures
+    observables = observables.concat(this.applicationService.delete(this.application));
+
+    observables
+      .takeUntil(this.ngUnsubscribe)
+      .subscribe(
+        () => { // onNext
+          // do nothing here - see onCompleted() function below
+        },
+        error => {
+          console.log('error =', error);
+          alert('Uh-oh, couldn\'t delete application');
+        },
+        () => { // onCompleted
+          // delete succeeded --> navigate back to search
+          this.router.navigate(['/search']);
+        }
+      );
   }
 
   public publishApplication() {
@@ -178,7 +184,8 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
       observables = observables.concat(this.applicationService.publish(this.application));
     }
 
-    observables.takeUntil(this.ngUnsubscribe)
+    observables
+      .takeUntil(this.ngUnsubscribe)
       .subscribe(
         () => { // onNext
           // do nothing here - see onCompleted() function below
@@ -242,7 +249,8 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
       observables = observables.concat(this.applicationService.unPublish(this.application));
     }
 
-    observables.takeUntil(this.ngUnsubscribe)
+    observables
+      .takeUntil(this.ngUnsubscribe)
       .subscribe(
         () => { // onNext
           // do nothing here - see onCompleted() function below
