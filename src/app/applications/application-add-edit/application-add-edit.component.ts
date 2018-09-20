@@ -562,7 +562,7 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
     if (this.application.decision && this.application.decision.documents) {
       for (const doc of this.application.decision.documents) {
         if (!doc._id) {
-          doc['formData'].append('_decision', this.application.decision._id); // set back-reference
+          doc['formData'].append('_decision', application2.decision._id); // set back-reference
           observables = observables.concat(this.documentService.add(doc['formData']));
         }
       }
