@@ -248,277 +248,6 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
     this.application.decision = new Decision();
   }
 
-  // submit new application
-  public addApplication() {
-    if (this.applicationForm.invalid) {
-      this.dialogService.addDialog(ConfirmComponent,
-        {
-          title: 'Cannot Create Application',
-          message: 'Please check for required fields or errors.',
-          okOnly: true
-        }, {
-          backdropColor: 'rgba(0, 0, 0, 0.5)'
-        })
-        .takeUntil(this.ngUnsubscribe);
-    } else {
-      // set publish date
-      // adjust for current tz
-      this.application.publishDate = moment(new Date()).format();
-
-      // add application
-      this.applicationService.add(this.application)
-        .takeUntil(this.ngUnsubscribe)
-        .subscribe(
-          application => { // onNext
-            this.snackBarRef = this.snackBar.open('Application created...', null, { duration: 2000 }); // not displayed due to navigate below
-            this.application._id = application._id; // save new id - must be done before adding documents
-
-            // add all application documents
-            if (this.application.documents) {
-              for (let i = 0; i < this.application.documents.length; i++) {
-                this.application.documents[i]['formData'].append('_application', application._id); // set back-reference
-                this.internalAddDocument(this.application.documents, i);
-              }
-            }
-
-            // add comment period
-            this.application.currentPeriod._application = application._id; // set back-reference
-            this.commentPeriodService.add(this.application.currentPeriod)
-              .takeUntil(this.ngUnsubscribe)
-              .subscribe(
-                commentPeriod => {
-                  this.snackBarRef = this.snackBar.open('Comment period created...', null, { duration: 2000 }); // not displayed due to navigate below
-                  this.application.currentPeriod = commentPeriod; // save updated comment period
-
-                  // add decision (if any)
-                  if (this.application.decision) {
-                    this.application.decision._application = application._id; // set back-reference
-                    this.decisionService.add(this.application.decision)
-                      .takeUntil(this.ngUnsubscribe)
-                      .subscribe(
-                        decision => {
-                          this.snackBarRef = this.snackBar.open('Decision created...', null, { duration: 2000 }); // not displayed due to navigate below
-
-                          // add all decision documents
-                          if (this.application.decision.documents) {
-                            for (let i = 0; i < this.application.decision.documents.length; i++) {
-                              this.application.decision.documents[i]['formData'].append('_decision', decision._id); // set back-reference
-                              this.internalAddDocument(this.application.decision.documents, i);
-                            }
-                          }
-
-                          this.application.decision = decision; // save updated decision - must be done after adding decision documents
-                        },
-                        error => {
-                          console.log('error =', error);
-                          alert('Uh-oh, couldn\'t create decision');
-                        }
-                      );
-                  }
-                },
-                error => {
-                  console.log('error =', error);
-                  alert('Uh-oh, couldn\'t create comment period');
-                }
-              );
-          },
-          error => {
-            console.log('error =', error);
-            alert('Uh-oh, couldn\'t create application');
-          },
-          () => { // onCompleted
-            this.applicationForm.form.markAsPristine();
-            // add succeeded --> navigate to details page
-            // TODO: must not navigate before document are added !!!
-            // this.router.navigate(['/a', this.application._id]);
-          }
-        );
-    }
-  }
-
-  // this is part 1 of saving an application and all its objects
-  // (multi-part due to dependencies)
-  public saveApplication() {
-    if (this.applicationForm.invalid) {
-      this.dialogService.addDialog(ConfirmComponent,
-        {
-          title: 'Cannot Save Application',
-          message: 'Please check for required fields or errors.',
-          okOnly: true
-        }, {
-          backdropColor: 'rgba(0, 0, 0, 0.5)'
-        })
-        .takeUntil(this.ngUnsubscribe);
-      return;
-    }
-
-    let observables = Observable.of(null);
-
-    // delete staged application and decision documents
-    // NB: delete first, add below -- in case the user wants to simultaneously
-    // delete an old one and add a new one with the same name
-    for (const doc of this.docsToDelete) {
-      observables = observables.concat(this.documentService.delete(doc));
-    }
-
-    // add any new application documents
-    if (this.application.documents) {
-      for (const doc of this.application.documents) {
-        if (!doc._id) {
-          doc['formData'].append('_application', this.application._id); // set back-reference
-          observables = observables.concat(this.documentService.add(doc['formData']));
-        }
-      }
-    }
-
-    // add/save comment period (if any)
-    if (this.application.currentPeriod) {
-      if (!this.application.currentPeriod._id) {
-        this.application.currentPeriod._application = this.application._id; // set back-reference
-        observables = observables.concat(this.commentPeriodService.add(this.application.currentPeriod));
-      } else {
-        observables = observables.concat(this.commentPeriodService.save(this.application.currentPeriod));
-      }
-    }
-
-    // add/save decision (if any)
-    if (this.application.decision) {
-      if (!this.application.decision._id) {
-        this.application.decision._application = this.application._id; // set back-reference
-        observables = observables.concat(this.decisionService.add(this.application.decision));
-      } else {
-        observables = observables.concat(this.decisionService.save(this.application.decision));
-      }
-    }
-
-    observables
-      .takeUntil(this.ngUnsubscribe)
-      .subscribe(
-        () => { // onNext
-          // do nothing here - see onCompleted() function below
-        },
-        error => {
-          console.log('error =', error);
-          alert('Uh-oh, couldn\'t save application, part 1');
-        },
-        () => { // onCompleted
-          // reload all data
-          this.applicationService.getById(this.application._id, true)
-            .takeUntil(this.ngUnsubscribe)
-            .subscribe(
-              application2 => {
-                this.saveApplicationPart2(application2);
-              },
-              error => {
-                console.log('error =', error);
-                alert('Uh-oh, couldn\'t reload application');
-              }
-            );
-        }
-      );
-  }
-
-  // this is part 2 of saving an application and all its objects
-  // (multi-part due to dependencies)
-  private saveApplicationPart2(application2: Application) {
-    let observables = Observable.of(null);
-
-    // auto-publish application documents
-    // if (this.application.documents) {
-    //   for (let i = 0; i < this.application.documents.length; i++) {
-    //     if (!this.application.documents[i]._id) {
-    //       this.application.documents[i]['formData'].append('_application', this.application._id); // set back-reference
-    //       this.internalAddDocument(this.application.documents, i);
-    //     }
-    //   }
-    // }
-
-    // auto-publish comment period
-    if (application2.isPublished && application2.currentPeriod) {
-      observables = observables.concat(this.commentPeriodService.publish(application2.currentPeriod));
-    }
-
-    // auto-publish decision
-    if (application2.isPublished && application2.decision) {
-      observables = observables.concat(this.decisionService.publish(application2.decision));
-    }
-
-    // add any new decision documents
-    if (this.application.decision && this.application.decision.documents) {
-      for (const doc of this.application.decision.documents) {
-        if (!doc._id) {
-          doc['formData'].append('_decision', this.application.decision._id); // set back-reference
-          observables = observables.concat(this.documentService.add(doc['formData']));
-        }
-      }
-    }
-
-    observables
-      .takeUntil(this.ngUnsubscribe)
-      .subscribe(
-        () => { // onNext
-          // do nothing here - see onCompleted() function below
-        },
-        error => {
-          console.log('error =', error);
-          alert('Uh-oh, couldn\'t save application, part 2');
-        },
-        () => { // onCompleted
-          // reload all data
-          this.applicationService.getById(this.application._id, true)
-            .takeUntil(this.ngUnsubscribe)
-            .subscribe(
-              application3 => {
-                this.saveApplicationPart3(application3);
-              },
-              error => {
-                console.log('error =', error);
-                alert('Uh-oh, couldn\'t reload application');
-              }
-            );
-        }
-      );
-  }
-
-  // this is part 3 of saving an application and all its objects
-  // (multi-part due to dependencies)
-  private saveApplicationPart3(application3: Application) {
-    let observables = Observable.of(null);
-
-    // auto-publish decision documents
-    // if (this.application.decision && this.application.decision.documents) {
-    //   for (let i = 0; i < this.application.decision.documents.length; i++) {
-    //     if (!this.application.decision.documents[i]._id) {
-    //       this.application.decision.documents[i]['formData'].append('_decision', this.application.decision._id); // set back-reference
-    //       this.internalAddDocument(this.application.decision.documents, i);
-    //     }
-    //   }
-    // }
-
-    // save application
-    this.application.publishDate = moment(this.application.publishDate).format(); // update publish date
-    observables = observables.concat(this.applicationService.save(this.application));
-
-
-    observables
-      .takeUntil(this.ngUnsubscribe)
-      .subscribe(
-        () => { // onNext
-          // do nothing here - see onCompleted() function below
-        },
-        error => {
-          console.log('error =', error);
-          alert('Uh-oh, couldn\'t save application, part 3');
-        },
-        () => { // onCompleted
-          this.snackBarRef = this.snackBar.open('Application saved...', null, { duration: 2000 }); // not displayed due to navigate below
-          this.applicationForm.form.markAsPristine();
-          // save succeeded --> navigate to details page
-          this.router.navigate(['/a', this.application._id]);
-        }
-      );
-  }
-
   // add application or decision documents
   public addDocuments(files: FileList, documents: Document[]) {
     if (files && documents) { // safety check
@@ -545,43 +274,11 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
     }
   }
 
-  private internalAddDocument(documents: Document[], i: number) {
-    this.documentService.add(documents[i]['formData'])
-      .takeUntil(this.ngUnsubscribe)
-      .subscribe(
-        addedDoc => {
-          this.snackBarRef = this.snackBar.open('Document added...', null, { duration: 2000 }); // not displayed due to forthcoming navigate
-          documents[i] = addedDoc; // save updated document
-
-          // auto-publish
-          if (this.application.isPublished) {
-            this.documentService.publish(documents[i])
-              .takeUntil(this.ngUnsubscribe)
-              .subscribe(
-                publishedDoc => {
-                  this.snackBarRef = this.snackBar.open('Document published...', null, { duration: 2000 }); // not displayed due to forthcoming navigate
-                  documents[i] = publishedDoc; // save updated document
-                },
-                error => {
-                  console.log('error =', error);
-                  alert('Uh-oh, couldn\'t publish document');
-                }
-              );
-          }
-        },
-        error => {
-          console.log('error =', error);
-          alert('Uh-oh, couldn\'t upload file');
-        }
-      );
-  }
-
   // delete application or decision document
   public deleteDocument(doc: Document, documents: Document[]) {
     if (doc && documents) { // safety check
       // remove doc from list
       _.remove(documents, item => (item.documentFileName === doc.documentFileName));
-      console.log('documents =', documents);
 
       if (doc._id) {
         // save document for removal from db when application is saved
@@ -590,17 +287,333 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
     }
   }
 
-  private internalDeleteDocument(doc: Document) {
-    this.documentService.delete(doc)
+  // this is part 1 of adding an application and all its objects
+  // (multi-part due to dependencies)
+  public addApplication() {
+    if (this.applicationForm.invalid) {
+      this.dialogService.addDialog(ConfirmComponent,
+        {
+          title: 'Cannot Create Application',
+          message: 'Please check for required fields or errors.',
+          okOnly: true
+        }, {
+          backdropColor: 'rgba(0, 0, 0, 0.5)'
+        })
+        .takeUntil(this.ngUnsubscribe);
+      return;
+    }
+
+    // add application
+    this.application.publishDate = moment(new Date()).format(); // set publish date
+    this.applicationService.add(this.application)
       .takeUntil(this.ngUnsubscribe)
       .subscribe(
-        () => {
-          this.snackBarRef = this.snackBar.open('File deleted...', null, { duration: 2000 }); // not displayed due to forthcoming navigate
-          doc = null;
+        application2 => { // onNext
+          this.addApplication2(application2);
         },
         error => {
           console.log('error =', error);
-          alert('Uh-oh, couldn\'t delete document');
+          alert('Uh-oh, couldn\'t create application');
+        }
+      );
+  }
+
+  // this is part 2 of adding an application and all its objects
+  // (multi-part due to dependencies)
+  private addApplication2(application2: Application) {
+    let observables = Observable.of(null);
+
+    // add all application documents
+    if (this.application.documents) {
+      for (const doc of this.application.documents) {
+        doc['formData'].append('_application', application2._id); // set back-reference
+        observables = observables.concat(this.documentService.add(doc['formData']));
+      }
+    }
+
+    // add comment period
+    if (this.application.currentPeriod) {
+      this.application.currentPeriod._application = application2._id; // set back-reference
+      observables = observables.concat(this.commentPeriodService.add(this.application.currentPeriod));
+    }
+
+    // add decision
+    if (this.application.decision) {
+      this.application.decision._application = application2._id; // set back-reference
+      observables = observables.concat(this.decisionService.add(this.application.decision));
+    }
+
+    observables
+      .takeUntil(this.ngUnsubscribe)
+      .subscribe(
+        () => { // onNext
+          // do nothing here - see onCompleted() function below
+        },
+        error => {
+          console.log('error =', error);
+          alert('Uh-oh, couldn\'t add application, part 2');
+        },
+        () => { // onCompleted
+          // reload all data
+          this.applicationService.getById(application2._id, true)
+            .takeUntil(this.ngUnsubscribe)
+            .subscribe(
+              application3 => {
+                this.addApplication3(application3);
+              },
+              error => {
+                console.log('error =', error);
+                alert('Uh-oh, couldn\'t reload application, part 2');
+              }
+            );
+        }
+      );
+  }
+
+  // this is part 3 of adding an application and all its objects
+  // (multi-part due to dependencies)
+  private addApplication3(application3: Application) {
+    let observables = Observable.of(null);
+
+    // add all decision documents
+    if (this.application.decision && this.application.decision.documents) {
+      for (const doc of this.application.decision.documents) {
+        doc['formData'].append('_decision', application3.decision._id); // set back-reference
+        observables = observables.concat(this.documentService.add(doc['formData']));
+      }
+    }
+
+    observables
+      .takeUntil(this.ngUnsubscribe)
+      .subscribe(
+        () => { // onNext
+          // do nothing here - see onCompleted() function below
+        },
+        error => {
+          console.log('error =', error);
+          alert('Uh-oh, couldn\'t save application, part 3');
+        },
+        () => { // onCompleted
+          // reload all data
+          this.applicationService.getById(application3._id, true)
+            .takeUntil(this.ngUnsubscribe)
+            .subscribe(
+              application => {
+                this.snackBarRef = this.snackBar.open('Application created...', null, { duration: 2000 }); // not displayed due to navigate below
+
+                // get updated application
+                this.application = application;
+                this.applicationForm.form.markAsPristine();
+
+                // add succeeded --> navigate to details page
+                this.router.navigate(['/a', this.application._id]);
+              },
+              error => {
+                console.log('error =', error);
+                alert('Uh-oh, couldn\'t reload application, part 3');
+              }
+            );
+        }
+      );
+  }
+
+  // this is part 1 of saving an application and all its objects
+  // (multi-part due to dependencies)
+  public saveApplication() {
+    if (this.applicationForm.invalid) {
+      this.dialogService.addDialog(ConfirmComponent,
+        {
+          title: 'Cannot Save Application',
+          message: 'Please check for required fields or errors.',
+          okOnly: true
+        }, {
+          backdropColor: 'rgba(0, 0, 0, 0.5)'
+        })
+        .takeUntil(this.ngUnsubscribe);
+      return;
+    }
+
+    let observables = Observable.of(null);
+
+    // delete staged application and decision documents
+    // NB: delete first and add below -- in case the user wants to simultaneously
+    //     delete an old doc and add a new doc with the same name
+    for (const doc of this.docsToDelete) {
+      observables = observables.concat(this.documentService.delete(doc));
+    }
+    this.docsToDelete = []; // assume delete succeeds
+
+    // add any new application documents
+    if (this.application.documents) {
+      for (const doc of this.application.documents) {
+        if (!doc._id) {
+          doc['formData'].append('_application', this.application._id); // set back-reference
+          observables = observables.concat(this.documentService.add(doc['formData']));
+        }
+      }
+    }
+
+    // add/save comment period
+    if (this.application.currentPeriod) {
+      if (!this.application.currentPeriod._id) {
+        this.application.currentPeriod._application = this.application._id; // set back-reference
+        observables = observables.concat(this.commentPeriodService.add(this.application.currentPeriod));
+      } else {
+        observables = observables.concat(this.commentPeriodService.save(this.application.currentPeriod));
+      }
+    }
+
+    // add/save decision
+    if (this.application.decision) {
+      if (!this.application.decision._id) {
+        this.application.decision._application = this.application._id; // set back-reference
+        observables = observables.concat(this.decisionService.add(this.application.decision));
+      } else {
+        observables = observables.concat(this.decisionService.save(this.application.decision));
+      }
+    }
+
+    observables
+      .takeUntil(this.ngUnsubscribe)
+      .subscribe(
+        () => { // onNext
+          // do nothing here - see onCompleted() function below
+        },
+        error => {
+          console.log('error =', error);
+          alert('Uh-oh, couldn\'t save application, part 1');
+        },
+        () => { // onCompleted
+          // reload all data
+          this.applicationService.getById(this.application._id, true)
+            .takeUntil(this.ngUnsubscribe)
+            .subscribe(
+              application2 => {
+                this.saveApplication2(application2);
+              },
+              error => {
+                console.log('error =', error);
+                alert('Uh-oh, couldn\'t reload application, part 1');
+              }
+            );
+        }
+      );
+  }
+
+  // this is part 2 of saving an application and all its objects
+  // (multi-part due to dependencies)
+  private saveApplication2(application2: Application) {
+    let observables = Observable.of(null);
+
+    // auto-publish application documents
+    if (application2.isPublished && application2.documents) {
+      for (const doc of application2.documents) {
+        if (!doc.isPublished) {
+          observables = observables.concat(this.documentService.publish(doc));
+        }
+      }
+    }
+
+    // auto-publish comment period
+    if (application2.isPublished && application2.currentPeriod) {
+      if (!application2.currentPeriod.isPublished) {
+        observables = observables.concat(this.commentPeriodService.publish(application2.currentPeriod));
+      }
+    }
+
+    // auto-publish decision
+    if (application2.isPublished && application2.decision) {
+      if (!application2.decision.isPublished) {
+        observables = observables.concat(this.decisionService.publish(application2.decision));
+      }
+    }
+
+    // add any new decision documents
+    if (this.application.decision && this.application.decision.documents) {
+      for (const doc of this.application.decision.documents) {
+        if (!doc._id) {
+          doc['formData'].append('_decision', this.application.decision._id); // set back-reference
+          observables = observables.concat(this.documentService.add(doc['formData']));
+        }
+      }
+    }
+
+    observables
+      .takeUntil(this.ngUnsubscribe)
+      .subscribe(
+        () => { // onNext
+          // do nothing here - see onCompleted() function below
+        },
+        error => {
+          console.log('error =', error);
+          alert('Uh-oh, couldn\'t save application, part 2');
+        },
+        () => { // onCompleted
+          // reload all data
+          this.applicationService.getById(application2._id, true)
+            .takeUntil(this.ngUnsubscribe)
+            .subscribe(
+              application3 => {
+                this.saveApplication3(application3);
+              },
+              error => {
+                console.log('error =', error);
+                alert('Uh-oh, couldn\'t reload application, part 2');
+              }
+            );
+        }
+      );
+  }
+
+  // this is part 3 of saving an application and all its objects
+  // (multi-part due to dependencies)
+  private saveApplication3(application3: Application) {
+    let observables = Observable.of(null);
+
+    // auto-publish decision documents
+    if (application3.decision && application3.decision.documents) {
+      for (const doc of application3.decision.documents) {
+        if (!doc.isPublished) {
+          observables = observables.concat(this.documentService.publish(doc));
+        }
+      }
+    }
+
+    // save application
+    this.application.publishDate = moment(this.application.publishDate).format(); // update publish date
+    observables = observables.concat(this.applicationService.save(this.application));
+
+    observables
+      .takeUntil(this.ngUnsubscribe)
+      .subscribe(
+        () => { // onNext
+          // do nothing here - see onCompleted() function below
+        },
+        error => {
+          console.log('error =', error);
+          alert('Uh-oh, couldn\'t save application, part 3');
+        },
+        () => { // onCompleted
+          // reload all data
+          this.applicationService.getById(application3._id, true)
+            .takeUntil(this.ngUnsubscribe)
+            .subscribe(
+              application => {
+                this.snackBarRef = this.snackBar.open('Application saved...', null, { duration: 2000 }); // not displayed due to navigate below
+
+                // get updated application
+                this.application = application;
+                this.applicationForm.form.markAsPristine();
+
+                // add succeeded --> navigate to details page
+                this.router.navigate(['/a', this.application._id]);
+              },
+              error => {
+                console.log('error =', error);
+                alert('Uh-oh, couldn\'t reload application, part 3');
+              }
+            );
+
         }
       );
   }
