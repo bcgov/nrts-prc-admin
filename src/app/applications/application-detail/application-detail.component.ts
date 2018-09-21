@@ -251,7 +251,7 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
 
     // unpublish decision
     if (this.application.decision && this.application.decision.isPublished) {
-      observables = observables.concat(this.decisionService.unPublish(this.application.decision))
+      observables = observables.concat(this.decisionService.unPublish(this.application.decision));
     }
 
     // unpublish application documents
