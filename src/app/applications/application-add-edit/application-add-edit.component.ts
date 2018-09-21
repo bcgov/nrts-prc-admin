@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, ViewChild, HostListener } from '@angular/core';
 import { NgForm } from '@angular/forms';
-import { Location } from '@angular/common';
+// import { Location } from '@angular/common';
 import { MatSnackBarRef, SimpleSnackBar, MatSnackBar } from '@angular/material';
 import { ActivatedRoute, Router, NavigationEnd } from '@angular/router';
 import { DialogService } from 'ng2-bootstrap-modal';
@@ -46,7 +46,7 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private _location: Location,
+    // private location: Location,
     public snackBar: MatSnackBar,
     public api: ApiService, // also also used in template
     private applicationService: ApplicationService,
@@ -126,7 +126,15 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
   }
 
   public cancelChanges() {
-    this._location.back();
+    // this.location.back(); // FAILS WHEN CANCEL IS CANCELLED (DUE TO DIRTY FORM OR UNSAVED DOCUMENTS) MULTIPLE TIMES
+
+    if (this.application._id) {
+      // go to details page
+      this.router.navigate(['/a', this.application._id]);
+    } else {
+      // go to search page
+      this.router.navigate(['/search']);
+    }
   }
 
   ngOnInit() {
