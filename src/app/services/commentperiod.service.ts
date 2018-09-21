@@ -150,7 +150,6 @@ export class CommentPeriodService {
     return (periods.length > 0) ? periods[0] : null;
   }
 
-  // NB: see also ManageCommentPeriodsComponent.getStatus()
   getStatus(period: CommentPeriod): string {
     if (!period || !period.startDate || !period.endDate) {
       return this.commentStatuses[this.NOT_OPEN];
