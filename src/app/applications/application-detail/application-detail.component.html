@@ -6,33 +6,33 @@
         <button class="btn btn-light" type="button" [routerLink]="['/a', application._id, 'edit']">
           Edit
         </button>
-        <button class="btn btn-primary" type="button" 
-          *ngIf="application.isPublished === false" 
-          (click)="publishApplication()" 
+        <button class="btn btn-primary" type="button"
+          *ngIf="application.isPublished === false"
+          (click)="publishApplication()"
           [disabled]="isPublishing">
           <i class="spinner rotating" [hidden]="!isPublishing"></i>
           <span>{{isPublishing ? 'Publishing' : 'Publish'}}</span>
         </button>
-        <button class="btn btn-primary" type="button" 
-          *ngIf="application.isPublished === true" 
-          (click)="unPublishApplication()" 
+        <button class="btn btn-primary" type="button"
+          *ngIf="application.isPublished === true"
+          (click)="unPublishApplication()"
           [disabled]="isUnpublishing">
           <i class="spinner rotating" [hidden]="!isUnpublishing"></i>
           <span>{{isUnpublishing ? 'Unpublishing' : 'Unpublish'}}</span>
         </button>
         <span class="vert-pipe">&nbsp;</span>
-        <button class="btn btn-icon" title="Remove this application from PRC" 
-          (click)="deleteApplication()" 
+        <button class="btn btn-icon" title="Remove this application from PRC"
+          (click)="deleteApplication()"
           [disabled]="isDeleting">
           <i class="material-icons">
             delete
           </i>
         </button>
-      </div>  
+      </div>
     </div>
   </div>
 </div>
-  
+
 <div class="bottom-container">
   <div class="container">
     <div class="row">
@@ -97,28 +97,24 @@
                 <section>
                   <h2>Documents</h2>
                   <ul class="doc-list">
-                    <li *ngFor="let document of application.documents">
+                    <li *ngFor="let doc of application.documents">
                       <span class="cell icon">
-                        <i class="material-icons link" 
-                          (click)="api.openDocument(document)">
+                        <i class="material-icons link" (click)="api.openDocument(doc)">
                           insert_drive_file
                         </i>
                       </span>
-                      <span class="cell name" [title]="document.displayName || ''">
+                      <span class="cell name" [title]="doc.displayName || ''">
                         <span class="cell__txt-content">
-                        <a (click)="api.openDocument(document)">
-                          {{document.documentFileName}}
-                        </a>
+                          <a (click)="api.openDocument(doc)">{{doc.documentFileName}}</a>
                         </span>
                       </span>
                       <span class="cell actions">
-                        <button class="btn btn-icon" type="button" title="Download this document" 
-                          (click)="api.downloadDocument(document)">
+                        <button class="btn btn-icon" type="button" title="Download this document" (click)="api.downloadDocument(doc)">
                           <i class="material-icons">file_download</i>
                         </button>
                       </span>
                     </li>
-                    <li class="no-results" *ngIf="!application.documents?.length > 0">
+                    <li class="no-results" *ngIf="application.documents.length === 0">
                       <em>No application documents</em>
                     </li>
                   </ul>
@@ -193,7 +189,7 @@
               </li>
             </ul>
             <div class="btn-container">
-              <button class="cta-btn btn btn-sm btn-outline-primary" type="button" 
+              <button class="cta-btn btn btn-sm btn-outline-primary" type="button"
                 [routerLink]="['/comments', application._id]">
                 Review Comments ({{application['numComments']}})
               </button>
@@ -209,35 +205,31 @@
             <div *ngIf="application.decision">
               <div [innerHTML]="(application.decision.description | newlines) || '<em>No decision description available</em>'"></div>
               <ul class="doc-list">
-                <li *ngFor="let document of application.decision.documents">
+                <li *ngFor="let doc of application.decision.documents">
                   <span class="cell icon">
-                    <i class="material-icons link" 
-                      (click)="api.openDocument(document)">
+                    <i class="material-icons link" (click)="api.openDocument(doc)">
                       insert_drive_file
                     </i>
                   </span>
-                  <span class="cell name" [title]="document.displayName || ''">
+                  <span class="cell name" [title]="doc.displayName || ''">
                       <span class="cell__txt-content">
-                        <a (click)="api.openDocument(document)">
-                          {{document.documentFileName}}
-                        </a>
+                        <a (click)="api.openDocument(doc)">{{doc.documentFileName}}</a>
                       </span>
                   </span>
                   <span class="cell actions">
-                    <button class="btn btn-icon" title="Download this document"
-                      (click)="api.downloadDocument(document)">
+                    <button class="btn btn-icon" title="Download this document" (click)="api.downloadDocument(doc)">
                       <i class="material-icons">file_download</i>
                     </button>
                   </span>
                 </li>
-                <li class="no-results" *ngIf="!application.decision?.documents.length > 0">
+                <li class="no-results" *ngIf="application.decision.documents.length === 0">
                   <em>No decision documents</em>
                 </li>
               </ul>
             </div>
             <div class="btn-container">
-              <button class="cta-btn btn btn-sm btn-outline-primary" type="button" 
-                [routerLink]="['/a', application._id, 'edit']" 
+              <button class="cta-btn btn btn-sm btn-outline-primary" type="button"
+                [routerLink]="['/a', application._id, 'edit']"
                 fragment="appDecision">
                 Edit Decision
               </button>
