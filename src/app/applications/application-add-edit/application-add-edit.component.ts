@@ -126,22 +126,6 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
   }
 
   public cancelChanges() {
-    // reload all data
-    if (this.application._id) {
-      this.applicationService.getById(this.application._id, true)
-        .takeUntil(this.ngUnsubscribe)
-        .subscribe(
-          application => {
-            this.application = application;
-          },
-          error => {
-            this.isSubmitting = false;
-            console.log('error =', error);
-            alert('Uh-oh, couldn\'t reload application');
-          }
-        );
-    }
-
     this._location.back();
   }
 
@@ -192,6 +176,7 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
   }
 
   public onStartDateChg(startDate: string) {
+    // console.log('startDate =', startDate);
     if (startDate) {
       this.application.currentPeriod.startDate = moment(startDate).toDate();
       // to set dates, we also need delta
@@ -202,6 +187,7 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
   }
 
   public onDeltaChg(delta: number) {
+    // console.log('delta =', delta);
     if (delta !== null) {
       this.delta = delta;
       // to set dates, we also need start date
@@ -212,6 +198,7 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
   }
 
   public onEndDateChg(endDate: string) {
+    // console.log('endDate =', endDate);
     if (endDate) {
       this.application.currentPeriod.endDate = moment(endDate).toDate();
       // to set dates, we also need start date
@@ -421,27 +408,12 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
           alert('Uh-oh, couldn\'t save application, part 3');
         },
         () => { // onCompleted
-          // reload all data
-          this.applicationService.getById(application3._id, true)
-            .takeUntil(this.ngUnsubscribe)
-            .subscribe(
-              application => {
-                this.isSubmitting = false;
-                this.snackBarRef = this.snackBar.open('Application created...', null, { duration: 2000 }); // not displayed due to navigate below
-
-                // get updated application
-                this.application = application;
-                this.applicationForm.form.markAsPristine();
-
-                // add succeeded --> navigate to details page
-                this.router.navigate(['/a', this.application._id]);
-              },
-              error => {
-                this.isSubmitting = false;
-                console.log('error =', error);
-                alert('Uh-oh, couldn\'t reload application, part 3');
-              }
-            );
+          // we don't need to reload data since we're navigating away below
+          this.isSubmitting = false;
+          this.snackBarRef = this.snackBar.open('Application created...', null, { duration: 2000 }); // not displayed due to navigate below
+          this.applicationForm.form.markAsPristine();
+          // add succeeded --> navigate to details page
+          this.router.navigate(['/a', application3._id]);
         }
       );
   }
@@ -617,7 +589,6 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
     }
 
     // save application
-    this.application.publishDate = moment(this.application.publishDate).format(); // update publish date
     observables = observables.concat(this.applicationService.save(this.application));
 
     observables
@@ -632,27 +603,12 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
           alert('Uh-oh, couldn\'t save application, part 3');
         },
         () => { // onCompleted
-          // reload all data
-          this.applicationService.getById(application3._id, true)
-            .takeUntil(this.ngUnsubscribe)
-            .subscribe(
-              application => {
-                this.isSaving = false;
-                this.snackBarRef = this.snackBar.open('Application saved...', null, { duration: 2000 }); // not displayed due to navigate below
-
-                // get updated application
-                this.application = application;
-                this.applicationForm.form.markAsPristine();
-
-                // add succeeded --> navigate to details page
-                this.router.navigate(['/a', this.application._id]);
-              },
-              error => {
-                this.isSaving = false;
-                console.log('error =', error);
-                alert('Uh-oh, couldn\'t reload application, part 3');
-              }
-            );
+          // we don't need to reload data since we're navigating away below
+          this.isSaving = false;
+          this.snackBarRef = this.snackBar.open('Application saved...', null, { duration: 2000 }); // not displayed due to navigate below
+          this.applicationForm.form.markAsPristine();
+          // save succeeded --> navigate to details page
+          this.router.navigate(['/a', application3._id]);
         }
       );
   }
