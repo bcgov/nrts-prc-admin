@@ -23,6 +23,8 @@ import { CommentPeriodService } from 'app/services/commentperiod.service';
 import { DecisionService } from 'app/services/decision.service';
 import { DocumentService } from 'app/services/document.service';
 
+const DEFAULT_DAYS = 30;
+
 @Component({
   selector: 'app-application-add-edit',
   templateUrl: './application-add-edit.component.html',
@@ -38,7 +40,7 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
   public application: Application = null;
   public startDate: string = null;
   public endDate: string = null;
-  public delta = 30; // default # days (including today)
+  public delta: number; // # days (including today)
   private snackBarRef: MatSnackBarRef<SimpleSnackBar> = null;
   private ngUnsubscribe: Subject<boolean> = new Subject<boolean>();
   private docsToDelete: Document[] = [];
@@ -150,17 +152,19 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
         (data: { application: Application }) => {
           if (data.application) {
             this.application = data.application;
-            // console.log('application =', this.application);
 
             // add comment period if there isn't one already (not just on create but also on edit --
             // this will fix the situation where existing applications don't have a comment period)
             if (!this.application.currentPeriod) {
               this.application.currentPeriod = new CommentPeriod();
+              this.onStartDateChg(this.formatDate(new Date())); // just sets startDate
+              this.onDeltaChg(DEFAULT_DAYS);                    // sets delta and endDate
             } else {
               // set date inputs
-              this.startDate = this.formatDate(new Date(this.application.currentPeriod.startDate));
-              this.endDate = this.formatDate(new Date(this.application.currentPeriod.endDate));
-              this.delta = moment(this.application.currentPeriod.endDate).diff(moment(this.application.currentPeriod.startDate), 'days') + 1;
+              const startDate = this.application.currentPeriod.startDate;
+              const endDate = this.application.currentPeriod.endDate;
+              this.onStartDateChg(this.formatDate(startDate)); // just sets startDate
+              this.onEndDateChg(this.formatDate(endDate));     // sets endDate and delta
             }
           } else {
             alert('Uh-oh, couldn\'t load application');
@@ -185,7 +189,6 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
   }
 
   public onStartDateChg(startDate: string) {
-    // console.log('startDate =', startDate);
     if (startDate) {
       this.application.currentPeriod.startDate = moment(startDate).toDate();
       // to set dates, we also need delta
@@ -196,7 +199,6 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
   }
 
   public onDeltaChg(delta: number) {
-    // console.log('delta =', delta);
     if (delta !== null) {
       this.delta = delta;
       // to set dates, we also need start date
@@ -207,7 +209,6 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
   }
 
   public onEndDateChg(endDate: string) {
-    // console.log('endDate =', endDate);
     if (endDate) {
       this.application.currentPeriod.endDate = moment(endDate).toDate();
       // to set dates, we also need start date
@@ -323,7 +324,7 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
     this.isSubmitting = true;
 
     // add application
-    this.application.publishDate = moment(new Date()).format(); // set publish date
+    this.application.publishDate = moment().format(); // set publish date = today
     this.applicationService.add(this.application)
       .takeUntil(this.ngUnsubscribe)
       .subscribe(

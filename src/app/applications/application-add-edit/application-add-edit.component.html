@@ -30,18 +30,26 @@
         <legend>Public Review</legend>
         <div class="review-dates">
           <div class="form-group mb-0">
-            <label>Start Date (required)</label>
-            <input class="form-control" type="date" name="startDate" required aria-required="true" [ngModel]="startDate" (ngModelChange)="onStartDateChg($event)" />
+            <label>Start Date <em>(required)</em></label>
+            <input class="form-control" type="date" name="startDate" required aria-required="true"
+              [ngModel]="startDate" (ngModelChange)="onStartDateChg($event)" #date1="ngModel" />
+            <div *ngIf="isSubmitSaveClicked && date1.invalid" class="alert alert-danger">
+              <div>Start Date is invalid</div>
+            </div>
           </div>
           <span class="spacer">+</span>
           <div class="form-group mb-0">
-            <label>Days (required)</label>
-            <input class="form-control" type="number" name="delta" required aria-required="true" [ngModel]="delta" (ngModelChange)="onDeltaChg($event)" />
+            <label>Days</label>
+            <input class="form-control" type="number" name="delta" [ngModel]="delta" (ngModelChange)="onDeltaChg($event)" />
           </div>
           <span class="spacer">=</span>
           <div class="form-group mb-0">
-            <label>End Date (required)</label>
-            <input class="form-control" type="date" name="endDate" required aria-required="true" [ngModel]="endDate" (ngModelChange)="onEndDateChg($event)" />
+            <label>End Date <em>(required)</em></label>
+            <input class="form-control" type="date" name="endDate" required aria-required="true"
+              [ngModel]="endDate" (ngModelChange)="onEndDateChg($event)" #date2="ngModel" />
+            <div *ngIf="isSubmitSaveClicked && date2.invalid" class="alert alert-danger">
+              <div>End Date is invalid</div>
+            </div>
           </div>
         </div>
         <!-- Need decision from PO -->
@@ -60,7 +68,7 @@
       <fieldset>
         <legend>Application Details</legend>
         <div class="form-group">
-          <label>Applicant</label>
+          <label>Applicant <em>(required)</em></label>
           <div class="input-group applicant-input">
             <input class="form-control" type="text" name="applicant" readonly required aria-required="true" [ngModel]="application.client" #applicant="ngModel" />
             <span class="input-group-btn">
@@ -69,8 +77,8 @@
               </button>
             </span>
           </div>
-          <div *ngIf="isSubmitSaveClicked" class="alert alert-danger">
-            <div *ngIf="applicant.invalid">Applicant is invalid</div>
+          <div *ngIf="isSubmitSaveClicked && applicant.invalid" class="alert alert-danger">
+            <div>Applicant is invalid</div>
           </div>
         </div>
 
