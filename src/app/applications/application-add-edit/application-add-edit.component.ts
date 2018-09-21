@@ -142,6 +142,7 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
         (data: { application: Application }) => {
           if (data.application) {
             this.application = data.application;
+            // console.log('application =', this.application);
 
             // add comment period if there isn't one already (not just on create but also on edit --
             // this will fix the situation where existing applications don't have a comment period)
@@ -409,9 +410,17 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
         },
         () => { // onCompleted
           // we don't need to reload data since we're navigating away below
-          this.isSubmitting = false;
-          this.snackBarRef = this.snackBar.open('Application created...', null, { duration: 2000 }); // not displayed due to navigate below
+          // this.isSubmitting = false; // LOOKS BETTER WITHOUT THIS
+          // this.snackBarRef = this.snackBar.open('Application created...', null, { duration: 2000 }); // not displayed due to navigate below
+
           this.applicationForm.form.markAsPristine();
+          if (this.application.documents) {
+            this.application.documents = []; // negate unsaved document check
+          }
+          if (this.application.decision && this.application.decision.documents) {
+            this.application.decision.documents = []; // negate unsaved document check
+          }
+
           // add succeeded --> navigate to details page
           this.router.navigate(['/a', application3._id]);
         }
@@ -604,9 +613,17 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
         },
         () => { // onCompleted
           // we don't need to reload data since we're navigating away below
-          this.isSaving = false;
-          this.snackBarRef = this.snackBar.open('Application saved...', null, { duration: 2000 }); // not displayed due to navigate below
+          // this.isSaving = false; // LOOKS BETTER WITHOUT THIS
+          // this.snackBarRef = this.snackBar.open('Application saved...', null, { duration: 2000 }); // not displayed due to navigate below
+
           this.applicationForm.form.markAsPristine();
+          if (this.application.documents) {
+            this.application.documents = []; // negate unsaved document check
+          }
+          if (this.application.decision && this.application.decision.documents) {
+            this.application.decision.documents = []; // negate unsaved document check
+          }
+
           // save succeeded --> navigate to details page
           this.router.navigate(['/a', application3._id]);
         }
