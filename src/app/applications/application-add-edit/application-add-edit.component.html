@@ -30,11 +30,12 @@
         <legend>Public Review</legend>
         <div class="review-dates">
           <div class="form-group mb-0">
-            <label>Start Date <em>(required)</em></label>
+            <label>Start Date</label>
             <input class="form-control" type="date" name="startDate" required aria-required="true"
+              [ngClass]="{'is-invalid': isSubmitSaveClicked && date1.invalid}"
               [ngModel]="startDate" (ngModelChange)="onStartDateChg($event)" #date1="ngModel" />
-            <div *ngIf="isSubmitSaveClicked && date1.invalid" class="alert alert-danger">
-              <div>Start Date is invalid</div>
+            <div class="invalid-feedback bg-danger" *ngIf="isSubmitSaveClicked && date1.invalid">
+              Enter a valid Start Date
             </div>
           </div>
           <span class="spacer">+</span>
@@ -44,11 +45,12 @@
           </div>
           <span class="spacer">=</span>
           <div class="form-group mb-0">
-            <label>End Date <em>(required)</em></label>
+            <label>End Date</label>
             <input class="form-control" type="date" name="endDate" required aria-required="true"
+              [ngClass]="{'is-invalid': isSubmitSaveClicked && date2.invalid}"
               [ngModel]="endDate" (ngModelChange)="onEndDateChg($event)" #date2="ngModel" />
-            <div *ngIf="isSubmitSaveClicked && date2.invalid" class="alert alert-danger">
-              <div>End Date is invalid</div>
+            <div class="invalid-feedback bg-danger" *ngIf="isSubmitSaveClicked && date2.invalid">
+              Enter a valid End Date
             </div>
           </div>
         </div>
@@ -69,16 +71,18 @@
         <legend>Application Details</legend>
         <div class="form-group">
           <label>Applicant <em>(required)</em></label>
-          <div class="input-group applicant-input">
-            <input class="form-control" type="text" name="applicant" readonly required aria-required="true" [ngModel]="application.client" #applicant="ngModel" />
+          <div class="input-group applicant-input"
+            [ngClass]="{'is-invalid': isSubmitSaveClicked && applicant.invalid}">
+            <input class="form-control" type="text" name="applicant" readonly required aria-required="true" 
+              [ngModel]="application.client" #applicant="ngModel" />
             <span class="input-group-btn">
               <button class="btn btn-light" type="button" (click)="selectClient()">
                 <span>{{application.client ? 'Change Applicant' : 'Select Applicant'}}</span>
               </button>
             </span>
           </div>
-          <div *ngIf="isSubmitSaveClicked && applicant.invalid" class="alert alert-danger">
-            <div>Applicant is invalid</div>
+          <div class="invalid-feedback bg-danger" *ngIf="isSubmitSaveClicked && applicant.invalid">
+            Select one or more applicants
           </div>
         </div>
 
@@ -89,7 +93,7 @@
             [(ngModel)]="application.description">
           </textarea>
         </div>
-        <div class="form-group">
+        <div class="form-group  mb-0">
           <label>Application Documents</label>
           <ul class="doc-list mb-3" *ngIf="application.documents?.length > 0">
               <li *ngFor="let doc of application.documents">
@@ -117,6 +121,7 @@
             </div>
           </div>
         </div>
+        <!--
         <div class="form-group mb-0">
           <label>Internal Notes (Optional)</label>
           <textarea class="form-control" rows="3" id="internalNotes" name="internalNotes" 
@@ -124,6 +129,7 @@
             [(ngModel)]="application.internal.notes">
           </textarea>
         </div>
+        -->
       </fieldset>
 
       <fieldset name="decisionForm" id="appDecision">
