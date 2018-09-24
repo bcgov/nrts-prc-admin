@@ -29,9 +29,11 @@ form {
 
   .form-group {
     display: inline-block;
+    vertical-align: top;
   }
 
   .spacer {
+    margin-top: 2.5rem;
     display: inline-block;
     width: 2rem;
     text-align: center;
@@ -50,7 +52,6 @@ form {
   }
 
   .btn {
-    border: 1px solid #ccc;
     font-size: 0.875rem;
     font-weight: 600;
   }

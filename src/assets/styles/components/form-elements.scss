@@ -74,3 +74,52 @@ legend {
 label {
   font-size: 0.875rem;
 }
+
+// Input Group 
+.input-group-btn {
+  .btn-light {
+    border-color: #ccc;
+  }
+}
+
+// Validation
+.invalid-feedback {
+  position: relative;
+  margin-top: 0.75rem;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  color: #fff;
+
+  &::after {
+    content: ' ';
+    position: absolute;
+    top: -1rem;
+    left: 1rem;
+    width: 1rem;
+    height: 1rem;
+    border-right: 0.5rem solid transparent;
+    border-bottom: 0.5rem solid #dc3545;
+    border-left: 0.5rem solid transparent;
+  }
+}
+
+.form-control.is-invalid {
+  border-color: #dc3545;
+}
+
+.input-group.is-invalid {
+  .form-control {
+    border-color: #dc3545;
+  }
+
+  .input-group-btn {
+    .btn {
+      border-color: #dc3545;
+    }
+  }
+}
+
+.form-control.is-invalid ~ .invalid-feedback,
+.input-group.is-invalid ~ .invalid-feedback {
+  display: inline-block;
+}
