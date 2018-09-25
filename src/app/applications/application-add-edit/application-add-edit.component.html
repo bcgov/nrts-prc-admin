@@ -134,11 +134,17 @@
 
       <fieldset name="decisionForm" id="appDecision">
         <legend class="mb-3">Application Decision</legend>
-        <button class="btn content-btn-alt" type="button" title="Add decision"
+        <button class="btn content-btn-alt" type="button" title="Add a decision"
           *ngIf="!application.decision"
           (click)="addDecision()">
           <i class="material-icons">add</i>
           Add Decision
+        </button>
+        <button class="btn content-btn-alt" type="button" title="Remove this decision"
+          *ngIf="application.decision"
+          (click)="deleteDecision()">
+          <i class="material-icons">remove</i>
+          Delete Decision
         </button>
         
         <!-- Clicking the ADD DECISION button from the details page should add the form to this page AND validate on the SAVE button click event -->

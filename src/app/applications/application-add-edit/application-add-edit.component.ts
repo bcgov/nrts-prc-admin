@@ -44,6 +44,7 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
   private snackBarRef: MatSnackBarRef<SimpleSnackBar> = null;
   private ngUnsubscribe: Subject<boolean> = new Subject<boolean>();
   private docsToDelete: Document[] = [];
+  private decisionToDelete: Decision = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -76,7 +77,7 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
   @HostListener('window:beforeunload', ['$event'])
   public handleBeforeUnload(event) {
     // display browser alert if needed
-    if (this.applicationForm.dirty || this.isUnsavedDocuments()) {
+    if (this.applicationForm.dirty || this.anyUnsavedItems()) {
       event.returnValue = true;
     }
   }
@@ -84,7 +85,7 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
   // check for unsaved changes before navigating away from current route (ie, this page)
   public canDeactivate(): Observable<boolean> | boolean {
     // allow synchronous navigation if everything is OK
-    if (!this.applicationForm.dirty && !this.isUnsavedDocuments()) {
+    if (!this.applicationForm.dirty && !this.anyUnsavedItems()) {
       return true;
     }
 
@@ -100,7 +101,7 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
   }
 
   // this is needed because we don't have a form control that is marked as dirty
-  private isUnsavedDocuments(): boolean {
+  private anyUnsavedItems(): boolean {
     // look for application documents not yet uploaded to db
     if (this.application.documents) {
       for (const doc of this.application.documents) {
@@ -121,6 +122,11 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
 
     // look for application or decision documents not yet removed from db
     if (this.docsToDelete && this.docsToDelete.length > 0) {
+      return true;
+    }
+
+    // look for decision not yet removed from db
+    if (this.decisionToDelete) {
       return true;
     }
 
@@ -262,6 +268,24 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
 
   public addDecision() {
     this.application.decision = new Decision();
+  }
+
+  public deleteDecision() {
+    if (this.application.decision) {
+      // stage decision documents to delete
+      if (this.application.decision.documents) {
+        for (const doc of this.application.decision.documents) {
+          this.deleteDocument(doc, this.application.decision.documents);
+        }
+      }
+
+      // if decision exists in db, stage it for deletion
+      if (this.application.decision._id) {
+        this.decisionToDelete = this.application.decision;
+      }
+
+      this.application.decision = null;
+    }
   }
 
   // add application or decision documents
@@ -486,6 +510,13 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
       }
     }
 
+    // delete staged decision
+    // NB: delete first and add below -- in case the user wants to simultaneously
+    //     delete an old decision and add a new decision
+    if (this.decisionToDelete) {
+      observables = observables.concat(this.decisionService.delete(this.decisionToDelete));
+    }
+
     // add/save decision
     if (this.application.decision) {
       if (!this.application.decision._id) {
@@ -631,6 +662,9 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
           }
           if (this.application.decision && this.application.decision.documents) {
             this.application.decision.documents = []; // negate unsaved document check
+          }
+          if (this.decisionToDelete) {
+            this.decisionToDelete = null; // negate unsaved item check
           }
 
           // save succeeded --> navigate to details page
