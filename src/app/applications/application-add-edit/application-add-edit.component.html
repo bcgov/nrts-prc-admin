@@ -95,7 +95,7 @@
           </div>
           -->
 
-          <div class="invalid-feedback bg-danger" *ngIf="isSubmitSaveClicked && applicant.invalid">
+          <div class="invalid-feedback bg-danger" *ngIf="isSubmitSaveClicked && !application.client">
             Select one or more applicants
           </div>
         </div>
@@ -143,8 +143,12 @@
           <div class="form-group">
             <label>Description</label>
             <textarea class="form-control" rows="3" name="decisionDesc" id="decisionDesc" required aria-required="true" #decisionDesc="ngModel"
+              [ngClass]="{'is-invalid': isSubmitSaveClicked && decisionDesc.invalid}"  
               [(ngModel)]="application.decision.description">
             </textarea>
+            <div class="invalid-feedback bg-danger" *ngIf="isSubmitSaveClicked && decisionDesc.invalid">
+              Select one or more applicants
+            </div>
           </div>
           <div class="form-group mb-0">
             <label>Decision Documents</label>
