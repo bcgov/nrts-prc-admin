@@ -81,9 +81,9 @@
         <tr class="app-comment-details" *ngIf="item.loaded">
           <td colspan="6">
             <span class="comment-info">
-              <span *ngIf="item.app?.numComments > 0">
+              <span *ngIf="item.app && item.app['numComments'] > 0">
                 <strong>
-                  <a [routerLink]="['/comments', item.app._id]">{{item.app.numComments}} {{item.app.numComments === '1' ? 'comment':'comments'}}</a>
+                  <a [routerLink]="['/comments', item.app._id]">{{item.app['numComments']}} {{item.app['numComments'] === '1' ? 'comment' : 'comments'}}</a>
                 </strong>
                 &nbsp;-&nbsp;
               </span>

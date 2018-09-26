@@ -75,6 +75,19 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
   }
 
   public deleteApplication() {
+    if (this.application['numComments'] > 0) {
+      this.dialogService.addDialog(ConfirmComponent,
+        {
+          title: 'Cannot Delete Application',
+          message: 'An application with submitted comments cannot be deleted.',
+          okOnly: true
+        }, {
+          backdropColor: 'rgba(0, 0, 0, 0.5)'
+        })
+        .takeUntil(this.ngUnsubscribe);
+      return;
+    }
+
     if (this.application.isPublished) {
       this.dialogService.addDialog(ConfirmComponent,
         {
