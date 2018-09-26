@@ -187,6 +187,24 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
       return;
     }
 
+    this.dialogService.addDialog(ConfirmComponent,
+      {
+        title: 'Confirm Publish',
+        message: 'Publishing this application will make it visible to the public. Are you sure you want to proceed?'
+      }, {
+        backdropColor: 'rgba(0, 0, 0, 0.5)'
+      })
+      .takeUntil(this.ngUnsubscribe)
+      .subscribe(
+        isConfirmed => {
+          if (isConfirmed) {
+            this.internalPublishApplication();
+          }
+        }
+      );
+  }
+
+  private internalPublishApplication() {
     this.isPublishing = true;
 
     let observables = Observable.of(null);
