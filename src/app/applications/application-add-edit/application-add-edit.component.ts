@@ -130,7 +130,7 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
       return true;
     }
 
-    return false;
+    return false; // no unsaved items
   }
 
   public cancelChanges() {
@@ -528,6 +528,7 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
     if (this.decisionToDelete) {
       observables = observables.concat(this.decisionService.delete(this.decisionToDelete));
     }
+    this.decisionToDelete = null; // assume delete succeeds
 
     // add/save decision
     if (this.application.decision) {
@@ -669,14 +670,23 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
           // this.snackBarRef = this.snackBar.open('Application saved...', null, { duration: 2000 }); // not displayed due to navigate below
 
           this.applicationForm.form.markAsPristine();
+
           if (this.application.documents) {
-            this.application.documents = []; // negate unsaved document check
+            for (const doc of this.application.documents) {
+              // assign 'arbitrary' id to docs so that:
+              // 1) unsaved document check passes
+              // 2) page doesn't jump around
+              doc._id = '0';
+            }
           }
+
           if (this.application.decision && this.application.decision.documents) {
-            this.application.decision.documents = []; // negate unsaved document check
-          }
-          if (this.decisionToDelete) {
-            this.decisionToDelete = null; // negate unsaved item check
+            for (const doc of this.application.decision.documents) {
+              // assign 'arbitrary' id to docs so that:
+              // 1) unsaved document check passes
+              // 2) page doesn't jump around
+              doc._id = '0';
+            }
           }
 
           // save succeeded --> navigate to details page
