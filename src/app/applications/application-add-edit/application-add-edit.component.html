@@ -1,9 +1,10 @@
 <div class="top-container">
   <div class="container">
     <div class="title-container">
-      <h1 class="title-container__title">
-        <span class="text-muted">Crown Land File: {{application.cl_file}}  &nbsp;&rsaquo;&nbsp; </span> {{!application._id ? 'Create Public Review' : 'Edit Public Review'}}
-      </h1>
+      <div class="title-container__title">
+        <h1><span class="text-muted">Crown Land File: {{application.cl_file}}  &nbsp;&rsaquo;&nbsp; </span> {{!application._id ? 'Create' : 'Edit'}} Application</h1>
+        <span class="title-container__sub text-muted">Disposition Transaction: {{application.tantalisID}}</span>
+      </div>
       <div class="title-container__actions">
         <button class="btn btn-light" type="button" title="Cancel changes" (click)="cancelChanges()">
           Cancel
@@ -11,7 +12,7 @@
         <button class="btn btn-primary" type="button" title="Submit new application" 
           *ngIf="!application._id" (click)="addApplication()" [disabled]="isSubmitting">
           <i class="spinner rotating" [hidden]="!isSubmitting"></i>
-          <span>{{isSubmitting ? 'Submitting' : 'Submit'}}</span>
+          <span>{{isSubmitting ? 'Saving' : 'Save'}}</span>
         </button>
         <button class="btn btn-primary" type="button" title="Save application" 
           *ngIf="application._id" (click)="saveApplication()" [disabled]="isSaving">
@@ -27,7 +28,7 @@
   <div class="container">
     <form class="mb-3" #applicationForm="ngForm">
       <fieldset>
-        <legend>Public Review</legend>
+        <legend>Comment Period</legend>
         <div class="review-dates">
           <div class="form-group mb-0">
             <label>Start Date</label>
@@ -70,17 +71,30 @@
       <fieldset>
         <legend>Application Details</legend>
         <div class="form-group">
-          <label>Applicant <em>(required)</em></label>
+          <label>Applicant(s)</label>
+          <div class="applicant-display" *ngIf="application.client">
+            {{application.client}}
+          </div>
+          <div>
+            <button class="btn content-btn-alt" type="button" 
+              (click)="selectClient()">
+              <span>Select Applicant(s)</span>
+            </button>
+          </div>
+
+          <!--
           <div class="input-group applicant-input"
             [ngClass]="{'is-invalid': isSubmitSaveClicked && applicant.invalid}">
             <input class="form-control" type="text" name="applicant" readonly required aria-required="true" 
               [ngModel]="application.client" #applicant="ngModel" />
             <span class="input-group-btn">
               <button class="btn btn-light" type="button" (click)="selectClient()">
-                <span>{{application.client ? 'Change Applicant' : 'Select Applicant'}}</span>
+                <span>Select Applicant(s)</span>
               </button>
             </span>
           </div>
+          -->
+
           <div class="invalid-feedback bg-danger" *ngIf="isSubmitSaveClicked && applicant.invalid">
             Select one or more applicants
           </div>
@@ -121,41 +135,17 @@
             </div>
           </div>
         </div>
-        <!--
-        <div class="form-group mb-0">
-          <label>Internal Notes (Optional)</label>
-          <textarea class="form-control" rows="3" id="internalNotes" name="internalNotes" 
-            #internalNotes="ngModel" 
-            [(ngModel)]="application.internal.notes">
-          </textarea>
-        </div>
-        -->
       </fieldset>
 
       <fieldset name="decisionForm" id="appDecision">
         <legend class="mb-3">Application Decision</legend>
-        <button class="btn content-btn-alt" type="button" title="Add a decision"
-          *ngIf="!application.decision"
-          (click)="addDecision()">
-          <i class="material-icons">add</i>
-          Add Decision
-        </button>
-        <button class="btn content-btn-alt" type="button" title="Remove this decision"
-          *ngIf="application.decision"
-          (click)="deleteDecision()">
-          <i class="material-icons">remove</i>
-          Delete Decision
-        </button>
-        
-        <!-- Clicking the ADD DECISION button from the details page should add the form to this page AND validate on the SAVE button click event -->
-        <div *ngIf="application.decision">
+        <div class="mb-4" *ngIf="application.decision">
           <div class="form-group">
             <label>Description</label>
             <textarea class="form-control" rows="3" name="decisionDesc" id="decisionDesc" required aria-required="true" #decisionDesc="ngModel"
               [(ngModel)]="application.decision.description">
             </textarea>
           </div>
-
           <div class="form-group mb-0">
             <label>Decision Documents</label>
             <ul class="doc-list mb-3" *ngIf="application.decision.documents?.length > 0">
@@ -187,7 +177,20 @@
             </div>
           </div>
         </div>
+        <button class="btn content-btn-alt" type="button" title="Add a decision"
+          *ngIf="!application.decision"
+          (click)="addDecision()">
+          <i class="material-icons md-20">add</i>
+          Add Decision
+        </button>
+        <button class="btn content-btn-alt danger" type="button" title="Remove this decision"
+          *ngIf="application.decision"
+          (click)="deleteDecision()">
+          <i class="material-icons md-20">remove</i>
+          Remove Decision
+        </button>
       </fieldset>
+
     </form>
   </div>
 </div>

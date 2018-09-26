@@ -1,7 +1,10 @@
 <div class="top-container">
   <div class="container">
     <div class="title-container">
-      <h1 class="title-container__title">Crown Land File: {{application.cl_file}}</h1>
+      <div class="title-container__title">
+        <h1>Crown Land File: {{application.cl_file}}</h1>
+        <span class="title-container__sub text-muted">Disposition Transaction: {{application.tantalisID}}</span>
+      </div>
       <div class="title-container__actions">
         <button class="btn btn-light" type="button" [routerLink]="['/a', application._id, 'edit']">
           Edit
@@ -165,7 +168,7 @@
 
       <div class="col-md-4">
         <div class="aside-card">
-          <h3 class="title">Public Review Details</h3>
+          <h3 class="title">Comment Period Details</h3>
           <div class="body" *ngIf="!application.currentPeriod">
             Not Open For Commenting
           </div>

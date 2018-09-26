@@ -168,6 +168,18 @@ main {
   }
 }
 
+.content-btn-alt.danger {
+  color: #dc3545;
+  border-color: #dc3545;
+
+  &:focus,
+  &:hover {
+    color: $white;
+    border-color: #dc3545;
+    background: #dc3545;
+  }
+}
+
 // Scroll Top Button
 .scroll-top-btn {
   position: fixed;

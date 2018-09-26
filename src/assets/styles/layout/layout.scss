@@ -162,7 +162,11 @@ hr {
   &__title {
     @include flex(1 1 auto);
     margin: 0;
-    font-size: 1.65rem;
+
+    h1 {
+      margin-bottom: 0;
+      font-size: 1.65rem;
+    }
   }
   
   &__actions {
@@ -174,6 +178,11 @@ hr {
       font-weight: bold;
     }
   }
+}
+
+.title-container__sub {
+  display: block;
+  letter-spacing: 0.01rem;
 }
 
 .top-container {
