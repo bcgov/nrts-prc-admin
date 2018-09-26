@@ -161,6 +161,19 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
   }
 
   public publishApplication() {
+    if (!this.application.description) {
+      this.dialogService.addDialog(ConfirmComponent,
+        {
+          title: 'Cannot Publish Application',
+          message: 'A description for this application is required to publish.',
+          okOnly: true
+        }, {
+          backdropColor: 'rgba(0, 0, 0, 0.5)'
+        })
+        .takeUntil(this.ngUnsubscribe);
+      return;
+    }
+
     this.isPublishing = true;
 
     let observables = Observable.of(null);
