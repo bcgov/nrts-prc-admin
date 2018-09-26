@@ -191,6 +191,11 @@ hr {
   padding-right: 17px; // Offset approximate width of scrollbar
   box-shadow: 0 0 0.5rem rgba(0,0,0,0.15);
   z-index: 999;
+  
+  .container {
+    padding-top: 1.5rem;
+    padding-bottom: 2rem;
+  }
 }
 
 .bottom-container {

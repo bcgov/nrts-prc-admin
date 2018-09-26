@@ -75,11 +75,14 @@
           <div class="applicant-display" *ngIf="application.client">
             {{application.client}}
           </div>
-          <div>
-            <button class="btn content-btn-alt" type="button" 
+          <div [ngClass]="{'is-invalid': isSubmitSaveClicked && !application.client}">
+            <button class="btn content-btn-alt" type="button"
               (click)="selectClient()">
               <span>Select Applicant(s)</span>
             </button>
+          </div>
+          <div class="invalid-feedback bg-danger" *ngIf="isSubmitSaveClicked && !application.client">
+            Select one or more applicants
           </div>
 
           <!--
@@ -95,9 +98,6 @@
           </div>
           -->
 
-          <div class="invalid-feedback bg-danger" *ngIf="isSubmitSaveClicked && !application.client">
-            Select one or more applicants
-          </div>
         </div>
 
         <div class="form-group">
@@ -147,7 +147,7 @@
               [(ngModel)]="application.decision.description">
             </textarea>
             <div class="invalid-feedback bg-danger" *ngIf="isSubmitSaveClicked && decisionDesc.invalid">
-              Select one or more applicants
+              Decision Description is required
             </div>
           </div>
           <div class="form-group mb-0">
