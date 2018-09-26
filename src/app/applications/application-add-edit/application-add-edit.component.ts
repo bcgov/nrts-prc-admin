@@ -332,6 +332,12 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
   public addApplication() {
     this.isSubmitSaveClicked = true;
 
+    // validate that Applicant(s) has been selected before saving
+    // (can't do this validation in the view)
+    if (!this.application.client) {
+      return;
+    }
+
     if (this.applicationForm.invalid) {
       this.dialogService.addDialog(ConfirmComponent,
         {
@@ -464,6 +470,12 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
   // (multi-part due to dependencies)
   public saveApplication() {
     this.isSubmitSaveClicked = true;
+
+    // validate that Applicant(s) has been selected before saving
+    // (can't do this validation in the view)
+    if (!this.application.client) {
+      return;
+    }
 
     if (this.applicationForm.invalid) {
       this.dialogService.addDialog(ConfirmComponent,
