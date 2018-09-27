@@ -126,15 +126,7 @@ export class ApplicationAsideComponent implements OnInit, OnChanges, OnDestroy {
     if (this.application) {
       // get number of pending comments
       if (this.application._id !== '0') {
-        this.commentService.getAllByApplicationId(this.application._id)
-          .takeUntil(this.ngUnsubscribe)
-          .subscribe(
-            (comments: Comment[]) => {
-              const pending = comments.filter(comment => this.commentService.isPending(comment));
-              this.numComments = pending.length.toString();
-            },
-            error => console.log('couldn\'t get pending comments, error =', error)
-          );
+        this.numComments = this.application['numComments'];
       }
 
       const self = this; // for closure functions below
