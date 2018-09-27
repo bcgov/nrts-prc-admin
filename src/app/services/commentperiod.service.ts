@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { Response } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/catch';
@@ -17,8 +16,11 @@ export class CommentPeriodService {
   readonly CLOSED = 'Closed';
   readonly OPEN = 'Open';
 
+  // use helpers to get these:
+  private commentStatuses = [];
+
+  // for caching
   private commentPeriod: CommentPeriod = null;
-  public commentStatuses = [];
 
   constructor(private api: ApiService) {
     // user-friendly strings
@@ -43,13 +45,6 @@ export class CommentPeriodService {
           return [] as CommentPeriod[];
         }
 
-        // replace \\n (JSON format) with newlines in each comment period
-        periods.forEach((period, i) => {
-          if (periods[i].description) {
-            periods[i].description = periods[i].description.replace(/\\n/g, '\n');
-          }
-        });
-
         return periods;
       })
       .catch(this.api.handleError);
@@ -70,11 +65,6 @@ export class CommentPeriodService {
       .map((period: CommentPeriod) => {
         if (!period) { return null as CommentPeriod; }
 
-        // replace \\n (JSON format) with newlines
-        if (period.description) {
-          period.description = period.description.replace(/\\n/g, '\n');
-        }
-
         this.commentPeriod = period;
         return this.commentPeriod;
       })
@@ -88,11 +78,6 @@ export class CommentPeriodService {
     // ID must not exist on POST
     delete period._id;
 
-    // replace newlines with \\n (JSON format)
-    if (period.description) {
-      period.description = period.description.replace(/\n/g, '\\n');
-    }
-
     return this.api.addCommentPeriod(period)
       .map(res => {
         const cp = res.text() ? res.json() : null;
@@ -104,11 +89,6 @@ export class CommentPeriodService {
   save(orig: CommentPeriod): Observable<CommentPeriod> {
     // make a (deep) copy of the passed-in comment period so we don't change it
     const period = _.cloneDeep(orig);
-
-    // replace newlines with \\n (JSON format)
-    if (period.description) {
-      period.description = period.description.replace(/\n/g, '\\n');
-    }
 
     return this.api.saveCommentPeriod(period)
       .map(res => {
@@ -145,13 +125,11 @@ export class CommentPeriodService {
       .catch(this.api.handleError);
   }
 
-  // returns first published period - multiple comment periods are currently not suported
+  // returns first period - multiple comment periods are currently not suported
   getCurrent(periods: CommentPeriod[]): CommentPeriod {
-    const published = periods.filter(period => period.isPublished);
-    return (published.length > 0) ? published[0] : null;
+    return (periods.length > 0) ? periods[0] : null;
   }
 
-  // NB: see also ManageCommentPeriodsComponent.getStatus()
   getStatus(period: CommentPeriod): string {
     if (!period || !period.startDate || !period.endDate) {
       return this.commentStatuses[this.NOT_OPEN];

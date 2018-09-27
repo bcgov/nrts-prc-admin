@@ -58,19 +58,19 @@ export class ApiService {
         break;
 
       case 'nrts-prc-scale.pathfinder.gov.bc.ca':
-        // Demo
+        // Scale
         this.pathAPI = 'https://nrts-prc-scale.pathfinder.gov.bc.ca/api';
         this.env = 'scale';
         break;
 
       case 'nrts-prc-beta.pathfinder.gov.bc.ca':
-        // Demo
+        // Beta
         this.pathAPI = 'https://nrts-prc-beta.pathfinder.gov.bc.ca/api';
         this.env = 'beta';
         break;
 
       case 'nrts-prc-master.pathfinder.gov.bc.ca':
-        // Demo
+        // Master
         this.pathAPI = 'https://nrts-prc-master.pathfinder.gov.bc.ca/api';
         this.env = 'master';
         break;
@@ -302,6 +302,11 @@ export class ApiService {
     return this.get(this.pathAPI, queryString, { headers: headers });
   }
 
+  deleteFeaturesByApplicationId(applicationId: string) {
+    const headers = new Headers({ 'Authorization': 'Bearer ' + this.token });
+    return this.delete(this.pathAPI, 'feature/?applicationID=' + applicationId, null, { headers: headers });
+  }
+
   //
   // Organizations
   //
@@ -423,9 +428,7 @@ export class ApiService {
       '_addedBy',
       '_application',
       'startDate',
-      'endDate',
-      'description',
-      'internal'
+      'endDate'
     ];
     let queryString = 'commentperiod?isDeleted=false&_application=' + appId + '&fields=';
     _.each(fields, function (f) {
@@ -442,9 +445,7 @@ export class ApiService {
       '_addedBy',
       '_application',
       'startDate',
-      'endDate',
-      'description',
-      'internal'
+      'endDate'
     ];
     let queryString = 'commentperiod/' + id + '?fields=';
     _.each(fields, function (f) {
@@ -457,7 +458,7 @@ export class ApiService {
   }
 
   addCommentPeriod(period: CommentPeriod) {
-    const fields = ['_application', 'startDate', 'endDate', 'description'];
+    const fields = ['_application', 'startDate', 'endDate'];
     let queryString = 'commentperiod?fields=';
     _.each(fields, function (f) {
       queryString += f + '|';
@@ -469,7 +470,7 @@ export class ApiService {
   }
 
   saveCommentPeriod(period: CommentPeriod) {
-    const fields = ['_application', 'startDate', 'endDate', 'description'];
+    const fields = ['_application', 'startDate', 'endDate'];
     let queryString = 'commentperiod/' + period._id + '?fields=';
     _.each(fields, function (f) {
       queryString += f + '|';
@@ -498,7 +499,13 @@ export class ApiService {
   //
   // Comments
   //
-  getCommentsByPeriodId(periodId: string) {
+  getCommentsByPeriodIdNoFields(periodId: string) {
+    const queryString = `comment?isDeleted=false&_commentPeriod=${periodId}&pageNum=0&pageSize=1000000`; // max 1M records
+    const headers = new Headers({ 'Authorization': 'Bearer ' + this.token });
+    return this.get(this.pathAPI, queryString, { headers: headers });
+  }
+
+  getCommentsByPeriodId(periodId: string, pageNum: number, pageSize: number, sortBy: string) {
     const fields = [
       '_addedBy',
       '_commentPeriod',
@@ -509,12 +516,13 @@ export class ApiService {
       'dateAdded',
       'commentStatus'
     ];
-    let queryString = 'comment?isDeleted=false&_commentPeriod=' + periodId + '&fields=';
-    _.each(fields, function (f) {
-      queryString += f + '|';
-    });
-    // Trim the last |
-    queryString = queryString.replace(/\|$/, '');
+
+    let queryString = `comment?isDeleted=false&_commentPeriod=${periodId}&`;
+    if (pageNum !== null) { queryString += `pageNum=${pageNum}&`; }
+    if (pageSize !== null) { queryString += `pageSize=${pageSize}&`; }
+    if (sortBy !== null) { queryString += `sortBy=${sortBy}&`; }
+    queryString += `fields=${this.buildValues(fields)}`;
+
     const headers = new Headers({ 'Authorization': 'Bearer ' + this.token });
     return this.get(this.pathAPI, queryString, { headers: headers });
   }
