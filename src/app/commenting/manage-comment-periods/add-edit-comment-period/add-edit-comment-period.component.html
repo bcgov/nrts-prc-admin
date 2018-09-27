@@ -47,18 +47,6 @@
             </div>
           </div>
         </div>
-
-        <div class="form-group description required">
-          <label class="control-label" for="description">Description</label>
-          <textarea class="form-control" rows="5" id="description" name="description" required aria-required="true" [(ngModel)]="cp.description"
-            #description="ngModel"></textarea>
-          <div class="alert alert-danger" [hidden]="description.valid || description.untouched">Description is required</div>
-        </div>
-
-        <div class="form-group notes optional">
-          <label class="control-label" for="notes">Internal Notes</label>
-          <textarea class="form-control" rows="5" id="notes" name="notes" [(ngModel)]="cp.internal.notes" #notes="ngModel"></textarea>
-        </div>
       </div>
 
       <div class="modal-footer">
