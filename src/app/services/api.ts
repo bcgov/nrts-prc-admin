@@ -302,6 +302,11 @@ export class ApiService {
     return this.get(this.pathAPI, queryString, { headers: headers });
   }
 
+  deleteFeaturesByApplicationId(applicationId: string) {
+    const headers = new Headers({ 'Authorization': 'Bearer ' + this.token });
+    return this.delete(this.pathAPI, 'feature/?applicationID=' + applicationId, null, { headers: headers });
+  }
+
   //
   // Organizations
   //
@@ -423,9 +428,7 @@ export class ApiService {
       '_addedBy',
       '_application',
       'startDate',
-      'endDate',
-      'description',
-      'internal'
+      'endDate'
     ];
     let queryString = 'commentperiod?isDeleted=false&_application=' + appId + '&fields=';
     _.each(fields, function (f) {
@@ -442,9 +445,7 @@ export class ApiService {
       '_addedBy',
       '_application',
       'startDate',
-      'endDate',
-      'description',
-      'internal'
+      'endDate'
     ];
     let queryString = 'commentperiod/' + id + '?fields=';
     _.each(fields, function (f) {
@@ -457,7 +458,7 @@ export class ApiService {
   }
 
   addCommentPeriod(period: CommentPeriod) {
-    const fields = ['_application', 'startDate', 'endDate', 'description'];
+    const fields = ['_application', 'startDate', 'endDate'];
     let queryString = 'commentperiod?fields=';
     _.each(fields, function (f) {
       queryString += f + '|';
@@ -469,7 +470,7 @@ export class ApiService {
   }
 
   saveCommentPeriod(period: CommentPeriod) {
-    const fields = ['_application', 'startDate', 'endDate', 'description'];
+    const fields = ['_application', 'startDate', 'endDate'];
     let queryString = 'commentperiod/' + period._id + '?fields=';
     _.each(fields, function (f) {
       queryString += f + '|';
