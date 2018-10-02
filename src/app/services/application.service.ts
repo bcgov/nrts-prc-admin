@@ -127,13 +127,18 @@ export class ApplicationService {
 
         // now get the referenced data (features)
         applications.forEach((application, i) => {
+          // derive application status for app list display + sorting
+          application['appStatus'] = this.getStatus(application);
+
           promises.push(this.searchService.getByDTID(application.tantalisID)
             .toPromise()
             .then(features => {
               application.features = features;
 
-              // calculate Total Area (hectares) from all features
-              application.areaHectares = 0;
+              // calculate Total Area (hectares) from all features, only if there are features present
+              if (application.features && application.features.length > 0) {
+                application.areaHectares = 0;
+              }
               _.each(application.features, function (f) {
                 if (f['properties']) {
                   application.areaHectares += f['properties'].TENURE_AREA_IN_HECTARES;
@@ -151,9 +156,6 @@ export class ApplicationService {
                 application.location = application.features[0].properties.TENURE_LOCATION;
                 application.businessUnit = application.features[0].properties.RESPONSIBLE_BUSINESS_UNIT;
               }
-
-              // derive application status for app list display + sorting
-              application['appStatus'] = this.getStatus(application);
             })
           );
         });
@@ -246,8 +248,10 @@ export class ApplicationService {
           .then(features => {
             application.features = features;
 
-            // calculate Total Area (hectares) from all features
-            application.areaHectares = 0;
+            // calculate Total Area (hectares) from all features, only if there are features present
+            if (application.features && application.features.length > 0) {
+              application.areaHectares = 0;
+            }
             _.each(application.features, function (f) {
               if (f['properties']) {
                 application.areaHectares += f['properties'].TENURE_AREA_IN_HECTARES;
