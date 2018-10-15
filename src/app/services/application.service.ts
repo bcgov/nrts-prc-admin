@@ -1,7 +1,5 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/operator/mergeMap';
-import 'rxjs/add/operator/toPromise';
 import 'rxjs/add/operator/catch';
 import { map, flatMap } from 'rxjs/operators';
 import * as moment from 'moment';
@@ -15,10 +13,8 @@ import { CommentPeriodService } from './commentperiod.service';
 import { CommentService } from './comment.service';
 import { DecisionService } from './decision.service';
 import { FeatureService } from './feature.service';
-import { Feature } from 'app/models/feature';
 import { Document } from 'app/models/document';
 import { CommentPeriod } from 'app/models/commentperiod';
-import { Decision } from 'app/models/decision';
 
 @Injectable()
 export class ApplicationService {
@@ -27,17 +23,16 @@ export class ApplicationService {
   readonly ACCEPTED = 'AC';
   readonly ALLOWED = 'AL';
   readonly CANCELLED = 'CA';
+  readonly DECISION_MADE = 'DE'; // special combination status (see isDecision below)
   readonly DISALLOWED = 'DI';
   readonly DISPOSITION_GOOD_STANDING = 'DG';
   readonly OFFER_ACCEPTED = 'OA';
   readonly OFFER_NOT_ACCEPTED = 'ON';
   readonly OFFERED = 'OF';
   readonly SUSPENDED = 'SU';
-  // special combination status (see isDecision below)
-  readonly DECISION_MADE = 'DE';
-  // special status when no data
-  readonly UNKNOWN = 'UN';
+  readonly UNKNOWN = 'UN'; // special status when no data
 
+  // regions / query param options
   readonly CARIBOO = 'CA';
   readonly KOOTENAY = 'KO';
   readonly LOWER_MAINLAND = 'LM';
@@ -61,18 +56,18 @@ export class ApplicationService {
     private decisionService: DecisionService,
     private featureService: FeatureService
   ) {
-    // display strings
+    // user-friendly strings for display
     this.applicationStatuses[this.ABANDONED] = 'Application Abandoned';
     this.applicationStatuses[this.ACCEPTED] = 'Application Under Review';
     this.applicationStatuses[this.ALLOWED] = 'Decision: Allowed';
     this.applicationStatuses[this.CANCELLED] = 'Application Cancelled';
+    this.applicationStatuses[this.DECISION_MADE] = 'Decision Made';
     this.applicationStatuses[this.DISALLOWED] = 'Decision: Not Approved';
     this.applicationStatuses[this.DISPOSITION_GOOD_STANDING] = 'Tenure: Disposition in Good Standing';
     this.applicationStatuses[this.OFFER_ACCEPTED] = 'Decision: Offer Accepted';
     this.applicationStatuses[this.OFFER_NOT_ACCEPTED] = 'Decision: Offer Not Accepted';
     this.applicationStatuses[this.OFFERED] = 'Decision: Offered';
     this.applicationStatuses[this.SUSPENDED] = 'Tenure: Suspended';
-    this.applicationStatuses[this.DECISION_MADE] = 'Decision Made'; // NB: calculated status
     this.applicationStatuses[this.UNKNOWN] = 'Unknown Application Status';
 
     this.regions[this.CARIBOO] = 'Cariboo, Williams Lake';
@@ -87,7 +82,8 @@ export class ApplicationService {
 
   // get count of applications
   getCount(): Observable<number> {
-    return this.getAllInternal()
+    // get just the applications, and count them
+    return this.api.getApplications()
       .map(applications => {
         return applications.length;
       })
@@ -96,15 +92,8 @@ export class ApplicationService {
 
   // get all applications
   getAll(): Observable<Application[]> {
-    const self = this;
-    return this.getAllInternal()
-    .catch(this.api.handleError);
-  }
-
-  // get just the applications
-  private getAllInternal(): Observable<Object[]> {
     return this.api.getApplications()
-    .catch(this.api.handleError);
+      .catch(this.api.handleError);
   }
 
   // get a specific application by its Tantalis ID
@@ -113,12 +102,10 @@ export class ApplicationService {
       return of(this.application);
     }
 
-    return this.api.getApplicationByTantalisID(tantalisID)
-    .map(res => {
-      // return the first (only) application
-      return new Application(res[0]);
-    })
-    .catch(this.api.handleError);
+    // first get the base application data
+    // then get the rest of the application data
+    return this._getExtraAppData(this.api.getApplicationByTantalisID(tantalisID))
+      .catch(this.api.handleError);
   }
 
   // get a specific application by its object id
@@ -127,28 +114,29 @@ export class ApplicationService {
       return of(this.application);
     }
 
-    return this._getAppData(appId);
+    // first get the base application data
+    // then get the rest of the application data
+    return this._getExtraAppData(this.api.getApplication(appId))
+      .catch(this.api.handleError);
   }
 
-  private _getAppData(appId: string): Observable<Application> {
+  private _getExtraAppData(app: Observable<Application>): Observable<Application> {
     const self = this;
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const promises: Array<Promise<any>> = [];
 
-    // rest call 1
-    return this.api.getApplication(appId)
-    .pipe(
+    return app.pipe(
       flatMap(res => {
         this.application = new Application(res[0]);
         return forkJoin(
-          this.featureService.getByApplicationId(appId),
-          this.documentService.getAllByApplicationId(appId),
-          this.commentPeriodService.getAllByApplicationId(appId),
-          this.decisionService.getByApplicationId(appId)
-          )
+          this.featureService.getByApplicationId(this.application._id),
+          this.documentService.getAllByApplicationId(this.application._id),
+          this.commentPeriodService.getAllByApplicationId(this.application._id),
+          this.commentService.getCountByApplicationId(this.application._id),
+          this.decisionService.getByApplicationId(this.application._id)
+        )
           .map(payloads => {
-            // Feature Request
+            // Features
             self.application.features = payloads[0];
             _.each(self.application.features, function (f) {
               if (f['properties']) {
@@ -156,7 +144,7 @@ export class ApplicationService {
               }
             });
 
-            // Document Request
+            // Documents
             _.each(payloads[1], function (d) {
               const newDoc = new Document(d);
               self.application.documents.push(newDoc);
@@ -167,7 +155,6 @@ export class ApplicationService {
             _.each(payloads[2], function (p) {
               periods.push(new CommentPeriod(p));
             })
-
             const cp = this.commentPeriodService.getCurrent(periods);
             self.application.currentPeriod = cp;
             // derive comment period status for display
@@ -179,17 +166,34 @@ export class ApplicationService {
               self.application.currentPeriod['daysRemaining'] = moment(cp.endDate).diff(moment(today), 'days') + 1; // including today
             }
 
+            // Comments (get count)
+            const numComments = payloads[3];
+            self.application['numComments'] = numComments.toString();
+
             // Decision
-            const decision = payloads[3];
+            const decision = payloads[4];
             self.application.decision = decision;
+
+            // replace \\n (JSON format) with newlines
+            if (self.application.description) {
+              self.application.description = self.application.description.replace(/\\n/g, '\n');
+            }
+            if (self.application.legalDescription) {
+              self.application.legalDescription = self.application.legalDescription.replace(/\\n/g, '\n');
+            }
 
             // user-friendly application status
             self.application['appStatus'] = this.getStatusString(this.getStatusCode(self.application.status));
 
-             // derive region code
+            // derive region code
             self.application.region = this.getRegionCode(self.application.businessUnit);
 
-            // Finally update the object and return
+            // 7-digit CL File number for display
+            if (self.application.cl_file) {
+              self.application['clFile'] = self.application.cl_file.toString().padStart(7, '0');
+            }
+
+            // finally update the object and return
             return self.application;
           });
       })
@@ -207,9 +211,11 @@ export class ApplicationService {
     // id must not exist on POST
     delete app._id;
 
-    // don't send features or documents
+    // don't send attached data (features, documents, etc)
     delete app.features;
     delete app.documents;
+    delete app.currentPeriod;
+    delete app.decision;
 
     // replace newlines with \\n (JSON format)
     if (app.description) {
@@ -227,9 +233,11 @@ export class ApplicationService {
     // make a (deep) copy of the passed-in application so we don't change it
     const app = _.cloneDeep(orig);
 
-    // don't send features or documents
+    // don't send attached data (features, documents, etc)
     delete app.features;
     delete app.documents;
+    delete app.currentPeriod;
+    delete app.decision;
 
     // replace newlines with \\n (JSON format)
     if (app.description) {
