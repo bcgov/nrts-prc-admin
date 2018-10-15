@@ -107,11 +107,9 @@ export class ApplicationService {
       return of(this.application);
     }
 
-    return this.api.getApplicationByTantalisID(tantalisID)
-      .map(res => {
-        // return the first (only) application
-        return new Application(res[0]);
-      })
+    // first get the base application data
+    // then get the rest of the application data
+    return this._getExtraAppData(this.api.getApplicationByTantalisID(tantalisID))
       .catch(this.api.handleError);
   }
 
@@ -121,88 +119,90 @@ export class ApplicationService {
       return of(this.application);
     }
 
-    return this._getAppData(appId);
+    // first get the base application data
+    // then get the rest of the application data
+    return this._getExtraAppData(this.api.getApplication(appId))
+      .catch(this.api.handleError);
   }
 
-  private _getAppData(appId: string): Observable<Application> {
+  private _getExtraAppData(app: Observable<Application>): Observable<Application> {
     const self = this;
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-    return this.api.getApplication(appId)
-      .pipe(
-        flatMap(res => {
-          this.application = new Application(res[0]);
-          return forkJoin(
-            this.featureService.getByApplicationId(appId),
-            this.documentService.getAllByApplicationId(appId),
-            this.commentPeriodService.getAllByApplicationId(appId),
-            this.commentService.getCountByApplicationId(appId),
-            this.decisionService.getByApplicationId(appId)
-          )
-            .map(payloads => {
-              // Features
-              self.application.features = payloads[0];
-              _.each(self.application.features, function (f) {
-                if (f['properties']) {
-                  self.application.areaHectares += f['properties'].TENURE_AREA_IN_HECTARES;
-                }
-              });
-
-              // Documents
-              _.each(payloads[1], function (d) {
-                const newDoc = new Document(d);
-                self.application.documents.push(newDoc);
-              });
-
-              // Comment Period
-              const periods = [];
-              _.each(payloads[2], function (p) {
-                periods.push(new CommentPeriod(p));
-              })
-              const cp = this.commentPeriodService.getCurrent(periods);
-              self.application.currentPeriod = cp;
-              // derive comment period status for display
-              self.application['cpStatus'] = this.commentPeriodService.getStatus(cp);
-
-              // derive days remaining for display
-              // use moment to handle Daylight Saving Time changes
-              if (cp && this.commentPeriodService.isOpen(cp)) {
-                self.application.currentPeriod['daysRemaining'] = moment(cp.endDate).diff(moment(today), 'days') + 1; // including today
+    return app.pipe(
+      flatMap(res => {
+        this.application = new Application(res[0]);
+        return forkJoin(
+          this.featureService.getByApplicationId(this.application._id),
+          this.documentService.getAllByApplicationId(this.application._id),
+          this.commentPeriodService.getAllByApplicationId(this.application._id),
+          this.commentService.getCountByApplicationId(this.application._id),
+          this.decisionService.getByApplicationId(this.application._id)
+        )
+          .map(payloads => {
+            // Features
+            self.application.features = payloads[0];
+            _.each(self.application.features, function (f) {
+              if (f['properties']) {
+                self.application.areaHectares += f['properties'].TENURE_AREA_IN_HECTARES;
               }
-
-              // Comments (get count)
-              const numComments = payloads[3];
-              self.application['numComments'] = numComments.toString();
-
-              // Decision
-              const decision = payloads[4];
-              self.application.decision = decision;
-
-              // replace \\n (JSON format) with newlines
-              if (self.application.description) {
-                self.application.description = self.application.description.replace(/\\n/g, '\n');
-              }
-              if (self.application.legalDescription) {
-                self.application.legalDescription = self.application.legalDescription.replace(/\\n/g, '\n');
-              }
-
-              // user-friendly application status
-              self.application['appStatus'] = this.getStatusString(this.getStatusCode(self.application.status));
-
-              // derive region code
-              self.application.region = this.getRegionCode(self.application.businessUnit);
-
-              // 7-digit CL File number for display
-              if (self.application.cl_file) {
-                self.application['clFile'] = self.application.cl_file.toString().padStart(7, '0');
-              }
-
-              // finally update the object and return
-              return self.application;
             });
-        })
-      );
+
+            // Documents
+            _.each(payloads[1], function (d) {
+              const newDoc = new Document(d);
+              self.application.documents.push(newDoc);
+            });
+
+            // Comment Period
+            const periods = [];
+            _.each(payloads[2], function (p) {
+              periods.push(new CommentPeriod(p));
+            })
+            const cp = this.commentPeriodService.getCurrent(periods);
+            self.application.currentPeriod = cp;
+            // derive comment period status for display
+            self.application['cpStatus'] = this.commentPeriodService.getStatus(cp);
+
+            // derive days remaining for display
+            // use moment to handle Daylight Saving Time changes
+            if (cp && this.commentPeriodService.isOpen(cp)) {
+              self.application.currentPeriod['daysRemaining'] = moment(cp.endDate).diff(moment(today), 'days') + 1; // including today
+            }
+
+            // Comments (get count)
+            const numComments = payloads[3];
+            self.application['numComments'] = numComments.toString();
+
+            // Decision
+            const decision = payloads[4];
+            self.application.decision = decision;
+
+            // replace \\n (JSON format) with newlines
+            if (self.application.description) {
+              self.application.description = self.application.description.replace(/\\n/g, '\n');
+            }
+            if (self.application.legalDescription) {
+              self.application.legalDescription = self.application.legalDescription.replace(/\\n/g, '\n');
+            }
+
+            // user-friendly application status
+            self.application['appStatus'] = this.getStatusString(this.getStatusCode(self.application.status));
+
+            // derive region code
+            self.application.region = this.getRegionCode(self.application.businessUnit);
+
+            // 7-digit CL File number for display
+            if (self.application.cl_file) {
+              self.application['clFile'] = self.application.cl_file.toString().padStart(7, '0');
+            }
+
+            // finally update the object and return
+            return self.application;
+          });
+      })
+    );
   }
 
   // create new application
