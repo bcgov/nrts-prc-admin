@@ -157,6 +157,11 @@
   }
 }
 
+.navbar-collapse {
+  overflow: hidden;
+}
+
+
 @media (min-width: 768px) {
   .navbar {
     background: transparent;
@@ -218,6 +223,7 @@
   }
 
   .navbar-collapse {
+    height: auto !important;
     flex-grow: 0;
   }
 }

@@ -3,12 +3,15 @@
     <a class="navbar-brand" title="Applications, Comments & Reasons for Decision - Beta" routerLink="/home">
       <span class="navbar-brand__title">Applications, Comments <span class="wb"><span class="amp">&</span> Reasons for Decision <span class="navbar-brand__version">BETA</span></span></span>
     </a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#mainNav" aria-controls="navbarText" aria-expanded="false"
-      aria-label="Toggle navigation">
+    <button class="navbar-toggler" type="button" title="Toggle Main Navigation"
+      aria-controls="navbarText" 
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+      (click)="toggleNav()">
       <i class="material-icons">menu</i>
       <span>MENU</span>
     </button>
-    <div class="collapse navbar-collapse" id="mainNav">
+    <div class="navbar-collapse" [@toggleNav]="isNavMenuOpen ? 'navOpen' : 'navClosed'" id="mainNav">
       <ul class="navbar-nav">
         <li class="nav-item">
           <a class="nav-link" routerLink="/search" title="Search the BCGW for applications">
