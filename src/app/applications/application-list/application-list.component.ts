@@ -62,19 +62,19 @@ export class ApplicationListComponent implements OnInit, OnDestroy {
         this.applications = applications;
         applications.forEach(app => {
           self.commentPeriodService.getAllByApplicationId(app._id)
-          .takeUntil(this.ngUnsubscribe)
-          .subscribe(cp => {
-            app.currentPeriod = cp[0];
-            app['cpStatus'] = self.commentPeriodService.getStatus(app.currentPeriod);
+            .takeUntil(this.ngUnsubscribe)
+            .subscribe(cp => {
+              app.currentPeriod = cp[0];
+              app['cpStatus'] = self.commentPeriodService.getStatus(app.currentPeriod);
 
-            if (app.currentPeriod && app.currentPeriod._id) {
-              self.commentService.getCommentsByPeriodId(app.currentPeriod._id)
-              .takeUntil(this.ngUnsubscribe)
-              .subscribe(comments => {
-                app['numComments'] = comments.length;
-              });
-            }
-          });
+              if (app.currentPeriod && app.currentPeriod._id) {
+                self.commentService.getCommentsByPeriodId(app.currentPeriod._id)
+                  .takeUntil(this.ngUnsubscribe)
+                  .subscribe(comments => {
+                    app['numComments'] = comments.length;
+                  });
+              }
+            });
         });
       }, error => {
         this.loading = false;
