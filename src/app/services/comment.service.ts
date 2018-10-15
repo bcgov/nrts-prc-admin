@@ -88,6 +88,9 @@ export class CommentService {
   // TODO: count only pending comments? (need comment status)
   getCountByPeriodId(periodId: string): Observable<number> {
     return this.api.getCommentsByPeriodIdNoFields(periodId)
+      .map((comments: Comment[]) => {
+        return comments.length;
+      })
       .catch(this.api.handleError);
   }
 
