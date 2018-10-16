@@ -37,6 +37,8 @@ export class Application {
   type: string;
 
   region: string; // region code derived from Business Unit
+  appStatus: string; // user-friendly application status
+  cpStatus: string; // user-friendly comment period status
 
   isPublished = false; // depends on tags; see below
 
@@ -69,6 +71,8 @@ export class Application {
     this.type                    = obj && obj.type                    || null;
 
     this.region                  = obj && obj.region                  || null;
+    this.appStatus               = obj && obj.appStatus               || null;
+    this.cpStatus                = obj && obj.cpStatus                || null;
 
     if (obj && obj.centroid) {
       obj.centroid.forEach(num => {

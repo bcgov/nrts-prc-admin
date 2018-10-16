@@ -163,7 +163,7 @@ export class ApplicationService {
             const cp = this.commentPeriodService.getCurrent(periods);
             self.application.currentPeriod = cp;
             // derive comment period status for display
-            self.application['cpStatus'] = this.commentPeriodService.getStatus(cp);
+            self.application.cpStatus = this.commentPeriodService.getStatus(cp);
 
             // derive days remaining for display
             // use moment to handle Daylight Saving Time changes
@@ -188,7 +188,7 @@ export class ApplicationService {
             }
 
             // user-friendly application status
-            self.application['appStatus'] = this.getStatusString(this.getStatusCode(self.application.status));
+            self.application.appStatus = this.getStatusString(this.getStatusCode(self.application.status));
 
             // derive region code
             self.application.region = this.getRegionCode(self.application.businessUnit);

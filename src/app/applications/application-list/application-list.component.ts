@@ -3,6 +3,7 @@ import { Router, ActivatedRoute, ParamMap, Params } from '@angular/router';
 import { Location } from '@angular/common';
 import { Subject } from 'rxjs/Subject';
 import 'rxjs/add/operator/takeUntil';
+import * as moment from 'moment';
 import * as _ from 'lodash';
 
 import { Application } from 'app/models/application';
@@ -43,6 +44,8 @@ export class ApplicationListComponent implements OnInit, OnDestroy {
     }
 
     const self = this;
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
     // get optional query parameters
     this.route.queryParamMap
@@ -61,20 +64,46 @@ export class ApplicationListComponent implements OnInit, OnDestroy {
         this.loading = false;
         this.applications = applications;
         applications.forEach(app => {
+          // get comment period
           self.commentPeriodService.getAllByApplicationId(app._id)
             .takeUntil(this.ngUnsubscribe)
-            .subscribe(cp => {
-              app.currentPeriod = cp[0];
-              app['cpStatus'] = self.commentPeriodService.getStatus(app.currentPeriod);
+            .subscribe(periods => {
+              const cp = self.commentPeriodService.getCurrent(periods)
+              app.currentPeriod = cp;
+              // derive comment period status for display
+              app.cpStatus = self.commentPeriodService.getStatus(cp);
 
-              if (app.currentPeriod && app.currentPeriod._id) {
-                self.commentService.getCommentsByPeriodId(app.currentPeriod._id)
-                  .takeUntil(this.ngUnsubscribe)
-                  .subscribe(comments => {
-                    app['numComments'] = comments.length;
-                  });
+              // derive days remaining for display
+              if (cp && self.commentPeriodService.isOpen(cp)) {
+                app.currentPeriod['daysRemaining'] = moment(cp.endDate).diff(moment(today), 'days') + 1; // including today
               }
             });
+
+          // get comment count
+          self.commentService.getCountByApplicationId(app._id)
+            .takeUntil(this.ngUnsubscribe)
+            .subscribe(count => {
+              app['numComments'] = count;
+            });
+
+          // replace \\n (JSON format) with newlines
+          if (app.description) {
+            app.description = app.description.replace(/\\n/g, '\n');
+          }
+          if (app.legalDescription) {
+            app.legalDescription = app.legalDescription.replace(/\\n/g, '\n');
+          }
+
+          // user-friendly application status
+          app.appStatus = self.applicationService.getStatusString(self.applicationService.getStatusCode(app.status));
+
+          // derive region code
+          app.region = self.applicationService.getRegionString(self.applicationService.getRegionCode(app.businessUnit));
+
+          // 7-digit CL File number for display
+          if (app.cl_file) {
+            app['clFile'] = app.cl_file.toString().padStart(7, '0');
+          }
         });
       }, error => {
         this.loading = false;

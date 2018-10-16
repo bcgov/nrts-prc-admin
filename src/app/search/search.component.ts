@@ -99,7 +99,7 @@ export class SearchComponent implements OnInit, OnDestroy {
                         value[0].loaded = true;
                         if (application) {
                           // display PRC status from application
-                          value[0].prcStatus = application['appStatus'];
+                          value[0].prcStatus = application.appStatus;
                           value[0].app = application;
                           // Force change detection since we changed a bound property after the normal check cycle and outside anything
                           // that would trigger a CD cycle - this will eliminate the error we get when running in dev mode.
