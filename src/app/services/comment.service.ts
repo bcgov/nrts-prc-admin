@@ -55,8 +55,22 @@ export class CommentService {
       .catch(this.api.handleError);
   }
 
+  // get count of comments for the specified comment period id
+  // TODO: count only pending comments? (need comment status)
+  getCountByPeriodId(periodId: string): Observable<number> {
+    return this.api.getCommentsByPeriodIdNoFields(periodId)
+      .map(res => {
+        const comments = res.text() ? res.json() : [];
+        comments.forEach((comment, i) => {
+          comments[i] = new Comment(comment);
+        });
+        return comments.length;
+      })
+      .catch(this.api.handleError);
+  }
+
   // get all comments for the specified application id
-  // (without documents)
+  // (including documents)
   getAllByApplicationId(appId: string, pageNum: number = 0, pageSize: number = 10, sortBy: string = null): Observable<Comment[]> {
     // first get the comment periods
     return this.commentPeriodService.getAllByApplicationId(appId)
@@ -84,22 +98,8 @@ export class CommentService {
       .catch(this.api.handleError);
   }
 
-  // get count of comments for the specified comment period id
-  // TODO: count only pending comments? (need comment status)
-  getCountByPeriodId(periodId: string): Observable<number> {
-    return this.api.getCommentsByPeriodIdNoFields(periodId)
-      .map(res => {
-        const comments = res.text() ? res.json() : [];
-        comments.forEach((comment, i) => {
-          comments[i] = new Comment(comment);
-        });
-        return comments.length;
-      })
-      .catch(this.api.handleError);
-  }
-
   // get all comments for the specified comment period id
-  // (without documents)
+  // (including documents)
   getAllByPeriodId(periodId: string, pageNum: number = 0, pageSize: number = 10, sortBy: string = null): Observable<Comment[]> {
     return this.api.getCommentsByPeriodId(periodId, pageNum, pageSize, sortBy)
       .map(res => {
@@ -109,22 +109,30 @@ export class CommentService {
         });
         return comments;
       })
-      .map((comments: Comment[]) => {
+      .mergeMap(comments => {
         if (comments.length === 0) {
-          return [] as Comment[];
+          return Observable.of([] as Comment[]);
         }
 
-        // replace \\n (JSON format) with newlines in each comment
-        comments.forEach((comment, i) => {
-          if (comments[i].comment) {
-            comments[i].comment = comments[i].comment.replace(/\\n/g, '\n');
+        const promises: Array<Promise<any>> = [];
+
+        comments.forEach(comment => {
+          // replace \\n (JSON format) with newlines
+          if (comment.comment) {
+            comment.comment = comment.comment.replace(/\\n/g, '\n');
           }
-          if (comments[i].review && comments[i].review.reviewerNotes) {
-            comments[i].review.reviewerNotes = comments[i].review.reviewerNotes.replace(/\\n/g, '\n');
+          if (comment.review && comment.review.reviewerNotes) {
+            comment.review.reviewerNotes = comment.review.reviewerNotes.replace(/\\n/g, '\n');
           }
+
+          // get the documents
+          promises.push(this.documentService.getAllByCommentId(comment._id)
+            .toPromise()
+            .then(documents => comment.documents = documents)
+          );
         });
 
-        return comments;
+        return Promise.all(promises).then(() => { return comments; });
       })
       .catch(this.api.handleError);
   }
