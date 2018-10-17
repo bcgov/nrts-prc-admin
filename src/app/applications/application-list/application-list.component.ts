@@ -3,6 +3,7 @@ import { Router, ActivatedRoute, ParamMap, Params } from '@angular/router';
 import { Location } from '@angular/common';
 import { Subject } from 'rxjs/Subject';
 import 'rxjs/add/operator/takeUntil';
+import * as moment from 'moment';
 import * as _ from 'lodash';
 
 import { Application } from 'app/models/application';
@@ -43,6 +44,8 @@ export class ApplicationListComponent implements OnInit, OnDestroy {
     }
 
     const self = this;
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
     // get optional query parameters
     this.route.queryParamMap
@@ -55,27 +58,11 @@ export class ApplicationListComponent implements OnInit, OnDestroy {
       });
 
     // get data
-    this.applicationService.getAll()
+    this.applicationService.getAll({ getCurrentPeriod: true, getNumComments: true })
       .takeUntil(this.ngUnsubscribe)
       .subscribe(applications => {
         this.loading = false;
         this.applications = applications;
-        applications.forEach(app => {
-          self.commentPeriodService.getAllByApplicationId(app._id)
-          .takeUntil(this.ngUnsubscribe)
-          .subscribe(cp => {
-            app.currentPeriod = cp[0];
-            app['cpStatus'] = self.commentPeriodService.getStatus(app.currentPeriod);
-
-            if (app.currentPeriod && app.currentPeriod._id) {
-              self.commentService.getCommentsByPeriodId(app.currentPeriod._id)
-              .takeUntil(this.ngUnsubscribe)
-              .subscribe(comments => {
-                app['numComments'] = comments.length;
-              });
-            }
-          });
-        });
       }, error => {
         this.loading = false;
         console.log(error);
