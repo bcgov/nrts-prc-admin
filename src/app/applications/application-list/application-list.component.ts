@@ -58,53 +58,11 @@ export class ApplicationListComponent implements OnInit, OnDestroy {
       });
 
     // get data
-    this.applicationService.getAll()
+    this.applicationService.getAll({ getCurrentPeriod: true, getNumComments: true })
       .takeUntil(this.ngUnsubscribe)
       .subscribe(applications => {
         this.loading = false;
         this.applications = applications;
-        applications.forEach(app => {
-          // get comment period
-          self.commentPeriodService.getAllByApplicationId(app._id)
-            .takeUntil(this.ngUnsubscribe)
-            .subscribe(periods => {
-              const cp = self.commentPeriodService.getCurrent(periods)
-              app.currentPeriod = cp;
-              // derive comment period status for display
-              app.cpStatus = self.commentPeriodService.getStatus(cp);
-
-              // derive days remaining for display
-              if (cp && self.commentPeriodService.isOpen(cp)) {
-                app.currentPeriod['daysRemaining'] = moment(cp.endDate).diff(moment(today), 'days') + 1; // including today
-              }
-            });
-
-          // get comment count
-          self.commentService.getCountByApplicationId(app._id)
-            .takeUntil(this.ngUnsubscribe)
-            .subscribe(count => {
-              app['numComments'] = count;
-            });
-
-          // replace \\n (JSON format) with newlines
-          if (app.description) {
-            app.description = app.description.replace(/\\n/g, '\n');
-          }
-          if (app.legalDescription) {
-            app.legalDescription = app.legalDescription.replace(/\\n/g, '\n');
-          }
-
-          // user-friendly application status
-          app.appStatus = self.applicationService.getStatusString(self.applicationService.getStatusCode(app.status));
-
-          // derive region code
-          app.region = self.applicationService.getRegionString(self.applicationService.getRegionCode(app.businessUnit));
-
-          // 7-digit CL File number for display
-          if (app.cl_file) {
-            app['clFile'] = app.cl_file.toString().padStart(7, '0');
-          }
-        });
       }, error => {
         this.loading = false;
         console.log(error);

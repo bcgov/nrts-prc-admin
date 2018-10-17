@@ -92,7 +92,7 @@ export class SearchComponent implements OnInit, OnDestroy {
                 // if app is in PRC, query application data to update UI
                 if (_.includes(search.sidsFound, key)) {
                   value[0].loaded = false;
-                  self.applicationService.getByTantalisID(+key, true)
+                  self.applicationService.getByTantalisID(+key, { getCurrentPeriod: true, getNumComments: true })
                     .takeUntil(self.ngUnsubscribe)
                     .subscribe(
                       application => {
