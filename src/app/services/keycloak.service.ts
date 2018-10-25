@@ -6,12 +6,39 @@ declare var Keycloak: any;
 export class KeycloakService {
   private keycloakAuth: any;
   private keycloakEnabled: boolean;
+  private keycloakUrl: string;
+  private keycloakRealm: string;
 
   constructor() {
-    if (window.location.origin === 'http://localhost:4200') {
-      this.keycloakEnabled = false;
-    } else {
-      this.keycloakEnabled = true;
+    switch (window.location.origin) {
+      case 'http://localhost:4200':
+        // Local
+        this.keycloakEnabled = false;
+        break;
+
+      case 'https://nrts-prc-demo.pathfinder.gov.bc.ca':
+      case 'https://nrts-prc-scale.pathfinder.gov.bc.ca':
+      case 'https://nrts-prc-beta.pathfinder.gov.bc.ca':
+      case 'https://nrts-prc-master.pathfinder.gov.bc.ca':
+      case 'https://nrts-prc-dev.pathfinder.gov.bc.ca':
+        // Dev
+        this.keycloakEnabled = true;
+        this.keycloakUrl = "https://sso-dev.pathfinder.gov.bc.ca/auth"
+        this.keycloakRealm = "prc";
+        break;
+
+      case 'https://nrts-prc-test.pathfinder.gov.bc.ca':
+        // Test
+        this.keycloakEnabled = true;
+        this.keycloakUrl = "https://sso-test.pathfinder.gov.bc.ca/auth"
+        this.keycloakRealm = "acrfd";
+        break;
+
+      default:
+        // Prod
+        this.keycloakEnabled = true;
+        this.keycloakUrl = "https://sso.pathfinder.gov.bc.ca/auth"
+        this.keycloakRealm = "acrfd";
     }
   }
 
@@ -26,8 +53,8 @@ export class KeycloakService {
       this.keycloakEnabled = true;
       return new Promise((resolve, reject) => {
         const config = {
-          url: 'https://sso-dev.pathfinder.gov.bc.ca/auth',
-          realm: 'prc',
+          url: this.keycloakUrl,
+          realm: this.keycloakRealm,
           clientId: 'prc-admin-console'
         };
 
