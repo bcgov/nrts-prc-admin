@@ -12,7 +12,7 @@ import 'rxjs/add/operator/concat';
 import * as moment from 'moment-timezone';
 import * as _ from 'lodash';
 
-import { SelectOrganizationComponent } from 'app/applications/select-organization/select-organization.component';
+import { SelectOrganizationComponent } from 'app/select-organization/select-organization.component';
 import { ConfirmComponent } from 'app/confirm/confirm.component';
 import { Application } from 'app/models/application';
 import { CommentPeriod } from 'app/models/commentperiod';
@@ -46,6 +46,8 @@ export class ApplicationAddEditComponent implements OnInit, OnDestroy {
   private ngUnsubscribe: Subject<boolean> = new Subject<boolean>();
   private docsToDelete: Document[] = [];
   private decisionToDelete: Decision = null;
+  public applicationFiles: Array<File> = [];
+  public decisionFiles: Array<File> = [];
 
   constructor(
     private route: ActivatedRoute,

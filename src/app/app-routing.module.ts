@@ -5,7 +5,6 @@ import { LoginComponent } from './login/login.component';
 import { SearchComponent } from './search/search.component';
 import { AdministrationComponent } from './administration/administration.component';
 import { UsersComponent } from './administration/users/users.component';
-import { HomeComponent } from './home/home.component';
 
 import { CanDeactivateGuard } from 'app/services/can-deactivate-guard.service';
 
