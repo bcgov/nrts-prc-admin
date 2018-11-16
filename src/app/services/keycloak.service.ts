@@ -33,7 +33,7 @@ export class KeycloakService {
       case 'https://nrts-prc-test.pathfinder.gov.bc.ca':
         // Test
         this.keycloakEnabled = true;
-        this.keycloakUrl = 'https://sso-test.pathfinder.gov.bc.ca/auth';
+        this.keycloakUrl = 'https://sso.pathfinder.gov.bc.ca/auth';
         this.keycloakRealm = 'acrfd';
         break;
 
