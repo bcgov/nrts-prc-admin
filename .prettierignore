@@ -1,0 +1,4 @@
+dist
+
+# use stylelint for scss linting/formatting
+*.scss
