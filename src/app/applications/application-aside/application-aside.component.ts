@@ -1,4 +1,4 @@
-import { Component, OnInit, OnChanges, OnDestroy, Input, SimpleChanges } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import * as L from 'leaflet';
@@ -13,7 +13,7 @@ import { FeatureService } from 'app/services/feature.service';
   templateUrl: './application-aside.component.html',
   styleUrls: ['./application-aside.component.scss']
 })
-export class ApplicationAsideComponent implements OnInit, OnChanges, OnDestroy {
+export class ApplicationAsideComponent implements OnInit, OnDestroy {
   @Input() application: Application = null;
 
   private ngUnsubscribe: Subject<boolean> = new Subject<boolean>();
@@ -138,13 +138,6 @@ export class ApplicationAsideComponent implements OnInit, OnChanges, OnDestroy {
     this.updateData();
   }
 
-  ngOnChanges(changes: SimpleChanges) {
-    // guard against null application
-    if (changes.application.currentValue) {
-      this.updateData();
-    }
-  }
-
   private updateData() {
     if (this.application) {
       if (this.fg) {
@@ -172,6 +165,11 @@ export class ApplicationAsideComponent implements OnInit, OnChanges, OnDestroy {
                 const layer = L.geoJSON(featureObj);
                 this.fg.addLayer(layer);
                 layer.addTo(this.map);
+
+                this.map.on('zoomend', () => {
+                  const weight = this.getWeight(feature.properties.TENURE_AREA_IN_HECTARES, this.map.getZoom());
+                  layer.setStyle({ weight });
+                });
               });
 
               const bounds = this.fg.getBounds();
@@ -185,39 +183,68 @@ export class ApplicationAsideComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
-  // called from parent component
-  public drawMap(app: Application) {
-    if (app.tantalisID) {
-      this.featureService
-        .getByTantalisId(app.tantalisID)
-        .pipe(takeUntil(this.ngUnsubscribe))
-        .subscribe(
-          features => {
-            if (this.fg) {
-              _.each(this.layers, layer => {
-                this.map.removeLayer(layer);
-              });
-              this.fg.clearLayers();
-            }
-
-            _.each(features, function(feature) {
-              const f = JSON.parse(JSON.stringify(feature));
-              // needs to be valid GeoJSON
-              delete f.geometry_name;
-              const featureObj: GeoJSON.Feature<any> = f;
-              const layer = L.geoJSON(featureObj);
-              this.fg.addLayer(layer);
-              layer.addTo(this.map);
-            });
-
-            const bounds = this.fg.getBounds();
-            if (bounds && bounds.isValid()) {
-              this.map.fitBounds(bounds, this.maxZoom);
-            }
-          },
-          error => console.log('error =', error)
-        );
+  /**
+   * Given a features size in hectares and the maps zoom level, returns the weight to use when rendering the shape.
+   * Increasing the weight is used to allow features to remain visible on the map when zoomed out far.
+   *
+   * @private
+   * @param {number} size size of the feature, in hectares.
+   * @param {number} zoom zoom level of the map.
+   * @returns {number} a positive non-null weight for the layer to use when rendering the shape (default: 3)
+   * @memberof DetailsMapComponent
+   */
+  private getWeight(size: number, zoom: number): number {
+    if (!size || !zoom) {
+      return 3; // default
     }
+
+    if (size < 2) {
+      if (zoom < 3) {
+        return 6;
+      }
+      if (zoom < 10) {
+        return 7;
+      }
+      if (zoom < 14) {
+        return 6;
+      }
+    }
+
+    if (size < 15) {
+      if (zoom < 12) {
+        return 6;
+      }
+    }
+
+    if (size < 30) {
+      if (zoom < 9) {
+        return 6;
+      }
+    }
+
+    if (size < 60) {
+      if (zoom < 12) {
+        return 5;
+      }
+    }
+
+    if (size < 150) {
+      if (zoom < 9) {
+        return 6;
+      }
+    }
+
+    if (size < 1000) {
+      if (zoom < 6) {
+        return 6;
+      }
+    }
+
+    if (zoom < 5) {
+      return 5;
+    }
+
+    return 3; // default
   }
 
   ngOnDestroy() {
