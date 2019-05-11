@@ -33,6 +33,14 @@
           <span>{{isUnpublishing ? 'Unpublishing' : 'Unpublish'}}</span>
         </button>
         <span class="vert-pipe">&nbsp;</span>
+        <button class="btn btn-icon" title="Refresh this application with the latest data from Tantalis"
+          (click)="refreshApplication()"
+          [disabled]="isRefreshing">
+          <i class="material-icons">
+            refresh
+          </i>
+        </button>
+        <span class="vert-pipe">&nbsp;</span>
         <button class="btn btn-icon" title="Remove this application from ACRFD"
           (click)="deleteApplication()"
           [disabled]="isDeleting">

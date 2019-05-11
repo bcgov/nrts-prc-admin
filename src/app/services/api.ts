@@ -282,6 +282,11 @@ export class ApiService {
     return this.http.delete<Application>(`${this.pathAPI}/${queryString}`, {});
   }
 
+  refreshApplication(app: Application): Observable<Application> {
+    const queryString = `application/${app._id}/refresh`;
+    return this.http.put<Application>(`${this.pathAPI}/${queryString}`, {});
+  }
+
   saveApplication(app: Application): Observable<Application> {
     const queryString = `application/${app._id}`;
     return this.http.put<Application>(`${this.pathAPI}/${queryString}`, app, {});
@@ -305,6 +310,16 @@ export class ApiService {
   deleteFeaturesByApplicationId(applicationID: string): Observable<object> {
     const queryString = `feature/?applicationID=${applicationID}`;
     return this.http.delete(`${this.pathAPI}/${queryString}`, {});
+  }
+
+  addFeature(feature: Feature): Observable<Feature> {
+    const queryString = 'feature/';
+    return this.http.post<Feature>(`${this.pathAPI}/${queryString}`, feature, {});
+  }
+
+  saveFeature(feature: Feature): Observable<Feature> {
+    const queryString = `feature/${feature._id}`;
+    return this.http.put<Feature>(`${this.pathAPI}/${queryString}`, feature, {});
   }
 
   //

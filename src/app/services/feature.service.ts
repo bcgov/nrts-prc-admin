@@ -5,6 +5,8 @@ import { map, catchError } from 'rxjs/operators';
 import { ApiService } from './api';
 import { Feature } from 'app/models/feature';
 
+import * as _ from 'lodash';
+
 @Injectable()
 export class FeatureService {
   constructor(private api: ApiService) {}
@@ -43,6 +45,21 @@ export class FeatureService {
 
   deleteByApplicationId(applicationId: string): Observable<object> {
     return this.api.deleteFeaturesByApplicationId(applicationId).pipe(catchError(error => this.api.handleError(error)));
+  }
+
+  add(originalFeature: Feature): Observable<Feature> {
+    const feature = _.cloneDeep(originalFeature);
+
+    delete feature._id;
+    delete feature.isDeleted;
+
+    return this.api.addFeature(feature).pipe(catchError(error => this.api.handleError(error)));
+  }
+
+  save(originalFeature: Feature): Observable<Feature> {
+    const feature = _.cloneDeep(originalFeature);
+
+    return this.api.saveFeature(feature).pipe(catchError(error => this.api.handleError(error)));
   }
 
   // MBL TODO: PUT/POST functionality.
