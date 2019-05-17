@@ -160,7 +160,7 @@ export class ApplicationAsideComponent implements OnInit, OnDestroy {
               _.each(features, feature => {
                 const f = JSON.parse(JSON.stringify(feature));
                 // needs to be valid GeoJSON
-                delete f.geometry_name;
+                delete f.geometryName;
                 const featureObj: GeoJSON.Feature<any> = f;
                 const layer = L.geoJSON(featureObj);
                 this.fg.addLayer(layer);

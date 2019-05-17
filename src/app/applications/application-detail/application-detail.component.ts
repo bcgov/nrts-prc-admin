@@ -23,6 +23,7 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
   public isPublishing = false;
   public isUnpublishing = false;
   public isDeleting = false;
+  public isRefreshing = false;
   public application: Application = null;
   private snackBarRef: MatSnackBarRef<SimpleSnackBar> = null;
   private ngUnsubscribe: Subject<boolean> = new Subject<boolean>();
@@ -171,6 +172,37 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
         this.router.navigate(['/search']);
       }
     );
+  }
+
+  /**
+   * Refreshes the application meta and features with the latest values from Tantalis.
+   *
+   * @memberof ApplicationDetailComponent
+   */
+  public refreshApplication() {
+    this.isRefreshing = true;
+    this.api
+      .refreshApplication(this.application)
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(
+        () => {
+          // onNext
+          // do nothing here - see onCompleted() function below
+        },
+        error => {
+          this.isRefreshing = false;
+          console.log('error: ', error);
+          alert("Uh-oh, couldn't update application");
+          // TODO: should fully reload application here so we have latest non-deleted objects
+        },
+        () => {
+          console.log('done');
+          // onCompleted
+          this.isRefreshing = false;
+          // TODO: should fully reload application here so we have latest non-deleted objects
+          // this.router.navigate(['/search']);
+        }
+      );
   }
 
   public publishApplication() {
