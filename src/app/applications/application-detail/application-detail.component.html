@@ -32,7 +32,7 @@
           <i class="spinner rotating" [hidden]="!isUnpublishing"></i>
           <span>{{isUnpublishing ? 'Unpublishing' : 'Unpublish'}}</span>
         </button>
-        <span class="vert-pipe">&nbsp;</span>
+        <span class="vert-pipe first-pipe">&nbsp;</span>
         <button class="btn btn-icon" title="Refresh this application with the latest data from Tantalis"
           (click)="refreshApplication()"
           [disabled]="isRefreshing">
