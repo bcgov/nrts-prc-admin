@@ -175,7 +175,7 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Refreshes the application meta and features with the latest values from Tantalis.
+   * Refreshes the application meta and features with the latest data from Tantalis.
    *
    * @memberof ApplicationDetailComponent
    */
@@ -185,22 +185,18 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
       .refreshApplication(this.application)
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(
-        () => {
-          // onNext
-          // do nothing here - see onCompleted() function below
+        updatedApplication => {
+          // updated the application with the latest data
+          this.application = { ...this.application, ...updatedApplication };
         },
         error => {
           this.isRefreshing = false;
-          console.log('error: ', error);
+          console.log('error =', error);
           alert("Uh-oh, couldn't update application");
-          // TODO: should fully reload application here so we have latest non-deleted objects
         },
         () => {
-          console.log('done');
-          // onCompleted
           this.isRefreshing = false;
-          // TODO: should fully reload application here so we have latest non-deleted objects
-          // this.router.navigate(['/search']);
+          this.snackBarRef = this.snackBar.open('Application refreshed...', null, { duration: 2000 });
         }
       );
   }
