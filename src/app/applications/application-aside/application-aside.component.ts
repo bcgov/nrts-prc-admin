@@ -128,9 +128,6 @@ export class ApplicationAsideComponent implements OnInit, OnDestroy {
         };
         map.getPanes().overlayPane.appendChild(element);
         return element;
-      },
-      onRemove: function(map) {
-        map.getPanes().overlayPane.removeChild(this.element);
       }
     });
     this.map.addControl(new resetViewControl());
