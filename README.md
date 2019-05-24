@@ -10,7 +10,7 @@ Administrative front-end for the ACRFD (formerly: PRC) application.
 
 | Technology | Version | Website                 | Description |
 |------------|---------|-------------------------|-------------------------------------------|
-| node       | 8.x.x   | https://nodejs.org/en/  | JavaScript Runtime                        |
+| node       | 10.x.x  | https://nodejs.org/en/  | JavaScript Runtime                        |
 | npm        | 6.x.x   | https://www.npmjs.com/  | Node Package Manager                      |
 | ng         | 6.x.x   | https://cli.angular.io/ | Angular CLI                               |
 | yarn       | latest  | https://yarnpkg.com/en/ | Package Manager (more efficient than npm) |
