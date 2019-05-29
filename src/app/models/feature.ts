@@ -11,6 +11,7 @@ export class Feature {
     INTRID_SID: number;
     TENURE_STAGE: string;
     TENURE_STATUS: string;
+    TENURE_REASON: string;
     TENURE_TYPE: string;
     TENURE_SUBTYPE: string;
     TENURE_PURPOSE: string;

@@ -58,7 +58,7 @@ export class ReviewCommentsComponent implements OnInit, OnDestroy {
     // get data from route resolver
     this.route.data.pipe(takeUntil(this.ngUnsubscribe)).subscribe((data: { application: Application }) => {
       if (data.application) {
-        this.application = data.application;
+        this.application = new Application(data.application);
 
         this.commentService
           .getCountByPeriodId(this.application.currentPeriod._id)

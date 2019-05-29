@@ -8,6 +8,7 @@ import * as _ from 'lodash';
 import { SearchService } from 'app/services/search.service';
 import { SearchTerms } from 'app/models/search';
 import { Application } from 'app/models/application';
+import { ConstantUtils, CodeType } from 'app/utils/constants/constantUtils';
 
 @Component({
   selector: 'app-search',
@@ -135,5 +136,16 @@ export class SearchComponent implements OnInit, OnDestroy {
       console.log('error, invalid application =', application);
       this.snackBarRef = this.snackBar.open('Error creating application ...', null, { duration: 3000 });
     }
+  }
+
+  /**
+   * Given a status code, returns a long user-friendly status string.
+   *
+   * @param {string} statusCode
+   * @returns {string}
+   * @memberof SearchComponent
+   */
+  getStatusStringLong(statusCode: string): string {
+    return ConstantUtils.getTextLong(CodeType.STATUS, statusCode);
   }
 }

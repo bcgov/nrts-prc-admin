@@ -14,6 +14,14 @@ import { FeatureService } from './feature.service';
 import { Application } from 'app/models/application';
 import { CommentPeriod } from 'app/models/commentperiod';
 
+import { StatusCodes, ReasonCodes } from 'app/utils/constants/application';
+import { ConstantUtils, CodeType } from 'app/utils/constants/constantUtils';
+
+/**
+ * Used by _getExtraAppData() to determine what related data to fetch when fetching applications.
+ *
+ * @interface IGetParameters
+ */
 interface IGetParameters {
   getFeatures?: boolean;
   getDocuments?: boolean;
@@ -21,26 +29,14 @@ interface IGetParameters {
   getDecision?: boolean;
 }
 
+/**
+ * Provides methods for working with Applications.
+ *
+ * @export
+ * @class ApplicationService
+ */
 @Injectable()
 export class ApplicationService {
-  // statuses / query param options
-  readonly ABANDONED = 'AB';
-  readonly APPLICATION_UNDER_REVIEW = 'AUR';
-  readonly APPLICATION_REVIEW_COMPLETE = 'ARC';
-  readonly DECISION_APPROVED = 'DA';
-  readonly DECISION_NOT_APPROVED = 'DNA';
-  readonly UNKNOWN = 'UN'; // special status when no data
-
-  // regions / query param options
-  readonly CARIBOO = 'CA';
-  readonly KOOTENAY = 'KO';
-  readonly LOWER_MAINLAND = 'LM';
-  readonly OMENICA = 'OM';
-  readonly PEACE = 'PE';
-  readonly SKEENA = 'SK';
-  readonly SOUTHERN_INTERIOR = 'SI';
-  readonly VANCOUVER_ISLAND = 'VI';
-
   constructor(
     private api: ApiService,
     private documentService: DocumentService,
@@ -50,12 +46,25 @@ export class ApplicationService {
     private featureService: FeatureService
   ) {}
 
-  // get count of applications
+  /**
+   * Get applications count.
+   *
+   * @returns {Observable<number>}
+   * @memberof ApplicationService
+   */
   getCount(): Observable<number> {
     return this.api.getCountApplications().pipe(catchError(error => this.api.handleError(error)));
   }
 
-  // get all applications
+  /**
+   * Get all applications.
+   *
+   * Note: currently returns at most 1000 records.
+   *
+   * @param {IGetParameters} [params=null]
+   * @returns {Observable<Application[]>}
+   * @memberof ApplicationService
+   */
   getAll(params: IGetParameters = null): Observable<Application[]> {
     // first get just the applications
     // NB: max 1000 records
@@ -77,7 +86,14 @@ export class ApplicationService {
     );
   }
 
-  // get applications by their Crown Land ID
+  /**
+   * Get applications by their Crown Land ID.
+   *
+   * @param {string} clid
+   * @param {IGetParameters} [params=null]
+   * @returns {Observable<Application[]>}
+   * @memberof ApplicationService
+   */
   getByCrownLandID(clid: string, params: IGetParameters = null): Observable<Application[]> {
     // first get just the applications
     return this.api.getApplicationsByCrownLandID(clid).pipe(
@@ -98,7 +114,14 @@ export class ApplicationService {
     );
   }
 
-  // get a specific application by its Tantalis ID
+  /**
+   * Get a specific application by its Tantalis ID (Disposition ID).
+   *
+   * @param {number} tantalisID
+   * @param {IGetParameters} [params=null]
+   * @returns {Observable<Application>}
+   * @memberof ApplicationService
+   */
   getByTantalisID(tantalisID: number, params: IGetParameters = null): Observable<Application> {
     // first get just the application
     return this.api.getApplicationByTantalisId(tantalisID).pipe(
@@ -113,7 +136,14 @@ export class ApplicationService {
     );
   }
 
-  // get a specific application by its object id
+  /**
+   * Get a specific application by its mongo object id.
+   *
+   * @param {string} appId
+   * @param {IGetParameters} [params=null]
+   * @returns {Observable<Application>}
+   * @memberof ApplicationService
+   */
   getById(appId: string, params: IGetParameters = null): Observable<Application> {
     // first get just the application
     return this.api.getApplication(appId).pipe(
@@ -128,6 +158,16 @@ export class ApplicationService {
     );
   }
 
+  /**
+   * Fetches application data.
+   *
+   * @private
+   * @param {Application} application
+   * @param {IGetParameters} { getFeatures = false, getDocuments = false,
+   *                           getCurrentPeriod = false, getDecision = false }
+   * @returns {Observable<Application>}
+   * @memberof ApplicationService
+   */
   private _getExtraAppData(
     application: Application,
     { getFeatures = false, getDocuments = false, getCurrentPeriod = false, getDecision = false }: IGetParameters
@@ -151,13 +191,13 @@ export class ApplicationService {
           const periods: CommentPeriod[] = payloads[2];
           application.currentPeriod = this.commentPeriodService.getCurrent(periods);
 
-          // user-friendly comment period status
-          const cpStatusCode = this.commentPeriodService.getStatusCode(application.currentPeriod);
-          application.cpStatus = this.commentPeriodService.getStatusString(cpStatusCode);
+          // user-friendly comment period long status string
+          const commentPeriodCode = this.commentPeriodService.getCode(application.currentPeriod);
+          application.cpStatus = ConstantUtils.getTextLong(CodeType.COMMENT, commentPeriodCode);
 
           // derive days remaining for display
           // use moment to handle Daylight Saving Time changes
-          if (application.currentPeriod && this.commentPeriodService.isOpen(cpStatusCode)) {
+          if (application.currentPeriod && this.commentPeriodService.isOpen(commentPeriodCode)) {
             const now = new Date();
             const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
             application.currentPeriod['daysRemaining'] =
@@ -182,13 +222,6 @@ export class ApplicationService {
           application.clFile = application.cl_file.toString().padStart(7, '0');
         }
 
-        // user-friendly application status
-        const appStatusCode = this.getStatusCode(application.status);
-        application.appStatus = this.getLongStatusString(appStatusCode);
-
-        // derive region code
-        application.region = this.getRegionCode(application.businessUnit);
-
         // derive unique applicants
         if (application.client) {
           const clients = application.client.split(', ');
@@ -198,7 +231,11 @@ export class ApplicationService {
         // derive retire date
         if (
           application.statusHistoryEffectiveDate &&
-          [this.DECISION_APPROVED, this.DECISION_NOT_APPROVED, this.ABANDONED].includes(appStatusCode)
+          [
+            StatusCodes.DECISION_APPROVED.code,
+            StatusCodes.DECISION_NOT_APPROVED.code,
+            StatusCodes.ABANDONED.code
+          ].includes(ConstantUtils.getParam(CodeType.STATUS, application.status))
         ) {
           application.retireDate = moment(application.statusHistoryEffectiveDate)
             .endOf('day')
@@ -214,7 +251,13 @@ export class ApplicationService {
     );
   }
 
-  // create new application
+  /**
+   * Create a new application.
+   *
+   * @param {*} item
+   * @returns {Observable<Application>}
+   * @memberof ApplicationService
+   */
   add(item: any): Observable<Application> {
     const app = new Application(item);
 
@@ -242,7 +285,13 @@ export class ApplicationService {
     return this.api.addApplication(app).pipe(catchError(error => this.api.handleError(error)));
   }
 
-  // update existing application
+  /**
+   * Update an existing application.
+   *
+   * @param {Application} orig
+   * @returns {Observable<Application>}
+   * @memberof ApplicationService
+   */
   save(orig: Application): Observable<Application> {
     // make a (deep) copy of the passed-in application so we don't change it
     const app = _.cloneDeep(orig);
@@ -277,184 +326,116 @@ export class ApplicationService {
   }
 
   /**
-   * Map Tantalis Status to status code.
+   * Returns true if the application has an abandoned status AND an amendment reason.
+   *
+   * @param {Application} application
+   * @returns {boolean} true if the application has an abandoned status AND an amendment reason, false otherwise.
+   * @memberof ApplicationService
    */
-  getStatusCode(statusString: string): string {
-    if (statusString) {
-      switch (statusString.toUpperCase()) {
-        case 'ABANDONED':
-        case 'CANCELLED':
-        case 'OFFER NOT ACCEPTED':
-        case 'OFFER RESCINDED':
-        case 'RETURNED':
-        case 'REVERTED':
-        case 'SOLD':
-        case 'SUSPENDED':
-        case 'WITHDRAWN':
-          return this.ABANDONED;
-
-        case 'ACCEPTED':
-        case 'ALLOWED':
-        case 'PENDING':
-        case 'RECEIVED':
-          return this.APPLICATION_UNDER_REVIEW;
-
-        case 'OFFER ACCEPTED':
-        case 'OFFERED':
-          return this.APPLICATION_REVIEW_COMPLETE;
-
-        case 'ACTIVE':
-        case 'COMPLETED':
-        case 'DISPOSITION IN GOOD STANDING':
-        case 'EXPIRED':
-        case 'HISTORIC':
-          return this.DECISION_APPROVED;
-
-        case 'DISALLOWED':
-          return this.DECISION_NOT_APPROVED;
-
-        case 'NOT USED':
-        case 'PRE-TANTALIS':
-          return this.UNKNOWN;
-      }
-    }
-    return this.UNKNOWN;
+  isAmendment(application: Application): boolean {
+    return (
+      application &&
+      application.status === StatusCodes.ABANDONED.code &&
+      application.reason === ReasonCodes.AMENDMENT.code
+    );
   }
 
   /**
-   * Map status code to Tantalis Status(es).
+   * Returns true if the application has an abandoned status and does not have an amendment reason.
+   *
+   * @param {Application} application
+   * @returns {boolean} true if the application has an abandoned status and does not have an amendment
+   * reason, false otherwise.
+   * @memberof ApplicationService
    */
-  getTantalisStatus(statusCode: string): string[] {
-    if (statusCode) {
-      switch (statusCode.toUpperCase()) {
-        case this.ABANDONED:
-          return [
-            'ABANDONED',
-            'CANCELLED',
-            'OFFER NOT ACCEPTED',
-            'OFFER RESCINDED',
-            'RETURNED',
-            'REVERTED',
-            'SOLD',
-            'SUSPENDED',
-            'WITHDRAWN'
-          ];
-        case this.APPLICATION_UNDER_REVIEW:
-          return ['ACCEPTED', 'ALLOWED', 'PENDING', 'RECEIVED'];
-        case this.APPLICATION_REVIEW_COMPLETE:
-          return ['OFFER ACCEPTED', 'OFFERED'];
-        case this.DECISION_APPROVED:
-          return ['ACTIVE', 'COMPLETED', 'DISPOSITION IN GOOD STANDING', 'EXPIRED', 'HISTORIC'];
-        case this.DECISION_NOT_APPROVED:
-          return ['DISALLOWED'];
-        case this.UNKNOWN:
-          return null;
-      }
-    }
-    return null;
+  isAbandoned(application: Application): boolean {
+    return (
+      application &&
+      application.status === StatusCodes.ABANDONED.code &&
+      (!application.reason || application.reason !== ReasonCodes.AMENDMENT.code)
+    );
+  }
+
+  /**
+   *
+   *
+   * @param {Application} application
+   * @returns {boolean} true if the application has an under review status, false otherwise.
+   * @memberof ApplicationService
+   */
+  isApplicationUnderReview(application: Application): boolean {
+    return application && application.status === StatusCodes.APPLICATION_UNDER_REVIEW.code;
+  }
+
+  /**
+   *
+   *
+   * @param {Application} application
+   * @returns {boolean} true if the application has a review complete status, false otherwise.
+   * @memberof ApplicationService
+   */
+  isApplicationReviewComplete(application: Application): boolean {
+    return application && application.status === StatusCodes.APPLICATION_REVIEW_COMPLETE.code;
+  }
+
+  /**
+   *
+   *
+   * @param {Application} application
+   * @returns {boolean} true if the application has a decision approved status, false otherwise.
+   * @memberof ApplicationService
+   */
+  isDecisionApproved(application: Application): boolean {
+    return application && application.status === StatusCodes.DECISION_APPROVED.code;
+  }
+
+  /**
+   *
+   *
+   * @param {Application} application
+   * @returns {boolean} true if the application has a decision not approved status, false otherwise.
+   * @memberof ApplicationService
+   */
+  isDecisionNotApproved(application: Application): boolean {
+    return application && application.status === StatusCodes.DECISION_NOT_APPROVED.code;
+  }
+
+  /**
+   *
+   *
+   * @param {Application} application
+   * @returns {boolean} true if the application has an unknown status, false otherwise.
+   * @memberof ApplicationService
+   */
+  isUnknown(application: Application): boolean {
+    return application && application.status === StatusCodes.UNKNOWN.code;
   }
 
   /**
    * Given a status code, returns a short user-friendly status string.
+   *
+   * @param {string} statusCode
+   * @returns {string}
+   * @memberof ApplicationService
    */
-  getShortStatusString(statusCode: string): string {
-    if (statusCode) {
-      switch (statusCode) {
-        case this.ABANDONED:
-          return 'Abandoned';
-        case this.APPLICATION_UNDER_REVIEW:
-          return 'Under Review';
-        case this.APPLICATION_REVIEW_COMPLETE:
-          return 'Decision Pending';
-        case this.DECISION_APPROVED:
-          return 'Approved';
-        case this.DECISION_NOT_APPROVED:
-          return 'Not Approved';
-        case this.UNKNOWN:
-          return 'Unknown';
-      }
-    }
-    return null;
+  getStatusStringShort(statusCode: string): string {
+    return ConstantUtils.getTextShort(CodeType.STATUS, statusCode);
   }
 
   /**
-   * Given a status code, returns a long user-friendly status string.
+   * Returns the application long status string.
+   *
+   * @param {Application} application
+   * @returns {string}
+   * @memberof ApplicationService
    */
-  getLongStatusString(statusCode: string): string {
-    if (statusCode) {
-      switch (statusCode) {
-        case this.ABANDONED:
-          return 'Abandoned';
-        case this.APPLICATION_UNDER_REVIEW:
-          return 'Application Under Review';
-        case this.APPLICATION_REVIEW_COMPLETE:
-          return 'Application Review Complete - Decision Pending';
-        case this.DECISION_APPROVED:
-          return 'Decision: Approved - Tenure Issued';
-        case this.DECISION_NOT_APPROVED:
-          return 'Decision: Not Approved';
-        case this.UNKNOWN:
-          return 'Unknown Status';
-      }
+  getStatusStringLong(application: Application): string {
+    if (application && application.reason === ReasonCodes.AMENDMENT.code) {
+      return ConstantUtils.getTextLong(CodeType.REASON, application.reason);
     }
-    return null;
-  }
 
-  isAbandoned(statusCode: string): boolean {
-    return statusCode === this.ABANDONED;
-  }
-
-  isApplicationUnderReview(statusCode: string): boolean {
-    return statusCode === this.APPLICATION_UNDER_REVIEW;
-  }
-
-  isApplicationReviewComplete(statusCode: string): boolean {
-    return statusCode === this.APPLICATION_REVIEW_COMPLETE;
-  }
-
-  isDecisionApproved(statusCode: string): boolean {
-    return statusCode === this.DECISION_APPROVED;
-  }
-
-  isDecisionNotApproved(statusCode: string): boolean {
-    return statusCode === this.DECISION_NOT_APPROVED;
-  }
-
-  isUnknown(statusCode: string): boolean {
-    return statusCode === this.UNKNOWN;
-  }
-
-  /**
-   * Returns region code.
-   */
-  getRegionCode(businessUnit: string): string {
-    return businessUnit && businessUnit.toUpperCase().split(' ')[0];
-  }
-
-  /**
-   * Given a region code, returns a user-friendly region string.
-   */
-  getRegionString(regionCode: string): string {
-    if (regionCode) {
-      switch (regionCode) {
-        case this.CARIBOO:
-          return 'Cariboo, Williams Lake';
-        case this.KOOTENAY:
-          return 'Kootenay, Cranbrook';
-        case this.LOWER_MAINLAND:
-          return 'Lower Mainland, Surrey';
-        case this.OMENICA:
-          return 'Omenica/Peace, Prince George';
-        case this.PEACE:
-          return 'Peace, Ft. St. John';
-        case this.SKEENA:
-          return 'Skeena, Smithers';
-        case this.SOUTHERN_INTERIOR:
-          return 'Thompson Okanagan, Kamloops';
-        case this.VANCOUVER_ISLAND:
-          return 'West Coast, Nanaimo';
-      }
-    }
-    return null;
+    return (
+      (application && ConstantUtils.getTextLong(CodeType.STATUS, application.status)) || StatusCodes.UNKNOWN.text.long
+    );
   }
 }

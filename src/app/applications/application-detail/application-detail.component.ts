@@ -187,7 +187,9 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
       .subscribe(
         updatedApplication => {
           // updated the application with the latest data
-          this.application = { ...this.application, ...updatedApplication };
+          this.application = new Application({ ...this.application, ...updatedApplication });
+          // TODO: verify that this needs to be new Application or not
+          console.log('1: ', this.application);
         },
         error => {
           this.isRefreshing = false;
@@ -307,7 +309,7 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
           })
           .pipe(takeUntil(this.ngUnsubscribe))
           .subscribe(
-            application => {
+            (application: Application) => {
               this.isPublishing = false;
               this.application = application;
             },
@@ -384,7 +386,7 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
           })
           .pipe(takeUntil(this.ngUnsubscribe))
           .subscribe(
-            application => {
+            (application: Application) => {
               this.isUnpublishing = false;
               this.application = application;
             },

@@ -1,7 +1,7 @@
 import { HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { KeycloakService } from 'app/services/keycloak.service';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, throwError } from 'rxjs';
 import { catchError, switchMap, tap } from 'rxjs/operators';
 
 /**
@@ -42,11 +42,11 @@ export class TokenInterceptor implements HttpInterceptor {
               return next.handle(request);
             }),
             catchError(err => {
-              return Observable.throw(err);
+              return throwError(err);
             })
           );
         }
-        return Observable.throw(error);
+        return throwError(error);
       })
     );
   }
