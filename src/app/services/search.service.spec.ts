@@ -35,7 +35,7 @@ describe('SearchService', () => {
     expect(service).toBeTruthy();
   });
 
-  describe('getAppsByClidDtid', () => {
+  describe('getApplicationsByCLFileAndTantalisID', () => {
     let service;
     let apiSpy;
     let ApplicationServiceSpy;
@@ -45,10 +45,10 @@ describe('SearchService', () => {
       ApplicationServiceSpy = TestBed.get(ApplicationService);
     });
 
-    describe('when getAppsByCLID returns results', () => {
+    describe('when getApplicationsByCLFile returns results', () => {
       beforeEach(() => {
-        // Only testing calls to getAppsByCLID
-        spyOn(service, 'getAppByDTID').and.returnValue(of([] as Application[]));
+        // Only testing calls to getApplicationsByCLFile
+        spyOn(service, 'getApplicationsByDispositionID').and.returnValue(of([] as Application[]));
       });
 
       describe('when no applications or search results are returned', () => {
@@ -57,7 +57,7 @@ describe('SearchService', () => {
 
           apiSpy.searchAppsByCLID.and.returnValue(of([] as SearchResults[]));
 
-          service.getAppsByClidDtid(['123']).subscribe(result => {
+          service.getApplicationsByCLFileAndTantalisID(['123']).subscribe(result => {
             expect(result).toEqual([] as Application[]);
           });
         }));
@@ -74,12 +74,12 @@ describe('SearchService', () => {
 
           apiSpy.searchAppsByCLID.and.returnValue(of([] as SearchResults[]));
 
-          service.getAppsByClidDtid(['123']).subscribe(res => {
+          service.getApplicationsByCLFileAndTantalisID(['123']).subscribe(res => {
             result.push(res);
           });
         }));
 
-        it('getAppsByClidDtid emits twice', async(() => {
+        it('getApplicationsByCLFileAndTantalisID emits twice', async(() => {
           expect(result.length).toEqual(2);
         }));
 
@@ -184,7 +184,7 @@ describe('SearchService', () => {
           ApplicationServiceSpy.getStatusCode.and.returnValue('someStatusCode');
           ApplicationServiceSpy.getRegionCode.and.returnValue('someRegionCode');
 
-          service.getAppsByClidDtid(['123']).subscribe(
+          service.getApplicationsByCLFileAndTantalisID(['123']).subscribe(
             res => {
               result.push(res);
             },
@@ -194,7 +194,7 @@ describe('SearchService', () => {
           );
         }));
 
-        it('getAppsByClidDtid emits twice', async(() => {
+        it('getApplicationsByCLFileAndTantalisID emits twice', async(() => {
           expect(result.length).toEqual(2);
         }));
 
@@ -254,7 +254,7 @@ describe('SearchService', () => {
           });
 
           it('has an appStatus', () => {
-            expect(prcResult[0].appStatus).toBe('someStatusString');
+            expect(prcResult[0].status).toBe('someStatusString');
           });
 
           it('has a region', () => {
@@ -276,10 +276,10 @@ describe('SearchService', () => {
       });
     });
 
-    describe('when getAppByDTID returns results', () => {
+    describe('when getApplicationsByDispositionID returns results', () => {
       beforeEach(() => {
-        // Only testing calls to getAppByDTID
-        spyOn(service, 'getAppsByCLID').and.returnValue(of([] as Application[]));
+        // Only testing calls to getApplicationsByDispositionID
+        spyOn(service, 'getApplicationsByCLFile').and.returnValue(of([] as Application[]));
       });
 
       describe('when no applications or search results are returned', () => {
@@ -288,7 +288,7 @@ describe('SearchService', () => {
 
           apiSpy.searchAppsByDTID.and.returnValue(of(null as SearchResults));
 
-          service.getAppsByClidDtid(['123']).subscribe(result => {
+          service.getApplicationsByCLFileAndTantalisID(['123']).subscribe(result => {
             expect(result).toEqual([] as Application[]);
           });
         }));
@@ -303,12 +303,12 @@ describe('SearchService', () => {
 
           apiSpy.searchAppsByDTID.and.returnValue(of(null as SearchResults));
 
-          service.getAppsByClidDtid(['123']).subscribe(res => {
+          service.getApplicationsByCLFileAndTantalisID(['123']).subscribe(res => {
             result.push(res);
           });
         }));
 
-        it('getAppsByClidDtid emits twice', async(() => {
+        it('getApplicationsByCLFileAndTantalisID emits twice', async(() => {
           expect(result.length).toEqual(2);
         }));
 
@@ -388,7 +388,7 @@ describe('SearchService', () => {
           ApplicationServiceSpy.getStatusCode.and.returnValue('someStatusCode');
           ApplicationServiceSpy.getRegionCode.and.returnValue('someRegionCode');
 
-          service.getAppsByClidDtid(['123']).subscribe(
+          service.getApplicationsByCLFileAndTantalisID(['123']).subscribe(
             res => {
               result.push(res);
             },
@@ -398,7 +398,7 @@ describe('SearchService', () => {
           );
         }));
 
-        it('getAppsByClidDtid emits twice', async(() => {
+        it('getApplicationsByCLFileAndTantalisID emits twice', async(() => {
           expect(result.length).toEqual(2);
         }));
 
@@ -467,14 +467,16 @@ describe('SearchService', () => {
 
     describe('when multiple applications are returned', () => {
       it('returns a merged array of applications', async(() => {
-        spyOn(service, 'getAppsByCLID').and.returnValue(of([new Application({ _id: 1 }), new Application({ _id: 2 })]));
+        spyOn(service, 'getApplicationsByCLFile').and.returnValue(
+          of([new Application({ _id: 1 }), new Application({ _id: 2 })])
+        );
 
-        spyOn(service, 'getAppByDTID').and.returnValue(
+        spyOn(service, 'getApplicationsByDispositionID').and.returnValue(
           of([new Application({ _id: 2 }), new Application({ _id: 3 }), new Application({ _id: 4 })])
         );
 
         const resultingApplications = new Set<Application>();
-        service.getAppsByClidDtid(['123', '234']).subscribe(
+        service.getApplicationsByCLFileAndTantalisID(['123', '234']).subscribe(
           result => {
             result.forEach(element => {
               resultingApplications.add(element);
@@ -484,11 +486,11 @@ describe('SearchService', () => {
             fail(error);
           },
           () => {
-            expect(service.getAppsByCLID).toHaveBeenCalledWith('123');
-            expect(service.getAppsByCLID).toHaveBeenCalledWith('234');
+            expect(service.getApplicationsByCLFile).toHaveBeenCalledWith('123');
+            expect(service.getApplicationsByCLFile).toHaveBeenCalledWith('234');
 
-            expect(service.getAppByDTID).toHaveBeenCalledWith(123);
-            expect(service.getAppByDTID).toHaveBeenCalledWith(234);
+            expect(service.getApplicationsByDispositionID).toHaveBeenCalledWith(123);
+            expect(service.getApplicationsByDispositionID).toHaveBeenCalledWith(234);
 
             const finalResults = Array.from(resultingApplications);
             expect(finalResults).toEqual([
@@ -505,16 +507,16 @@ describe('SearchService', () => {
 
     describe('when an exception is thrown', () => {
       it('ApiService.handleError is called and the error is re-thrown', async(() => {
-        spyOn(service, 'getAppsByCLID').and.returnValue(throwError(Error('someError')));
+        spyOn(service, 'getApplicationsByCLFile').and.returnValue(throwError(Error('someError')));
 
-        spyOn(service, 'getAppByDTID').and.returnValue(of([]));
+        spyOn(service, 'getApplicationsByDispositionID').and.returnValue(of([]));
 
         apiSpy.handleError.and.callFake(error => {
           expect(error).toEqual(Error('someError'));
           return throwError(Error('someRethrownError'));
         });
 
-        service.getAppsByClidDtid(['123']).subscribe(
+        service.getApplicationsByCLFileAndTantalisID(['123']).subscribe(
           () => {
             fail('An error was expected.');
           },

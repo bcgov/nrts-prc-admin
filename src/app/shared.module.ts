@@ -8,20 +8,11 @@ import { PublishedPipe } from 'app/pipes/published.pipe';
 import { ObjectFilterPipe } from 'app/pipes/object-filter.pipe';
 import { LinkifyPipe } from 'app/pipes/linkify.pipe';
 
-import { VarDirective } from 'app/utils/ng-var.directive';
 import { FileUploadComponent } from 'app/file-upload/file-upload.component';
 
 @NgModule({
   imports: [BrowserModule, MatSlideToggleModule, MatSnackBarModule],
-  declarations: [
-    OrderByPipe,
-    NewlinesPipe,
-    PublishedPipe,
-    ObjectFilterPipe,
-    LinkifyPipe,
-    VarDirective,
-    FileUploadComponent
-  ],
+  declarations: [OrderByPipe, NewlinesPipe, PublishedPipe, ObjectFilterPipe, LinkifyPipe, FileUploadComponent],
   exports: [
     MatSlideToggleModule,
     MatSnackBarModule,
@@ -29,7 +20,6 @@ import { FileUploadComponent } from 'app/file-upload/file-upload.component';
     NewlinesPipe,
     PublishedPipe,
     LinkifyPipe,
-    VarDirective,
     FileUploadComponent
   ]
 })

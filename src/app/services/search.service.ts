@@ -18,15 +18,32 @@ export class SearchService {
 
   constructor(private api: ApiService, private applicationService: ApplicationService) {}
 
-  // get search results by array of CLIDs or DTIDs
-  getAppsByClidDtid(keys: string[]): Observable<Application[]> {
+  /**
+   * Get application search results by array of Crown Land File or Disposition ID
+   *
+   * Note: DispositionID is called TantalisID in ACRFD
+   *
+   * @param {string[]} keys
+   * @returns {Observable<Application[]>}
+   * @memberof SearchService
+   */
+  getApplicationsByCLFileAndTantalisID(keys: string[]): Observable<Application[]> {
     this.isError = false;
-    const observables = keys.map(clid => this.getAppsByCLID(clid)).concat(keys.map(dtid => this.getAppByDTID(+dtid)));
+    const observables = keys
+      .map(clid => this.getApplicationsByCLFile(clid))
+      .concat(keys.map(dtid => this.getApplicationsByDispositionID(+dtid)));
     return merge(...observables).pipe(catchError(error => this.api.handleError(error)));
   }
 
-  // get search results by CL File #
-  private getAppsByCLID(clid: string): Observable<Application[]> {
+  /**
+   * Get application search results by Crown Land File #
+   *
+   * @private
+   * @param {string} clid
+   * @returns {Observable<Application[]>}
+   * @memberof SearchService
+   */
+  private getApplicationsByCLFile(clid: string): Observable<Application[]> {
     const getByCrownLandID = this.applicationService.getByCrownLandID(clid, { getCurrentPeriod: true });
 
     const searchAppsByCLID = this.api.searchAppsByCLID(clid).pipe(
@@ -117,8 +134,15 @@ export class SearchService {
     );
   }
 
-  // get search results by Disposition Transaction ID
-  private getAppByDTID(dtid: number): Observable<Application[]> {
+  /**
+   * Get application search results by Disposition Transaction ID
+   *
+   * @private
+   * @param {number} dtid
+   * @returns {Observable<Application[]>}
+   * @memberof SearchService
+   */
+  private getApplicationsByDispositionID(dtid: number): Observable<Application[]> {
     const getByTantalisID = this.applicationService.getByTantalisID(dtid, { getCurrentPeriod: true });
 
     const searchAppsByDTID = this.api.searchAppsByDTID(dtid).pipe(

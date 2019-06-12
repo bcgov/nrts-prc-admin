@@ -6,8 +6,6 @@ import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { KeycloakService } from 'app/services/keycloak.service';
-
 import { Application } from 'app/models/application';
 import { Comment } from 'app/models/comment';
 import { CommentPeriod } from 'app/models/commentperiod';
@@ -37,6 +35,37 @@ interface IRefreshApplicationResponse {
   features: Feature[];
 }
 
+/**
+ * Supported query parameters for application requests.
+ *
+ * Note: all parameters are optional.
+ *
+ * @export
+ * @interface IApplicationParameters
+ */
+export interface IApplicationParameters {
+  pageNum?: number;
+  pageSize?: number;
+  cpStart?: Date;
+  cpEnd?: Date;
+  tantalisID?: number;
+  cl_file?: number;
+  purpose?: string[];
+  subpurpose?: string[];
+  status?: string[];
+  reason?: string[];
+  subtype?: string;
+  agency?: string;
+  businessUnit?: string;
+  client?: string;
+  tenureStage?: string;
+  areaHectares?: string;
+  statusHistoryEffectiveDate?: Date;
+  centroid?: string;
+  publishDate?: Date;
+  isDeleted?: boolean;
+}
+
 @Injectable()
 export class ApiService {
   public token: string;
@@ -46,7 +75,7 @@ export class ApiService {
   // params: Params;
   env: 'local' | 'dev' | 'test' | 'demo' | 'scale' | 'beta' | 'master' | 'prod';
 
-  constructor(private http: HttpClient, private keycloakService: KeycloakService) {
+  constructor(private http: HttpClient) {
     // this.jwtHelper = new JwtHelperService();
     const currentUser = JSON.parse(window.localStorage.getItem('currentUser'));
     this.token = currentUser && currentUser.token;
@@ -112,9 +141,6 @@ export class ApiService {
       ? `${error.status} - ${error.statusText}`
       : 'Server error';
     console.log('API error =', reason);
-    if (error && error.status === 403 && !this.keycloakService.isKeyCloakEnabled()) {
-      window.location.href = '/admin/login';
-    }
     return throwError(error);
   }
 
@@ -146,7 +172,15 @@ export class ApiService {
   //
   // Applications
   //
-  getApplications(pageNum: number, pageSize: number): Observable<Application[]> {
+
+  /**
+   * Fetch all applications that match the provided parameters.
+   *
+   * @param {IApplicationParameters} [queryParams=null]
+   * @returns {Observable<Application[]>}
+   * @memberof ApiService
+   */
+  getApplications(queryParams: IApplicationParameters = null): Observable<Application[]> {
     const fields = [
       'agency',
       'areaHectares',
@@ -169,14 +203,12 @@ export class ApiService {
       'tenureStage',
       'type'
     ];
-    let queryString = 'application?isDeleted=false&';
-    if (pageNum !== null) {
-      queryString += `pageNum=${pageNum}&`;
-    }
-    if (pageSize !== null) {
-      queryString += `pageSize=${pageSize}&`;
-    }
-    queryString += `fields=${this.buildValues(fields)}`;
+
+    const queryString =
+      'application?' +
+      `${this.buildQueryParametersString(queryParams)}&` +
+      `fields=${this.convertArrayIntoPipeString(fields)}`;
+
     return this.http.get<Application[]>(`${this.pathAPI}/${queryString}`, {});
   }
 
@@ -204,12 +236,20 @@ export class ApiService {
       'tenureStage',
       'type'
     ];
-    const queryString = `application/${id}?isDeleted=false&fields=${this.buildValues(fields)}`;
+    const queryString = `application/${id}?isDeleted=false&fields=${this.convertArrayIntoPipeString(fields)}`;
     return this.http.get<Application[]>(`${this.pathAPI}/${queryString}`, {});
   }
 
-  getCountApplications(): Observable<number> {
-    const queryString = 'application?isDeleted=false';
+  /**
+   * Gets the number of applications that match the provided parameters.
+   *
+   * @param {IApplicationParameters} [queryParams=null]
+   * @returns {Observable<number>}
+   * @memberof ApiService
+   */
+  getCountApplications(queryParams: IApplicationParameters = null): Observable<number> {
+    const queryString = 'application?' + this.buildQueryParametersString(queryParams);
+
     return this.http.head<HttpResponse<object>>(`${this.pathAPI}/${queryString}`, { observe: 'response' }).pipe(
       map(res => {
         // retrieve the count from the response headers
@@ -243,7 +283,7 @@ export class ApiService {
       'tenureStage',
       'type'
     ];
-    const queryString = `application?isDeleted=false&cl_file=${clid}&fields=${this.buildValues(fields)}`;
+    const queryString = `application?isDeleted=false&cl_file=${clid}&fields=${this.convertArrayIntoPipeString(fields)}`;
     return this.http.get<Application[]>(`${this.pathAPI}/${queryString}`, {});
   }
 
@@ -271,7 +311,9 @@ export class ApiService {
       'tenureStage',
       'type'
     ];
-    const queryString = `application?isDeleted=false&tantalisId=${tantalisId}&fields=${this.buildValues(fields)}`;
+    const queryString = `application?isDeleted=false&tantalisId=${tantalisId}&fields=${this.convertArrayIntoPipeString(
+      fields
+    )}`;
     return this.http.get<Application[]>(`${this.pathAPI}/${queryString}`, {});
   }
 
@@ -310,13 +352,18 @@ export class ApiService {
   //
   getFeaturesByTantalisId(tantalisId: number): Observable<Feature[]> {
     const fields = ['type', 'tags', 'geometry', 'properties', 'isDeleted', 'applicationID'];
-    const queryString = `feature?isDeleted=false&tantalisId=${tantalisId}&fields=${this.buildValues(fields)}`;
+    const queryString = `feature?isDeleted=false&tantalisId=${tantalisId}&fields=${this.convertArrayIntoPipeString(
+      fields
+    )}`;
     return this.http.get<Feature[]>(`${this.pathAPI}/${queryString}`, {});
   }
 
   getFeaturesByApplicationId(applicationId: string): Observable<Feature[]> {
     const fields = ['type', 'tags', 'geometry', 'properties', 'isDeleted', 'applicationID'];
-    const queryString = `feature?isDeleted=false&applicationId=${applicationId}&fields=${this.buildValues(fields)}`;
+    const queryString =
+      'feature?isDeleted=false&' +
+      `applicationId=${applicationId}&` +
+      `fields=${this.convertArrayIntoPipeString(fields)}`;
     return this.http.get<Feature[]>(`${this.pathAPI}/${queryString}`, {});
   }
 
@@ -340,14 +387,14 @@ export class ApiService {
   //
   getDecisionsByAppId(appId: string): Observable<Decision[]> {
     const fields = ['_addedBy', '_application', 'name', 'description'];
-    const queryString = `decision?_application=${appId}&fields=${this.buildValues(fields)}`;
+    const queryString = `decision?_application=${appId}&fields=${this.convertArrayIntoPipeString(fields)}`;
     return this.http.get<Decision[]>(`${this.pathAPI}/${queryString}`, {});
   }
 
   // NB: returns array with 1 element
   getDecision(id: string): Observable<Decision[]> {
     const fields = ['_addedBy', '_application', 'name', 'description'];
-    const queryString = `decision/${id}?fields=${this.buildValues(fields)}`;
+    const queryString = `decision/${id}?fields=${this.convertArrayIntoPipeString(fields)}`;
     return this.http.get<Decision[]>(`${this.pathAPI}/${queryString}`, {});
   }
 
@@ -381,14 +428,16 @@ export class ApiService {
   //
   getPeriodsByAppId(appId: string): Observable<CommentPeriod[]> {
     const fields = ['_addedBy', '_application', 'startDate', 'endDate'];
-    const queryString = `commentperiod?isDeleted=false&_application=${appId}&fields=${this.buildValues(fields)}`;
+    const queryString = `commentperiod?isDeleted=false&_application=${appId}&fields=${this.convertArrayIntoPipeString(
+      fields
+    )}`;
     return this.http.get<CommentPeriod[]>(`${this.pathAPI}/${queryString}`, {});
   }
 
   // NB: returns array with 1 element
   getPeriod(id: string): Observable<CommentPeriod[]> {
     const fields = ['_addedBy', '_application', 'startDate', 'endDate'];
-    const queryString = `commentperiod/${id}?fields=${this.buildValues(fields)}`;
+    const queryString = `commentperiod/${id}?fields=${this.convertArrayIntoPipeString(fields)}`;
     return this.http.get<CommentPeriod[]>(`${this.pathAPI}/${queryString}`, {});
   }
 
@@ -453,7 +502,7 @@ export class ApiService {
     if (sortBy !== null) {
       queryString += `sortBy=${sortBy}&`;
     }
-    queryString += `fields=${this.buildValues(fields)}`;
+    queryString += `fields=${this.convertArrayIntoPipeString(fields)}`;
 
     return this.http.get<Comment[]>(`${this.pathAPI}/${queryString}`, {});
   }
@@ -470,7 +519,7 @@ export class ApiService {
       'dateAdded',
       'commentStatus'
     ];
-    const queryString = `comment/${id}?fields=${this.buildValues(fields)}`;
+    const queryString = `comment/${id}?fields=${this.convertArrayIntoPipeString(fields)}`;
     return this.http.get<Comment[]>(`${this.pathAPI}/${queryString}`, {});
   }
 
@@ -499,19 +548,25 @@ export class ApiService {
   //
   getDocumentsByAppId(appId: string): Observable<Document[]> {
     const fields = ['_application', 'documentFileName', 'displayName', 'internalURL', 'internalMime'];
-    const queryString = `document?isDeleted=false&_application=${appId}&fields=${this.buildValues(fields)}`;
+    const queryString = `document?isDeleted=false&_application=${appId}&fields=${this.convertArrayIntoPipeString(
+      fields
+    )}`;
     return this.http.get<Document[]>(`${this.pathAPI}/${queryString}`, {});
   }
 
   getDocumentsByCommentId(commentId: string): Observable<Document[]> {
     const fields = ['_comment', 'documentFileName', 'displayName', 'internalURL', 'internalMime'];
-    const queryString = `document?isDeleted=false&_comment=${commentId}&fields=${this.buildValues(fields)}`;
+    const queryString = `document?isDeleted=false&_comment=${commentId}&fields=${this.convertArrayIntoPipeString(
+      fields
+    )}`;
     return this.http.get<Document[]>(`${this.pathAPI}/${queryString}`, {});
   }
 
   getDocumentsByDecisionId(decisionId: string): Observable<Document[]> {
     const fields = ['_decision', 'documentFileName', 'displayName', 'internalURL', 'internalMime'];
-    const queryString = `document?isDeleted=false&_decision=${decisionId}&fields=${this.buildValues(fields)}`;
+    const queryString = `document?isDeleted=false&_decision=${decisionId}&fields=${this.convertArrayIntoPipeString(
+      fields
+    )}`;
     return this.http.get<Document[]>(`${this.pathAPI}/${queryString}`, {});
   }
 
@@ -538,7 +593,7 @@ export class ApiService {
 
   uploadDocument(formData: FormData): Observable<Document> {
     const fields = ['documentFileName', 'displayName', 'internalURL', 'internalMime'];
-    const queryString = `document/?fields=${this.buildValues(fields)}`;
+    const queryString = `document/?fields=${this.convertArrayIntoPipeString(fields)}`;
     return this.http.post<Document>(`${this.pathAPI}/${queryString}`, formData, {});
   }
 
@@ -597,7 +652,7 @@ export class ApiService {
   //
   getUsers(): Observable<User[]> {
     const fields = ['displayName', 'username', 'firstName', 'lastName'];
-    const queryString = `user?fields=${this.buildValues(fields)}`;
+    const queryString = `user?fields=${this.convertArrayIntoPipeString(fields)}`;
     return this.http.get<User[]>(`${this.pathAPI}/${queryString}`, {});
   }
 
@@ -627,5 +682,105 @@ export class ApiService {
     }
 
     return collection.join('|');
+  }
+
+  /**
+   * Checks each parameters of the given queryParams and builds a single query string.
+   *
+   * @param {IApplicationParameters} queryParams
+   * @returns {string}
+   * @memberof ApiService
+   */
+  public buildQueryParametersString(queryParams: IApplicationParameters): string {
+    if (!queryParams) {
+      return '';
+    }
+
+    let queryString = '';
+
+    if (queryParams.pageNum >= 0) {
+      queryString += `pageNum=${queryParams.pageNum}&`;
+    }
+
+    if (queryParams.pageSize >= 0) {
+      queryString += `pageSize=${queryParams.pageSize}&`;
+    }
+
+    if (queryParams.cpStart) {
+      queryString += `cpStart=${queryParams.cpStart.toISOString()}&`;
+    }
+
+    if (queryParams.cpEnd) {
+      queryString += `cpEnd=${queryParams.cpEnd.toISOString()}&`;
+    }
+
+    if (queryParams.tantalisID >= 0) {
+      queryString += `tantalisID=${queryParams.tantalisID}&`;
+    }
+
+    if (queryParams.cl_file >= 0) {
+      queryString += `cl_file=${queryParams.cl_file}&`;
+    }
+
+    if (queryParams.purpose && queryParams.purpose.length) {
+      queryParams.purpose.forEach((purpose: string) => (queryString += `purpose[eq]=${encodeURIComponent(purpose)}&`));
+    }
+
+    if (queryParams.subpurpose && queryParams.subpurpose.length) {
+      queryParams.subpurpose.forEach(
+        (subpurpose: string) => (queryString += `subpurpose[eq]=${encodeURIComponent(subpurpose)}&`)
+      );
+    }
+
+    if (queryParams.status && queryParams.status.length) {
+      queryParams.status.forEach((status: string) => (queryString += `status[eq]=${encodeURIComponent(status)}&`));
+    }
+
+    if (queryParams.reason && queryParams.reason.length) {
+      queryParams.reason.forEach((reason: string) => (queryString += `reason[eq]=${encodeURIComponent(reason)}&`));
+    }
+
+    if (queryParams.subtype) {
+      queryString += `subtype=${encodeURIComponent(queryParams.subtype)}&`;
+    }
+
+    if (queryParams.agency) {
+      queryString += `agency=${encodeURIComponent(queryParams.agency)}&`;
+    }
+
+    if (queryParams.businessUnit) {
+      queryString += `businessUnit[eq]=${encodeURIComponent(queryParams.businessUnit)}&`;
+    }
+
+    if (queryParams.client) {
+      queryString += `client=${encodeURIComponent(queryParams.client)}&`;
+    }
+
+    if (queryParams.tenureStage) {
+      queryString += `tenureStage=${encodeURIComponent(queryParams.tenureStage)}&`;
+    }
+
+    if (queryParams.areaHectares) {
+      queryString += `areaHectares=${encodeURIComponent(queryParams.areaHectares)}&`;
+    }
+
+    if (queryParams.statusHistoryEffectiveDate) {
+      queryString += `statusHistoryEffectiveDate=${queryParams.statusHistoryEffectiveDate.toISOString()}&`;
+    }
+
+    if (queryParams.centroid) {
+      queryString += `centroid=${queryParams.centroid}&`;
+    }
+
+    if (queryParams.publishDate) {
+      queryString += `publishDate=${queryParams.publishDate.toISOString()}&`;
+    }
+
+    if ([true, false].includes(queryParams.isDeleted)) {
+      queryString += `isDeleted=${queryParams.isDeleted}&`;
+    }
+
+    // trim the last &
+    return queryString.replace(/\&$/, '');
   }
 }

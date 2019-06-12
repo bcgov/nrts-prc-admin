@@ -8,7 +8,7 @@ import * as _ from 'lodash';
 import { Application } from 'app/models/application';
 import { Comment } from 'app/models/comment';
 import { CommentService } from 'app/services/comment.service';
-import { ExcelService } from 'app/services/excel.service';
+import { ExportService } from 'app/services/export.service';
 
 class SortKey {
   innerHTML: string;
@@ -51,7 +51,7 @@ export class ReviewCommentsComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private commentService: CommentService,
-    private excelService: ExcelService
+    private exportService: ExportService
   ) {}
 
   ngOnInit() {
@@ -186,7 +186,7 @@ export class ReviewCommentsComponent implements OnInit, OnDestroy {
             'isPublished'
             // document columns go here
           ];
-          this.excelService.exportAsExcelFile(flatComments, excelFileName, columnOrder);
+          this.exportService.exportAsExcelFile(flatComments, excelFileName, columnOrder);
         },
         error => console.log('error =', error)
       );

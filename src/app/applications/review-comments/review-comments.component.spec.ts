@@ -6,7 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterTestingModule } from '@angular/router/testing';
 import { NewlinesPipe } from 'app/pipes/newlines.pipe';
 import { CommentService } from 'app/services/comment.service';
-import { ExcelService } from 'app/services/excel.service';
+import { ExportService } from 'app/services/export.service';
 import { ApiService } from 'app/services/api';
 import { Application } from 'app/models/application';
 import { Comment } from 'app/models/comment';
@@ -64,7 +64,7 @@ describe('ReviewCommentsComponent', () => {
       declarations: [ReviewCommentsComponent, NewlinesPipe, CommentDetailStubComponent, SearchComponent],
       providers: [
         { provide: CommentService, useValue: commentServiceStub },
-        { provide: ExcelService },
+        { provide: ExportService },
         { provide: ApiService },
         { provide: ActivatedRoute, useValue: activatedRouteStub }
       ]

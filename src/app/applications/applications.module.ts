@@ -19,7 +19,7 @@ import { CommentDetailComponent } from './review-comments/comment-detail/comment
 // services
 import { ApiService } from 'app/services/api';
 import { ApplicationService } from 'app/services/application.service';
-import { ExcelService } from 'app/services/excel.service';
+import { ExportService } from 'app/services/export.service';
 
 @NgModule({
   imports: [
@@ -47,6 +47,6 @@ import { ExcelService } from 'app/services/excel.service';
     ReviewCommentsComponent,
     CommentDetailComponent
   ],
-  providers: [ApiService, ApplicationService, ExcelService]
+  providers: [ApiService, ApplicationService, ExportService]
 })
 export class ApplicationsModule {}
