@@ -11,7 +11,7 @@ export class DocumentService {
 
   // get all documents for the specified application id
   getAllByApplicationId(id: string): Observable<Document[]> {
-    return this.api.getDocumentsByAppId(id).pipe(
+    return this.api.getDocumentsByApplicationId(id).pipe(
       map(res => {
         if (res && res.length > 0) {
           const documents: Document[] = [];

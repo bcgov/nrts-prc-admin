@@ -8,7 +8,7 @@
     </div>
     <div class="title-container">
       <div class="title-container__title">
-        <h1>Review Comments for Crown Land File: {{application.clFile}}</h1>
+        <h1>Review Comments for Crown Land File: {{application.meta.clFile}}</h1>
       </div>
       <div class="title-container__actions">
         <button class="btn btn-light" (click)="exportToExcel()" [disabled]="comments.length === 0">
@@ -43,11 +43,11 @@
 
               <div class="comment-body">{{item.comment}}</div>
 
-              <div class="comment-attachments" *ngIf="item.documents.length > 0">
+              <div class="comment-attachments" *ngIf="item.meta.documents.length > 0">
                 <i class="material-icons">
                   attach_file
                 </i>
-                {{item.documents && item.documents.length}} {{item.documents.length === 1 ? "Attachment":"Attachments"}}
+                {{item.meta.documents && item.meta.documents.length}} {{item.meta.documents.length === 1 ? "Attachment":"Attachments"}}
               </div>
             </div>
           </ng-template>

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
-import { map, flatMap, catchError } from 'rxjs/operators';
+import { map, mergeMap, catchError } from 'rxjs/operators';
 import * as _ from 'lodash';
 
 import { ApiService } from './api';
@@ -18,8 +18,8 @@ export class DecisionService {
   // get decision for the specified application id
   getByApplicationId(appId: string, params: IGetParameters = null): Observable<Decision> {
     // first get the decision data
-    return this.api.getDecisionsByAppId(appId).pipe(
-      flatMap(res => {
+    return this.api.getDecisionsByApplicationId(appId).pipe(
+      mergeMap(res => {
         if (res && res.length > 0) {
           // return the first (only) decision
           const decision = new Decision(res[0]);
@@ -28,7 +28,7 @@ export class DecisionService {
           if (params && params.getDocuments) {
             return this.documentService.getAllByDecisionId(decision._id).pipe(
               map(documents => {
-                decision.documents = documents;
+                decision.meta.documents = documents;
                 return decision;
               })
             );
@@ -46,7 +46,7 @@ export class DecisionService {
   getById(decisionId, params: IGetParameters = null): Observable<Decision> {
     // first get the decision data
     return this.api.getDecision(decisionId).pipe(
-      flatMap(res => {
+      mergeMap(res => {
         if (res && res.length > 0) {
           // return the first (only) decision
           const decision = new Decision(res[0]);
@@ -55,7 +55,7 @@ export class DecisionService {
           if (params && params.getDocuments) {
             return this.documentService.getAllByDecisionId(decision._id).pipe(
               map(documents => {
-                decision.documents = documents;
+                decision.meta.documents = documents;
                 return decision;
               })
             );
@@ -77,7 +77,7 @@ export class DecisionService {
     delete decision._id;
 
     // don't send documents
-    delete decision.documents;
+    delete decision.meta.documents;
 
     return this.api.addDecision(decision).pipe(catchError(error => this.api.handleError(error)));
   }
@@ -87,7 +87,7 @@ export class DecisionService {
     const decision = _.cloneDeep(orig);
 
     // don't send documents
-    delete decision.documents;
+    delete decision.meta.documents;
 
     return this.api.saveDecision(decision).pipe(catchError(error => this.api.handleError(error)));
   }

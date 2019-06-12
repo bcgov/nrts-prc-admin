@@ -8,6 +8,7 @@ import { AdministrationComponent } from './administration/administration.compone
 import { UsersComponent } from './administration/users/users.component';
 
 import { CanDeactivateGuard } from 'app/services/can-deactivate-guard.service';
+import { ListComponent } from './list/list.component';
 
 const routes: Routes = [
   {
@@ -25,6 +26,10 @@ const routes: Routes = [
   {
     path: 'not-authorized',
     component: NotAuthorizedComponent
+  },
+  {
+    path: 'list',
+    component: ListComponent
   },
   {
     path: 'search',

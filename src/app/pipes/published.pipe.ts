@@ -11,6 +11,6 @@ export class PublishedPipe implements PipeTransform {
     if (!items) {
       return items;
     }
-    return items.filter(item => item.isPublished);
+    return items.filter(item => item.meta.isPublished);
   }
 }
