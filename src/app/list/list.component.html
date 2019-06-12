@@ -1,0 +1,172 @@
+<div class="grid-container">
+
+  <div class="search-container">
+    <div class="container" id="anchor-point">
+      <h1>List Crown Land Applications</h1>
+
+      <div class="filter-grid">
+        <div>
+          <select class="form-control filter-select" (change)="setRegionFilter($event.target.value)"
+            [disabled]="searching || exporting" title="Filter by region">
+            <option value="">Filter by Region</option>
+            <option *ngFor="let regionCode of regionCodes" [value]="regionCode.code"
+              [selected]="regionCodeFilter === regionCode.code">{{regionCode.text.long}}</option>
+          </select>
+          <select class="form-control filter-select" (change)="setCommentFilter($event.target.value)"
+            [disabled]="searching || exporting" title="Filter by comment period">
+            <option value="">Filter by Comment Period</option>
+            <option *ngFor="let commentCode of commentCodes" [value]="commentCode.text.long"
+              [selected]="commentCodeFilters[0] === commentCode.text.long">{{commentCode.text.long}}
+            </option>
+          </select>
+        </div>
+
+        <div>
+          <select class="form-control filter-select" (change)="setStatusFilter($event.target.value)"
+            [disabled]="searching || exporting" title="Filter by status">
+            <option value="">Filter by Status</option>
+            <option *ngFor="let statusCode of statusCodes" [value]="statusCode.code"
+              [selected]="statusCodeFilters[0] === statusCode.code">{{statusCode.text.long}}</option>
+          </select>
+          <select class="form-control filter-select" (change)="setPurposeFilter($event.target.value)"
+            [disabled]="searching || exporting" title="Filter by purpose">
+            <option value="">Filter by Purpose</option>
+            <option *ngFor="let purposeCode of purposeCodes" [value]="purposeCode.code"
+              [selected]="purposeCodeFilters[0] === purposeCode.code">{{purposeCode.text.long}}</option>
+          </select>
+        </div>
+
+        <div class="filter-buttons">
+          <button class="filter-btn-clear btn btn-secondary" (click)="clearQueryParameters()"
+            [disabled]="searching || exporting" title="Clear search filters">Clear</button>
+          <button class="filter-btn-search btn btn-primary" type="submit" (click)="getApplications()"
+            [disabled]="searching || exporting" title="Search for applications">
+            Search
+            <i class="spinner-border" [hidden]="!searching"></i>
+          </button>
+          <button class="filter-btn-export btn btn-light" (click)="export()" [disabled]="searching || exporting"
+            title="Export application list as CSV">
+            Export
+            <i class="material-icons" [hidden]="exporting">file_download</i>
+            <i class="spinner-border" [hidden]="!exporting"></i>
+          </button>
+        </div>
+
+        <div>
+          <div class="filter-count">
+            {{this.pagination.message}}
+          </div>
+
+          <div class="pagination-nav" [hidden]="pagination.pageCount <= 1">
+            <ul class="pagination" [ngClass]="{'disabled': searching || exporting}">
+              <li>
+                <a class="page-link" (click)="updatePage(-1)" [hidden]="pagination.currentPage <= 1"
+                  title="Previous page">Prev</a>
+              </li>
+              <li>
+                <a class="page-link" (click)="setPage(pagination.currentPage - 1)"
+                  [hidden]="pagination.currentPage <= 1"
+                  title="Page {{pagination.currentPage - 1}}">{{pagination.currentPage - 1}}</a>
+              </li>
+              <li>
+                <a class="page-link current-page" (click)="setPage(pagination.currentPage)"
+                  title="Page {{pagination.currentPage}}">{{pagination.currentPage}}</a>
+              </li>
+              <li>
+                <a class="page-link" (click)="setPage(pagination.currentPage + 1)"
+                  [hidden]="pagination.currentPage >= pagination.pageCount"
+                  title="Page {{pagination.currentPage + 1}}">{{pagination.currentPage + 1}}</a>
+              </li>
+              <li>
+                <a class="page-link" (click)="updatePage(1)" [hidden]="pagination.currentPage === pagination.pageCount"
+                  title="Next page">Next</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="loading-container" *ngIf="loading">
+      <div class="spinner-new rotating"></div>
+    </div>
+    <div *ngIf="!loading">
+      <table class="table-cards" id="table-card">
+        <thead>
+          <tr>
+            <th class="sortable" (click)="sort('applicants')">Applicant(s)
+              <i class="sort"
+                [ngClass]="{'sort-asc': (sorting.column == 'applicants' && sorting.direction < 0), 'sort-desc': (sorting.column == 'applicants' && sorting.direction > 0) }"
+                aria-hidden="true"></i>
+            </th>
+            <th class="sortable" (click)="sort('clFile')">CL File
+              <i class="sort"
+                [ngClass]="{'sort-asc': (sorting.column == 'clFile' && sorting.direction < 0), 'sort-desc': (sorting.column == 'clFile' && sorting.direction > 0) }"
+                aria-hidden="true"></i>
+            </th>
+            <th class="sortable" (click)="sort('purpose')">Purpose / Subpurpose
+              <i class="sort"
+                [ngClass]="{'sort-asc': (sorting.column == 'purpose' && sorting.direction < 0), 'sort-desc': (sorting.column == 'purpose' && sorting.direction > 0) }"
+                aria-hidden="true"></i>
+            </th>
+            <th class="sortable" (click)="sort('region')">Region
+              <i class="sort"
+                [ngClass]="{'sort-asc': (sorting.column == 'region' && sorting.direction < 0), 'sort-desc': (sorting.column == 'region' && sorting.direction > 0) }"
+                aria-hidden="true"></i>
+            </th>
+            <th class="sortable" (click)="sort('status')">Status
+              <i class="sort"
+                [ngClass]="{'sort-asc': (sorting.column == 'status' && sorting.direction < 0), 'sort-desc': (sorting.column == 'status' && sorting.direction > 0) }"
+                aria-hidden="true"></i>
+            </th>
+            <th class="sortable" (click)="sort('cpStatus')">CP Status
+              <i class="sort"
+                [ngClass]="{'sort-asc': (sorting.column == 'cpStatus' && sorting.direction < 0), 'sort-desc': (sorting.column == 'cpStatus' && sorting.direction > 0) }"
+                aria-hidden="true"></i>
+            </th>
+            <th class="sortable" (click)="sort('numComments')">Comments
+              <i class="sort"
+                [ngClass]="{'sort-asc': (sorting.column == 'numComments' && sorting.direction < 0), 'sort-desc': (sorting.column == 'numComments' && sorting.direction > 0) }"
+                aria-hidden="true"></i>
+            </th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <ng-container
+            *ngFor="let app of applications | orderBy: {property: sorting.column, direction: sorting.direction}">
+            <tr>
+              <td data-label="Applicant(s)">
+                <span>{{app.applicants || '-'}}</span>
+              </td>
+              <td data-label="CL File">
+                <span>
+                  <a [routerLink]="['/a', app._id]">{{app.clFile || '-'}}</a>
+                </span>
+              </td>
+              <td data-label="Purpose / Subpurpose">
+                <span>{{app.purpose || '-'}} / {{app.subpurpose || '-'}}</span>
+              </td>
+              <td data-label="Region">
+                <span>{{app.region || '-'}}</span>
+              </td>
+              <td data-label="Status">
+                <span>{{app.status || '-'}}</span>
+              </td>
+              <td data-label="CP Status">
+                <span>{{app.cpStatus}}</span>
+              </td>
+              <td data-label="Comments" class="text-align">
+                <span>{{app.numComments}}</span>
+              </td>
+            </tr>
+          </ng-container>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>

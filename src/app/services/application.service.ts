@@ -4,7 +4,7 @@ import { flatMap, map, catchError } from 'rxjs/operators';
 import * as moment from 'moment';
 import * as _ from 'lodash';
 
-import { ApiService } from './api';
+import { ApiService, IApplicationParameters } from './api';
 import { DocumentService } from './document.service';
 import { CommentPeriodService } from './commentperiod.service';
 import { CommentService } from './comment.service';
@@ -12,7 +12,6 @@ import { DecisionService } from './decision.service';
 import { FeatureService } from './feature.service';
 
 import { Application } from 'app/models/application';
-import { CommentPeriod } from 'app/models/commentperiod';
 
 import { StatusCodes, ReasonCodes } from 'app/utils/constants/application';
 import { ConstantUtils, CodeType } from 'app/utils/constants/constantUtils';
@@ -49,26 +48,25 @@ export class ApplicationService {
   /**
    * Get applications count.
    *
-   * @returns {Observable<number>}
+   * @param {IApplicationParameters} [queryParams={ isDeleted: false }]
    * @memberof ApplicationService
    */
-  getCount(): Observable<number> {
-    return this.api.getCountApplications().pipe(catchError(error => this.api.handleError(error)));
+  getCount(queryParams: IApplicationParameters = { isDeleted: false }): Observable<number> {
+    return this.api.getCountApplications(queryParams).pipe(catchError(error => this.api.handleError(error)));
   }
 
   /**
    * Get all applications.
    *
-   * Note: currently returns at most 1000 records.
-   *
    * @param {IGetParameters} [params=null]
+   * @param {number} [pageNum=0]
+   * @param {number} [pageSize=1000]
    * @returns {Observable<Application[]>}
    * @memberof ApplicationService
    */
-  getAll(params: IGetParameters = null): Observable<Application[]> {
+  getAll(dataParams: IGetParameters = null, queryParams: IApplicationParameters = null): Observable<Application[]> {
     // first get just the applications
-    // NB: max 1000 records
-    return this.api.getApplications(0, 1000).pipe(
+    return this.api.getApplications(queryParams).pipe(
       flatMap(apps => {
         if (!apps || apps.length === 0) {
           // NB: forkJoin([]) will complete immediately
@@ -78,7 +76,7 @@ export class ApplicationService {
         const observables: Array<Observable<Application>> = [];
         apps.forEach(app => {
           // now get the rest of the data for each application
-          observables.push(this._getExtraAppData(new Application(app), params || {}));
+          observables.push(this._getExtraAppData(new Application(app), dataParams || {}));
         });
         return forkJoin(observables);
       }),
@@ -159,6 +157,51 @@ export class ApplicationService {
   }
 
   /**
+   * Fetches comment data.
+   *
+   * @private
+   * @param {Application} application
+   * @returns
+   * @memberof ApplicationService
+   */
+  private _getExtraCommentData(application: Application) {
+    return this.commentPeriodService.getAllByApplicationId(application._id).pipe(
+      flatMap(periods => {
+        application.currentPeriod = this.commentPeriodService.getCurrent(periods);
+
+        // user-friendly comment period long status string
+        const commentPeriodCode = this.commentPeriodService.getCode(application.currentPeriod);
+        application.cpStatus = ConstantUtils.getTextLong(CodeType.COMMENT, commentPeriodCode);
+
+        // derive days remaining for display
+        // use moment to handle Daylight Saving Time changes
+        if (application.currentPeriod && this.commentPeriodService.isOpen(commentPeriodCode)) {
+          const now = new Date();
+          const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+          application.currentPeriod['daysRemaining'] =
+            moment(application.currentPeriod.endDate).diff(moment(today), 'days') + 1; // including today
+        }
+
+        // get the number of comments for the current comment period only
+        // multiple comment periods are currently not supported
+        if (!application.currentPeriod) {
+          application['numComments'] = 0;
+          return of(application);
+        }
+
+        return forkJoin(
+          this.commentService.getCountByPeriodId(application.currentPeriod._id).pipe(
+            map(numComments => {
+              application['numComments'] = numComments;
+              return of(application);
+            })
+          )
+        );
+      })
+    );
+  }
+
+  /**
    * Fetches application data.
    *
    * @private
@@ -175,7 +218,7 @@ export class ApplicationService {
     return forkJoin(
       getFeatures ? this.featureService.getByApplicationId(application._id) : of(null),
       getDocuments ? this.documentService.getAllByApplicationId(application._id) : of(null),
-      getCurrentPeriod ? this.commentPeriodService.getAllByApplicationId(application._id) : of(null),
+      getCurrentPeriod ? this._getExtraCommentData(application) : of(null),
       getDecision ? this.decisionService.getByApplicationId(application._id, { getDocuments: true }) : of(null)
     ).pipe(
       map(payloads => {
@@ -185,32 +228,6 @@ export class ApplicationService {
 
         if (getDocuments) {
           application.documents = payloads[1];
-        }
-
-        if (getCurrentPeriod) {
-          const periods: CommentPeriod[] = payloads[2];
-          application.currentPeriod = this.commentPeriodService.getCurrent(periods);
-
-          // user-friendly comment period long status string
-          const commentPeriodCode = this.commentPeriodService.getCode(application.currentPeriod);
-          application.cpStatus = ConstantUtils.getTextLong(CodeType.COMMENT, commentPeriodCode);
-
-          // derive days remaining for display
-          // use moment to handle Daylight Saving Time changes
-          if (application.currentPeriod && this.commentPeriodService.isOpen(commentPeriodCode)) {
-            const now = new Date();
-            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-            application.currentPeriod['daysRemaining'] =
-              moment(application.currentPeriod.endDate).diff(moment(today), 'days') + 1; // including today
-          }
-
-          // get the number of comments for the current comment period only
-          // multiple comment periods are currently not supported
-          if (application.currentPeriod) {
-            this.commentService.getCountByPeriodId(application.currentPeriod._id).subscribe(numComments => {
-              application['numComments'] = numComments;
-            });
-          }
         }
 
         if (getDecision) {
@@ -333,7 +350,7 @@ export class ApplicationService {
    * @memberof ApplicationService
    */
   isAmendment(application: Application): boolean {
-    return (
+    return !!(
       application &&
       application.status === StatusCodes.ABANDONED.code &&
       (application.reason === ReasonCodes.AMENDMENT_APPROVED.code ||

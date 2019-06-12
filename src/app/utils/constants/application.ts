@@ -87,14 +87,14 @@ export class ReasonCodes implements ICodeSet {
   public static readonly AMENDMENT_APPROVED: ICodeGroup = {
     code: 'AMENDMENT APPROVED - APPLICATION',
     param: 'AA',
-    text: { long: 'Amendment: Approved', short: 'Approved' },
+    text: { long: 'Amendment: Approved', short: 'Amendment: Approved' },
     mappedCodes: []
   };
 
   public static readonly AMENDMENT_NOT_APPROVED: ICodeGroup = {
     code: 'AMENDMENT NOT APPROVED - APPLICATION',
     param: 'ANA',
-    text: { long: 'Amendment: Not Approved', short: 'Not Approved' },
+    text: { long: 'Amendment: Not Approved', short: 'Amendment: Not Approved' },
     mappedCodes: []
   };
 
@@ -116,56 +116,56 @@ export class RegionCodes implements ICodeSet {
   public static readonly CARIBOO: ICodeGroup = {
     code: 'CA - LAND MGMNT - CARIBOO FIELD OFFICE',
     param: 'CA',
-    text: { long: 'Cariboo, Williams Lake', short: '' },
+    text: { long: 'Cariboo, Williams Lake', short: 'Cariboo, Williams Lake' },
     mappedCodes: []
   };
 
   public static readonly KOOTENAY: ICodeGroup = {
     code: 'KO - LAND MGMNT - KOOTENAY FIELD OFFICE',
     param: 'KO',
-    text: { long: 'Kootenay, Cranbrook', short: '' },
+    text: { long: 'Kootenay, Cranbrook', short: 'Kootenay, Cranbrook' },
     mappedCodes: []
   };
 
   public static readonly LOWER_MAINLAND: ICodeGroup = {
     code: 'LM - LAND MGMNT - LOWER MAINLAND SERVICE REGION',
     param: 'LM',
-    text: { long: 'Lower Mainland, Surrey', short: '' },
+    text: { long: 'Lower Mainland, Surrey', short: 'Lower Mainland, Surrey' },
     mappedCodes: []
   };
 
   public static readonly OMENICA: ICodeGroup = {
     code: 'OM - LAND MGMNT - NORTHERN SERVICE REGION',
     param: 'OM',
-    text: { long: 'Omenica/Peace, Prince George', short: '' },
+    text: { long: 'Omenica/Peace, Prince George', short: 'Omenica/Peace, Prince George' },
     mappedCodes: []
   };
 
   public static readonly PEACE: ICodeGroup = {
     code: 'PE - LAND MGMNT - PEACE FIELD OFFICE',
     param: 'PE',
-    text: { long: 'Peace, Ft. St. John', short: '' },
+    text: { long: 'Peace, Ft. St. John', short: 'Peace, Ft. St. John' },
     mappedCodes: []
   };
 
   public static readonly SKEENA: ICodeGroup = {
     code: 'SK - LAND MGMNT - SKEENA FIELD OFFICE',
     param: 'SK',
-    text: { long: 'Skeena, Smithers', short: '' },
+    text: { long: 'Skeena, Smithers', short: 'Skeena, Smithers' },
     mappedCodes: []
   };
 
   public static readonly SOUTHERN_INTERIOR: ICodeGroup = {
     code: 'SI - LAND MGMNT - SOUTHERN SERVICE REGION',
     param: 'SI',
-    text: { long: 'Thompson Okanagan, Kamloops', short: '' },
+    text: { long: 'Thompson Okanagan, Kamloops', short: 'Thompson Okanagan, Kamloops' },
     mappedCodes: []
   };
 
   public static readonly VANCOUVER_ISLAND: ICodeGroup = {
     code: 'VI - LAND MGMNT - VANCOUVER ISLAND SERVICE REGION',
     param: 'VI',
-    text: { long: 'West Coast, Nanaimo', short: '' },
+    text: { long: 'West Coast, Nanaimo', short: 'West Coast, Nanaimo' },
     mappedCodes: []
   };
 
@@ -196,21 +196,21 @@ export class PurposeCodes implements ICodeSet {
   public static readonly AGRICULTURE: ICodeGroup = {
     code: 'AGRICULTURE',
     param: 'AGR',
-    text: { long: 'Agriculture', short: '' },
+    text: { long: 'Agriculture', short: 'Agriculture' },
     mappedCodes: ['EXTENSIVE', 'INTENSIVE', 'GRAZING']
   };
 
   public static readonly 'ALL SEASONS RESORT': ICodeGroup = {
     code: 'ALL SEASONS RESORT',
     param: 'ALL',
-    text: { long: 'All Seasons Resort', short: '' },
+    text: { long: 'All Seasons Resort', short: 'All Seasons Resort' },
     mappedCodes: ['MISCELLANEOUS']
   };
 
   public static readonly 'ALPINE SKIING': ICodeGroup = {
     code: 'ALPINE SKIING',
     param: 'ALP',
-    text: { long: 'Alpine Skiing', short: '' },
+    text: { long: 'Alpine Skiing', short: 'Alpine Skiing' },
     mappedCodes: [
       'GENERAL',
       'LIFTS',
@@ -230,14 +230,14 @@ export class PurposeCodes implements ICodeSet {
   public static readonly AQUACULTURE: ICodeGroup = {
     code: 'AQUACULTURE',
     param: 'AQU',
-    text: { long: 'Aquaculture', short: '' },
+    text: { long: 'Aquaculture', short: 'Aquaculture' },
     mappedCodes: ['FIN FISH', 'SHELL FISH', 'PLANTS', 'CRUSTACEANS']
   };
 
   public static readonly COMMERCIAL: ICodeGroup = {
     code: 'COMMERCIAL',
     param: 'COM',
-    text: { long: 'Commercial', short: '' },
+    text: { long: 'Commercial', short: 'Commercial' },
     mappedCodes: [
       'GENERAL',
       'COMMERCIAL A',
@@ -260,7 +260,7 @@ export class PurposeCodes implements ICodeSet {
   public static readonly 'COMMERCIAL RECREATION': ICodeGroup = {
     code: 'COMMERCIAL RECREATION',
     param: 'CR',
-    text: { long: 'Commercial Recreation', short: '' },
+    text: { long: 'Commercial Recreation', short: 'Commercial Recreation' },
     mappedCodes: [
       'HELI SKI',
       'CAT SKI',
@@ -288,21 +288,21 @@ export class PurposeCodes implements ICodeSet {
   public static readonly COMMUNICATION: ICodeGroup = {
     code: 'COMMUNICATION',
     param: 'CMU',
-    text: { long: 'Communication', short: '' },
+    text: { long: 'Communication', short: 'Communication' },
     mappedCodes: ['COMMUNICATION SITES', 'COMBINED USES']
   };
 
   public static readonly COMMUNITY: ICodeGroup = {
     code: 'COMMUNITY',
     param: 'CMY',
-    text: { long: 'Community', short: '' },
+    text: { long: 'Community', short: 'Community' },
     mappedCodes: ['COMMUNITY FACILITY', 'MISCELLANEOUS', 'TRAIL MAINTENANCE']
   };
 
   public static readonly 'ENERGY PRODUCTION': ICodeGroup = {
     code: 'ENERGY PRODUCTION',
     param: 'EP',
-    text: { long: 'Energy Production', short: '' },
+    text: { long: 'Energy Production', short: 'Energy Production' },
     mappedCodes: [
       'GENERAL',
       'BATTERY SITE',
@@ -325,7 +325,7 @@ export class PurposeCodes implements ICodeSet {
   public static readonly 'ENVIRONMENT, CONSERVATION, & RECR': ICodeGroup = {
     code: 'ENVIRONMENT, CONSERVATION, & RECR',
     param: 'ECR',
-    text: { long: 'Environment, Conservation, & Recreation', short: '' },
+    text: { long: 'Environment, Conservation, & Recreation', short: 'Environment, Conservation, & Recreation' },
     mappedCodes: [
       'ECOLOGICAL RESERVE',
       'GREENBELT',
@@ -349,7 +349,7 @@ export class PurposeCodes implements ICodeSet {
   public static readonly 'FIRST NATIONS': ICodeGroup = {
     code: 'FIRST NATIONS',
     param: 'FN',
-    text: { long: 'First Nations', short: '' },
+    text: { long: 'First Nations', short: 'First Nations' },
     mappedCodes: [
       'INDIAN CUT-OFF',
       'RESERVE EXPANSION',
@@ -367,7 +367,7 @@ export class PurposeCodes implements ICodeSet {
   public static readonly INDUSTRIAL: ICodeGroup = {
     code: 'INDUSTRIAL',
     param: 'IND',
-    text: { long: 'Industrial', short: '' },
+    text: { long: 'Industrial', short: 'Industrial' },
     mappedCodes: [
       'GENERAL',
       'LIGHT INDUSTRIAL',
@@ -382,7 +382,7 @@ export class PurposeCodes implements ICodeSet {
   public static readonly INSTITUTIONAL: ICodeGroup = {
     code: 'INSTITUTIONAL',
     param: 'INS',
-    text: { long: 'Institutional', short: '' },
+    text: { long: 'Institutional', short: 'Institutional' },
     mappedCodes: [
       'FIRE HALL',
       'LOCAL/REGIONAL PARK',
@@ -402,21 +402,21 @@ export class PurposeCodes implements ICodeSet {
   public static readonly 'MISCELLANEOUS LAND USES': ICodeGroup = {
     code: 'MISCELLANEOUS LAND USES',
     param: 'MLU',
-    text: { long: 'Miscellaneous Land Uses', short: '' },
+    text: { long: 'Miscellaneous Land Uses', short: 'Miscellaneous Land Uses' },
     mappedCodes: ['PLANNING/MARKETING/DEVELOP PROJECTS', 'LAND EXCHANGE', 'OTHER', 'LAND USE PLAN INTERIM AGREEMENT']
   };
 
   public static readonly 'OCEAN ENERGY': ICodeGroup = {
     code: 'OCEAN ENERGY',
     param: 'OE',
-    text: { long: 'Ocean Energy', short: '' },
+    text: { long: 'Ocean Energy', short: 'Ocean Energy' },
     mappedCodes: ['INVESTIGATIVE AND MONITORING PHASE', 'GENERAL AREA']
   };
 
   public static readonly QUARRYING: ICodeGroup = {
     code: 'QUARRYING',
     param: 'QRY',
-    text: { long: 'Quarrying', short: '' },
+    text: { long: 'Quarrying', short: 'Quarrying' },
     mappedCodes: [
       'SAND AND GRAVEL',
       'PEAT AND SOIL',
@@ -433,7 +433,7 @@ export class PurposeCodes implements ICodeSet {
   public static readonly RESIDENTIAL: ICodeGroup = {
     code: 'RESIDENTIAL',
     param: 'RES',
-    text: { long: 'Residential', short: '' },
+    text: { long: 'Residential', short: 'Residential' },
     mappedCodes: [
       'URBAN RESIDENTIAL',
       'RURAL RESIDENTIAL',
@@ -452,14 +452,14 @@ export class PurposeCodes implements ICodeSet {
   public static readonly 'SOLAR POWER': ICodeGroup = {
     code: 'SOLAR POWER',
     param: 'SP',
-    text: { long: 'Solar Power', short: '' },
+    text: { long: 'Solar Power', short: 'Solar Power' },
     mappedCodes: ['INVESTIGATIVE PHASE']
   };
 
   public static readonly 'TRANSPORTATION': ICodeGroup = {
     code: 'TRANSPORTATION',
     param: 'TRN',
-    text: { long: 'Transportation', short: '' },
+    text: { long: 'Transportation', short: 'Transportation' },
     mappedCodes: [
       'AIRPORT/AIRSTRIP',
       'ROADWAY',
@@ -474,7 +474,7 @@ export class PurposeCodes implements ICodeSet {
   public static readonly UTILITY: ICodeGroup = {
     code: 'UTILITY',
     param: 'UTL',
-    text: { long: 'Utility', short: '' },
+    text: { long: 'Utility', short: 'Utility' },
     mappedCodes: [
       'ELECTRIC POWER LINE',
       'GAS AND OIL PIPELINE',
@@ -489,7 +489,7 @@ export class PurposeCodes implements ICodeSet {
   public static readonly WATERPOWER: ICodeGroup = {
     code: 'WATERPOWER',
     param: 'WAT',
-    text: { long: 'Waterpower', short: '' },
+    text: { long: 'Waterpower', short: 'Waterpower' },
     mappedCodes: [
       'GENERAL AREA',
       'POWERHOUSE SITE',
@@ -508,7 +508,7 @@ export class PurposeCodes implements ICodeSet {
   public static readonly WINDPOWER: ICodeGroup = {
     code: 'WINDPOWER',
     param: 'WND',
-    text: { long: 'Windpower', short: '' },
+    text: { long: 'Windpower', short: 'Windpower' },
     mappedCodes: [
       'INVESTIGATIVE AND MONITORING PHASE',
       'DEVELOPMENT PHASE',

@@ -16,6 +16,7 @@ import { AppRoutingModule } from 'app/app-routing.module';
 import { AppComponent } from 'app/app.component';
 import { HomeComponent } from 'app/home/home.component';
 import { SearchComponent } from 'app/search/search.component';
+import { ListComponent } from 'app/list/list.component';
 import { LoginComponent } from 'app/login/login.component';
 import { ConfirmComponent } from 'app/confirm/confirm.component';
 import { HeaderComponent } from 'app/header/header.component';
@@ -57,7 +58,8 @@ export function kcFactory(keycloakService: KeycloakService) {
     AdministrationComponent,
     UsersComponent,
     AddEditUserComponent,
-    NotAuthorizedComponent
+    NotAuthorizedComponent,
+    ListComponent
   ],
   imports: [
     BrowserModule,

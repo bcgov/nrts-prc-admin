@@ -6,6 +6,7 @@ import { ApplicationService } from './application.service';
 import { SearchService } from './search.service';
 import { SearchResults } from 'app/models/search';
 import { InterestedParty } from 'app/models/interestedParty';
+import { ReasonCodes, StatusCodes } from 'app/utils/constants/application';
 
 describe('SearchService', () => {
   beforeEach(() => {
@@ -35,7 +36,7 @@ describe('SearchService', () => {
     expect(service).toBeTruthy();
   });
 
-  describe('getAppsByClidDtid', () => {
+  describe('getApplicationsByCLFileAndTantalisID', () => {
     let service;
     let apiSpy;
     let ApplicationServiceSpy;
@@ -45,10 +46,10 @@ describe('SearchService', () => {
       ApplicationServiceSpy = TestBed.get(ApplicationService);
     });
 
-    describe('when getAppsByCLID returns results', () => {
+    describe('when getApplicationsByCLFile returns results', () => {
       beforeEach(() => {
-        // Only testing calls to getAppsByCLID
-        spyOn(service, 'getAppByDTID').and.returnValue(of([] as Application[]));
+        // Only testing calls to getApplicationsByCLFile
+        spyOn(service, 'getApplicationsByDispositionID').and.returnValue(of([] as Application[]));
       });
 
       describe('when no applications or search results are returned', () => {
@@ -57,7 +58,7 @@ describe('SearchService', () => {
 
           apiSpy.searchAppsByCLID.and.returnValue(of([] as SearchResults[]));
 
-          service.getAppsByClidDtid(['123']).subscribe(result => {
+          service.getApplicationsByCLFileAndTantalisID(['123']).subscribe(result => {
             expect(result).toEqual([] as Application[]);
           });
         }));
@@ -74,12 +75,12 @@ describe('SearchService', () => {
 
           apiSpy.searchAppsByCLID.and.returnValue(of([] as SearchResults[]));
 
-          service.getAppsByClidDtid(['123']).subscribe(res => {
+          service.getApplicationsByCLFileAndTantalisID(['123']).subscribe(res => {
             result.push(res);
           });
         }));
 
-        it('getAppsByClidDtid emits twice', async(() => {
+        it('getApplicationsByCLFileAndTantalisID emits twice', async(() => {
           expect(result.length).toEqual(2);
         }));
 
@@ -144,11 +145,12 @@ describe('SearchService', () => {
                 ],
                 CROWN_LANDS_FILE: '11',
                 DISPOSITION_TRANSACTION_SID: '33',
-                RESPONSIBLE_BUSINESS_UNIT: '44',
+                RESPONSIBLE_BUSINESS_UNIT: 'KO - LAND MGMNT - KOOTENAY FIELD OFFICE',
                 TENURE_PURPOSE: 'tenure-purpose-1',
                 TENURE_LOCATION: 'tenure-location-1',
                 TENURE_STAGE: 'tenure-stage-1',
-                TENURE_STATUS: 'tenure-status-1',
+                TENURE_STATUS: StatusCodes.ABANDONED.code,
+                TENURE_REASON: ReasonCodes.AMENDMENT_APPROVED.code,
                 TENURE_SUBPURPOSE: 'tenure-subpurpose-1',
                 TENURE_SUBTYPE: 'tenure-subtype-1',
                 TENURE_TYPE: 'tenure-type-1'
@@ -166,11 +168,12 @@ describe('SearchService', () => {
                 ],
                 CROWN_LANDS_FILE: '22',
                 DISPOSITION_TRANSACTION_SID: '55',
-                RESPONSIBLE_BUSINESS_UNIT: '66',
+                RESPONSIBLE_BUSINESS_UNIT: 'OM - LAND MGMNT - NORTHERN SERVICE REGION',
                 TENURE_PURPOSE: 'tenure-purpose-2',
                 TENURE_LOCATION: 'tenure-location-2',
                 TENURE_STAGE: 'tenure-stage-2',
-                TENURE_STATUS: 'tenure-status-2',
+                TENURE_STATUS: StatusCodes.APPLICATION_REVIEW_COMPLETE.code,
+                TENURE_REASON: ReasonCodes.AMENDMENT_APPROVED.code,
                 TENURE_SUBPURPOSE: 'tenure-subpurpose-2',
                 TENURE_SUBTYPE: 'tenure-subtype-2',
                 TENURE_TYPE: 'tenure-type-2'
@@ -178,13 +181,7 @@ describe('SearchService', () => {
             ])
           );
 
-          ApplicationServiceSpy.getStatusString.and.callFake(arg => {
-            return 'someStatusString';
-          });
-          ApplicationServiceSpy.getStatusCode.and.returnValue('someStatusCode');
-          ApplicationServiceSpy.getRegionCode.and.returnValue('someRegionCode');
-
-          service.getAppsByClidDtid(['123']).subscribe(
+          service.getApplicationsByCLFileAndTantalisID(['123']).subscribe(
             res => {
               result.push(res);
             },
@@ -194,7 +191,7 @@ describe('SearchService', () => {
           );
         }));
 
-        it('getAppsByClidDtid emits twice', async(() => {
+        it('getApplicationsByCLFileAndTantalisID emits twice', async(() => {
           expect(result.length).toEqual(2);
         }));
 
@@ -214,23 +211,27 @@ describe('SearchService', () => {
             expect(prcResult[0].subpurpose).toBe('tenure-subpurpose-1');
             expect(prcResult[0].type).toBe('tenure-type-1');
             expect(prcResult[0].subtype).toBe('tenure-subtype-1');
-            expect(prcResult[0].status).toBe('tenure-status-1');
+            expect(prcResult[0].status).toBe('ABANDONED');
+            expect(prcResult[0].reason).toBe('AMENDMENT APPROVED - APPLICATION');
             expect(prcResult[0].tenureStage).toBe('tenure-stage-1');
             expect(prcResult[0].location).toBe('tenure-location-1');
-            expect(prcResult[0].businessUnit).toBe('44');
+            expect(prcResult[0].businessUnit).toBe('KO - LAND MGMNT - KOOTENAY FIELD OFFICE');
             expect(prcResult[0].cl_file).toBe(11);
             expect(prcResult[0].tantalisID).toBe(33);
+            expect(prcResult[0].region).toBe('Kootenay, Cranbrook');
 
             expect(prcResult[1].purpose).toBe('tenure-purpose-2');
             expect(prcResult[1].subpurpose).toBe('tenure-subpurpose-2');
             expect(prcResult[1].type).toBe('tenure-type-2');
             expect(prcResult[1].subtype).toBe('tenure-subtype-2');
-            expect(prcResult[1].status).toBe('tenure-status-2');
+            expect(prcResult[1].status).toBe('APPLICATION REVIEW COMPLETE');
+            expect(prcResult[1].reason).toBe('AMENDMENT APPROVED - APPLICATION');
             expect(prcResult[1].tenureStage).toBe('tenure-stage-2');
             expect(prcResult[1].location).toBe('tenure-location-2');
-            expect(prcResult[1].businessUnit).toBe('66');
+            expect(prcResult[1].businessUnit).toBe('OM - LAND MGMNT - NORTHERN SERVICE REGION');
             expect(prcResult[1].cl_file).toBe(22);
             expect(prcResult[1].tantalisID).toBe(55);
+            expect(prcResult[0].region).toBe('Kootenay, Cranbrook');
           });
 
           it('builds and sets a client string', () => {
@@ -252,34 +253,14 @@ describe('SearchService', () => {
             expect(prcResult[0].clFile).toBe('0000011');
             expect(prcResult[1].clFile).toBe('0000022');
           });
-
-          it('has an appStatus', () => {
-            expect(prcResult[0].appStatus).toBe('someStatusString');
-          });
-
-          it('has a region', () => {
-            expect(prcResult[0].region).toBe('someRegionCode');
-          });
-        });
-
-        it('calls ApplicationService getStatusString', () => {
-          expect(ApplicationServiceSpy.getStatusString).toHaveBeenCalledWith('someStatusCode');
-        });
-
-        it('calls ApplicationService getStatusCode', () => {
-          expect(ApplicationServiceSpy.getStatusCode).toHaveBeenCalled();
-        });
-
-        it('calls ApplicationService getRegionCode', () => {
-          expect(ApplicationServiceSpy.getRegionCode).toHaveBeenCalled();
         });
       });
     });
 
-    describe('when getAppByDTID returns results', () => {
+    describe('when getApplicationsByDispositionID returns results', () => {
       beforeEach(() => {
-        // Only testing calls to getAppByDTID
-        spyOn(service, 'getAppsByCLID').and.returnValue(of([] as Application[]));
+        // Only testing calls to getApplicationsByDispositionID
+        spyOn(service, 'getApplicationsByCLFile').and.returnValue(of([] as Application[]));
       });
 
       describe('when no applications or search results are returned', () => {
@@ -288,7 +269,7 @@ describe('SearchService', () => {
 
           apiSpy.searchAppsByDTID.and.returnValue(of(null as SearchResults));
 
-          service.getAppsByClidDtid(['123']).subscribe(result => {
+          service.getApplicationsByCLFileAndTantalisID(['123']).subscribe(result => {
             expect(result).toEqual([] as Application[]);
           });
         }));
@@ -303,12 +284,12 @@ describe('SearchService', () => {
 
           apiSpy.searchAppsByDTID.and.returnValue(of(null as SearchResults));
 
-          service.getAppsByClidDtid(['123']).subscribe(res => {
+          service.getApplicationsByCLFileAndTantalisID(['123']).subscribe(res => {
             result.push(res);
           });
         }));
 
-        it('getAppsByClidDtid emits twice', async(() => {
+        it('getApplicationsByCLFileAndTantalisID emits twice', async(() => {
           expect(result.length).toEqual(2);
         }));
 
@@ -327,18 +308,6 @@ describe('SearchService', () => {
             expect(prcResult[0]._id).toBe('2');
             expect(prcResult[0]['isCreated']).toBe(true);
           });
-        });
-
-        it('does not call ApplicationService getStatusString', () => {
-          expect(ApplicationServiceSpy.getStatusString).not.toHaveBeenCalled();
-        });
-
-        it('does not call ApplicationService getStatusCode', () => {
-          expect(ApplicationServiceSpy.getStatusCode).not.toHaveBeenCalled();
-        });
-
-        it('does not call ApplicationService getRegionCode', () => {
-          expect(ApplicationServiceSpy.getRegionCode).not.toHaveBeenCalled();
         });
       });
 
@@ -370,11 +339,12 @@ describe('SearchService', () => {
                 ],
                 CROWN_LANDS_FILE: '11',
                 DISPOSITION_TRANSACTION_SID: '33',
-                RESPONSIBLE_BUSINESS_UNIT: '44',
+                RESPONSIBLE_BUSINESS_UNIT: 'CA - LAND MGMNT - CARIBOO FIELD OFFICE',
                 TENURE_PURPOSE: 'tenure-purpose-1',
                 TENURE_LOCATION: 'tenure-location-1',
                 TENURE_STAGE: 'tenure-stage-1',
-                TENURE_STATUS: 'tenure-status-1',
+                TENURE_STATUS: StatusCodes.DECISION_APPROVED.code,
+                TENURE_REASON: 'tenure-reason-1',
                 TENURE_SUBPURPOSE: 'tenure-subpurpose-1',
                 TENURE_SUBTYPE: 'tenure-subtype-1',
                 TENURE_TYPE: 'tenure-type-1'
@@ -382,13 +352,7 @@ describe('SearchService', () => {
             )
           );
 
-          ApplicationServiceSpy.getStatusString.and.callFake(arg => {
-            return 'someStatusString';
-          });
-          ApplicationServiceSpy.getStatusCode.and.returnValue('someStatusCode');
-          ApplicationServiceSpy.getRegionCode.and.returnValue('someRegionCode');
-
-          service.getAppsByClidDtid(['123']).subscribe(
+          service.getApplicationsByCLFileAndTantalisID(['123']).subscribe(
             res => {
               result.push(res);
             },
@@ -398,7 +362,7 @@ describe('SearchService', () => {
           );
         }));
 
-        it('getAppsByClidDtid emits twice', async(() => {
+        it('getApplicationsByCLFileAndTantalisID emits twice', async(() => {
           expect(result.length).toEqual(2);
         }));
 
@@ -418,12 +382,14 @@ describe('SearchService', () => {
             expect(tantalisResult[0].subpurpose).toBe('tenure-subpurpose-1');
             expect(tantalisResult[0].type).toBe('tenure-type-1');
             expect(tantalisResult[0].subtype).toBe('tenure-subtype-1');
-            expect(tantalisResult[0].status).toBe('tenure-status-1');
+            expect(tantalisResult[0].status).toBe('DECISION APPROVED');
+            expect(tantalisResult[0].reason).toBe(null);
             expect(tantalisResult[0].tenureStage).toBe('tenure-stage-1');
             expect(tantalisResult[0].location).toBe('tenure-location-1');
-            expect(tantalisResult[0].businessUnit).toBe('44');
+            expect(tantalisResult[0].businessUnit).toBe('CA - LAND MGMNT - CARIBOO FIELD OFFICE');
             expect(tantalisResult[0].cl_file).toBe(11);
             expect(tantalisResult[0].tantalisID).toBe(33);
+            expect(tantalisResult[0].region).toBe('Cariboo, Williams Lake');
           });
 
           it('builds and sets a client string', () => {
@@ -441,40 +407,22 @@ describe('SearchService', () => {
           it('has a clFile property padded to 7 digits', () => {
             expect(tantalisResult[0].clFile).toBe('0000011');
           });
-
-          it('has an appStatus', () => {
-            expect(tantalisResult[0].appStatus).toBe('someStatusString');
-          });
-
-          it('has a region', () => {
-            expect(tantalisResult[0].region).toBe('someRegionCode');
-          });
-        });
-
-        it('calls ApplicationService getStatusString', () => {
-          expect(ApplicationServiceSpy.getStatusString).toHaveBeenCalledWith('someStatusCode');
-        });
-
-        it('calls ApplicationService getStatusCode', () => {
-          expect(ApplicationServiceSpy.getStatusCode).toHaveBeenCalled();
-        });
-
-        it('calls ApplicationService getRegionCode', () => {
-          expect(ApplicationServiceSpy.getRegionCode).toHaveBeenCalled();
         });
       });
     });
 
     describe('when multiple applications are returned', () => {
       it('returns a merged array of applications', async(() => {
-        spyOn(service, 'getAppsByCLID').and.returnValue(of([new Application({ _id: 1 }), new Application({ _id: 2 })]));
+        spyOn(service, 'getApplicationsByCLFile').and.returnValue(
+          of([new Application({ _id: 1 }), new Application({ _id: 2 })])
+        );
 
-        spyOn(service, 'getAppByDTID').and.returnValue(
+        spyOn(service, 'getApplicationsByDispositionID').and.returnValue(
           of([new Application({ _id: 2 }), new Application({ _id: 3 }), new Application({ _id: 4 })])
         );
 
         const resultingApplications = new Set<Application>();
-        service.getAppsByClidDtid(['123', '234']).subscribe(
+        service.getApplicationsByCLFileAndTantalisID(['123', '234']).subscribe(
           result => {
             result.forEach(element => {
               resultingApplications.add(element);
@@ -484,11 +432,11 @@ describe('SearchService', () => {
             fail(error);
           },
           () => {
-            expect(service.getAppsByCLID).toHaveBeenCalledWith('123');
-            expect(service.getAppsByCLID).toHaveBeenCalledWith('234');
+            expect(service.getApplicationsByCLFile).toHaveBeenCalledWith('123');
+            expect(service.getApplicationsByCLFile).toHaveBeenCalledWith('234');
 
-            expect(service.getAppByDTID).toHaveBeenCalledWith(123);
-            expect(service.getAppByDTID).toHaveBeenCalledWith(234);
+            expect(service.getApplicationsByDispositionID).toHaveBeenCalledWith(123);
+            expect(service.getApplicationsByDispositionID).toHaveBeenCalledWith(234);
 
             const finalResults = Array.from(resultingApplications);
             expect(finalResults).toEqual([
@@ -505,16 +453,16 @@ describe('SearchService', () => {
 
     describe('when an exception is thrown', () => {
       it('ApiService.handleError is called and the error is re-thrown', async(() => {
-        spyOn(service, 'getAppsByCLID').and.returnValue(throwError(Error('someError')));
+        spyOn(service, 'getApplicationsByCLFile').and.returnValue(throwError(Error('someError')));
 
-        spyOn(service, 'getAppByDTID').and.returnValue(of([]));
+        spyOn(service, 'getApplicationsByDispositionID').and.returnValue(of([]));
 
         apiSpy.handleError.and.callFake(error => {
           expect(error).toEqual(Error('someError'));
           return throwError(Error('someRethrownError'));
         });
 
-        service.getAppsByClidDtid(['123']).subscribe(
+        service.getApplicationsByCLFileAndTantalisID(['123']).subscribe(
           () => {
             fail('An error was expected.');
           },
