@@ -82,7 +82,7 @@ describe('constantUtils', () => {
     });
 
     it('returns reason code group if reason codeType provided and mataching searchString provided', () => {
-      const codeGroup = ConstantUtils.getCodeGroup(CodeType.REASON, 'AMENDMENT NOT APPROVED APPROVED - APPLICATION');
+      const codeGroup = ConstantUtils.getCodeGroup(CodeType.REASON, 'AMENDMENT NOT APPROVED - APPLICATION');
       expect(codeGroup).toEqual(ReasonCodes.AMENDMENT_NOT_APPROVED);
     });
 

@@ -201,3 +201,25 @@
   white-space: nowrap;
   font-size: 90%;
 }
+
+// pagination
+
+.pagination {
+  text-align: center;
+
+  .btn-group {
+    margin: 0 auto;
+  }
+}
+
+.pg-count {
+  padding: 0.75rem;
+}
+
+.pg-btn {
+  border-radius: 0;
+
+  i {
+    margin-top: -0.1rem;
+  }
+}

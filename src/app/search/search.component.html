@@ -4,11 +4,11 @@
     <form #f="ngForm" class="search-form ui form" (ngSubmit)="onSubmit()">
       <label for="keywordInput">Enter Crown Land File or Disposition Transaction number</label>
       <div class="input-group main-search-field">
-        <input class="form-control" type="text" name="keywordInput" id="keywordInput"
-            [(ngModel)]="terms.keywords" [disabled]="searching" autofocus/>
+        <input class="form-control" type="text" name="keywordInput" id="keywordInput" [(ngModel)]="keywords"
+          [disabled]="searching" autofocus />
         <div class="input-group-append">
           <!-- prevent searching if input is empty or we're already searching -->
-          <button class="btn btn-primary" type="submit" [disabled]="!terms.keywords || searching">
+          <button class="btn btn-primary" type="submit" [disabled]="!keywords || searching">
             <i class="spinner rotating" [hidden]="!searching"></i>
             <span>{{searching ? 'Searching...' : 'Find'}}</span>
           </button>
@@ -21,10 +21,10 @@
 <div class="container">
   <div class="search-results">
     <h2 *ngIf="ranSearch && !searching && count == 0">
-      <strong>No result<span *ngIf="count != 1">s</span> found for "{{keywords.length > 0 ? keywords.join(', ') : 'unknown'}}"</strong>
+      <strong>No result<span *ngIf="count != 1">s</span> found for "{{keywords ? keywords : 'unknown'}}"</strong>
     </h2>
     <h2 *ngIf="ranSearch && !searching && count > 0">
-      <strong>{{count}} result<span *ngIf="count != 1">s</span> found for "{{keywords.length > 0 ? keywords.join(', ') : 'unknown'}}"</strong>
+      <strong>{{count}} result<span *ngIf="count != 1">s</span> found for "{{keywords ? keywords : 'unknown'}}"</strong>
     </h2>
     <table class="table" *ngIf="count > 0">
       <thead>
@@ -45,7 +45,9 @@
           <td class="disp">
             <strong>{{application.tantalisID}}</strong>
           </td>
-          <td [innerHTML]="application.applicants ? (application.applicants | titlecase) : '<em>No Applicant on this File</em>'"></td>
+          <td
+            [innerHTML]="application.applicants ? (application.applicants | titlecase) : '<em>No Applicant on this File</em>'">
+          </td>
           <td>
             {{application.purpose | titlecase}} / {{application.subpurpose | titlecase}}
           </td>
@@ -55,9 +57,7 @@
           <td class="actions">
             <div class="btn-container">
               <button class="btn btn-sm btn-primary" type="button" title="Create this application in ACFRD"
-                *ngIf="!application['isCreated']"
-                (click)="onImport(application)"
-                [disabled]="application.isRetired">
+                *ngIf="!application['isCreated']" (click)="onImport(application)" [disabled]="application.isRetired">
                 <i class="material-icons">add</i>
                 Create
               </button>
@@ -72,7 +72,8 @@
                   <i class="material-icons">insert_drive_file</i>
                   View Application
                 </button>
-                <button class="dropdown-item" type="button" [routerLink]="['/a', application._id, 'edit']" *ngIf="!application.isRetired">
+                <button class="dropdown-item" type="button" [routerLink]="['/a', application._id, 'edit']"
+                  *ngIf="!application.isRetired">
                   <i class="material-icons">edit</i>
                   Edit Details
                 </button>
@@ -89,7 +90,8 @@
             <span class="comment-info">
               <span *ngIf="application['numComments'] > 0">
                 <strong>
-                  <a [routerLink]="['/comments', application._id]">{{application['numComments']}} {{application['numComments'] === 1 ? 'comment' : 'comments'}}</a>
+                  <a [routerLink]="['/comments', application._id]">{{application['numComments']}}
+                    {{application['numComments'] === 1 ? 'comment' : 'comments'}}</a>
                 </strong>
                 &nbsp;-&nbsp;
               </span>
@@ -98,7 +100,8 @@
               </span>
               <span *ngIf="application.currentPeriod">
                 &nbsp;-&nbsp;
-                {{application.currentPeriod.startDate | date:'longDate'}} to {{application.currentPeriod.endDate | date:'longDate'}}
+                {{application.currentPeriod.startDate | date:'longDate'}} to
+                {{application.currentPeriod.endDate | date:'longDate'}}
                 <span *ngIf="application.currentPeriod['daysRemaining']">
                   &nbsp;({{application.currentPeriod['daysRemaining'] + (application.currentPeriod['daysRemaining'] === 1 ? ' day ' : ' days ') + 'remaining'}})
                 </span>

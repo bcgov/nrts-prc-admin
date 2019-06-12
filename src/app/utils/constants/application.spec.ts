@@ -30,7 +30,7 @@ describe('application constants', () => {
   describe('RegionCodes', () => {
     describe('getCodeGroups()', () => {
       it('returns all 8 code groups', () => {
-        const codeGroups = new StatusCodes().getCodeGroups();
+        const codeGroups = new RegionCodes().getCodeGroups();
         expect(codeGroups.length).toEqual(8);
         expect(codeGroups).toContain(RegionCodes.CARIBOO);
         expect(codeGroups).toContain(RegionCodes.KOOTENAY);
@@ -47,7 +47,7 @@ describe('application constants', () => {
   describe('PurposeCodes', () => {
     describe('getCodeGroups()', () => {
       it('returns all 22 code groups', () => {
-        const codeGroups = new StatusCodes().getCodeGroups();
+        const codeGroups = new PurposeCodes().getCodeGroups();
         expect(codeGroups.length).toEqual(22);
         expect(codeGroups).toContain(PurposeCodes.AGRICULTURE);
         expect(codeGroups).toContain(PurposeCodes['ALL SEASONS RESORT']);
@@ -78,7 +78,7 @@ describe('application constants', () => {
   describe('LandUseTypeCodes', () => {
     describe('getCodeGroups()', () => {
       it('returns all 16 code groups', () => {
-        const codeGroups = new StatusCodes().getCodeGroups();
+        const codeGroups = new LandUseTypeCodes().getCodeGroups();
         expect(codeGroups.length).toEqual(16);
         expect(codeGroups).toContain(LandUseTypeCodes['CERTIFICATE OF PURCHASE']);
         expect(codeGroups).toContain(LandUseTypeCodes['CROWN GRANT']);

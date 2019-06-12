@@ -16,12 +16,9 @@ export class KeycloakService {
   constructor() {
     switch (window.location.origin) {
       case 'http://localhost:4200':
-      case 'https://nrts-prc-demo.pathfinder.gov.bc.ca':
-      case 'https://nrts-prc-scale.pathfinder.gov.bc.ca':
-      case 'https://nrts-prc-beta.pathfinder.gov.bc.ca':
-      case 'https://nrts-prc-master.pathfinder.gov.bc.ca':
       case 'https://nrts-prc-dev.pathfinder.gov.bc.ca':
-        // Local, Dev etc
+      case 'https://nrts-prc-master.pathfinder.gov.bc.ca':
+        // Local, Dev, Master
         this.keycloakEnabled = true;
         this.keycloakUrl = 'https://sso-dev.pathfinder.gov.bc.ca/auth';
         this.keycloakRealm = 'prc';
