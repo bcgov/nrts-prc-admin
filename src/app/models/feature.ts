@@ -1,11 +1,14 @@
 export class Feature {
   _id: string;
   type: string;
-  applicationID: string;
-  isDeleted: boolean;
   geometry: {
     type: string;
-    coordinates: any;
+    geometries: [
+      {
+        type: string;
+        coordinates: any;
+      }
+    ];
   };
   properties: {
     INTRID_SID: number;
@@ -31,15 +34,15 @@ export class Feature {
     OBJECTID: number;
     SW_ANNO_CAD_DATA: any; // TODO: what type is this?
   };
-  geometryName: string;
+  isDeleted: boolean;
+  applicationID: string;
 
   constructor(obj?: any) {
     this._id = (obj && obj._id) || null;
     this.type = (obj && obj.type) || null;
-    this.applicationID = (obj && obj.type) || null;
-    this.isDeleted = (obj && obj.isDeleted) || null;
     this.geometry = (obj && obj.geometry) || null;
     this.properties = (obj && obj.properties) || null;
-    this.geometryName = (obj && obj.geometryName) || null;
+    this.isDeleted = (obj && obj.isDeleted) || null;
+    this.applicationID = (obj && obj.type) || null;
   }
 }

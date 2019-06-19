@@ -185,9 +185,14 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
       .refreshApplication(this.application)
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(
-        updatedApplication => {
-          // updated the application with the latest data
-          this.application = { ...this.application, ...updatedApplication };
+        updatedApplicationAndFeatures => {
+          // update the application with the latest data
+          this.application = {
+            ...this.application,
+            ...updatedApplicationAndFeatures.application
+          };
+          // update the features with the latest data
+          this.application.features = updatedApplicationAndFeatures.features;
         },
         error => {
           this.isRefreshing = false;
