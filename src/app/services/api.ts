@@ -28,6 +28,16 @@ interface ILocalLoginResponse {
   accessToken: string;
 }
 
+/**
+ * refreshApplication response type.
+ *
+ * @interface IRefreshApplicationResponse
+ */
+interface IRefreshApplicationResponse {
+  application: Application;
+  features: Feature[];
+}
+
 @Injectable()
 export class ApiService {
   public token: string;
@@ -282,9 +292,9 @@ export class ApiService {
     return this.http.delete<Application>(`${this.pathAPI}/${queryString}`, {});
   }
 
-  refreshApplication(app: Application): Observable<Application> {
+  refreshApplication(app: Application): Observable<IRefreshApplicationResponse> {
     const queryString = `application/${app._id}/refresh`;
-    return this.http.put<Application>(`${this.pathAPI}/${queryString}`, {});
+    return this.http.put<IRefreshApplicationResponse>(`${this.pathAPI}/${queryString}`, {});
   }
 
   saveApplication(app: Application): Observable<Application> {
@@ -296,13 +306,13 @@ export class ApiService {
   // Features
   //
   getFeaturesByTantalisId(tantalisId: number): Observable<Feature[]> {
-    const fields = ['type', 'tags', 'geometry', 'geometryName', 'properties', 'isDeleted', 'applicationID'];
+    const fields = ['type', 'tags', 'geometry', 'properties', 'isDeleted', 'applicationID'];
     const queryString = `feature?isDeleted=false&tantalisId=${tantalisId}&fields=${this.buildValues(fields)}`;
     return this.http.get<Feature[]>(`${this.pathAPI}/${queryString}`, {});
   }
 
   getFeaturesByApplicationId(applicationId: string): Observable<Feature[]> {
-    const fields = ['type', 'tags', 'geometry', 'geometryName', 'properties', 'isDeleted', 'applicationID'];
+    const fields = ['type', 'tags', 'geometry', 'properties', 'isDeleted', 'applicationID'];
     const queryString = `feature?isDeleted=false&applicationId=${applicationId}&fields=${this.buildValues(fields)}`;
     return this.http.get<Feature[]>(`${this.pathAPI}/${queryString}`, {});
   }

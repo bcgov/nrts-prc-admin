@@ -36,7 +36,7 @@
         <button class="btn btn-icon" title="Refresh this application with the latest data from Tantalis"
           (click)="refreshApplication()"
           [disabled]="isRefreshing">
-          <i class="material-icons">
+          <i class="material-icons" [ngClass]="{'rotating': isRefreshing}">
             refresh
           </i>
         </button>
