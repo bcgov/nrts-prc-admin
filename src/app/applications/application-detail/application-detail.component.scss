@@ -174,3 +174,30 @@ ngb-alert {
   left: 50%;
   margin-left: -6rem;
 }
+
+// This, plus the use of the inlineSVG directive, is all because IE renders material icons poorly (IE renders the
+// icons asymmetrically, so spinners rotate super wonky).  This entire chunk of scss and the inlineSVG directive
+// could be replaced with the regular use of material icons if IE rendered the icons correctly. See other material-icon
+// <i> tags for examples.
+.btn {
+  &:hover .refresh-spinner > ::ng-deep svg {
+    fill: #212529;
+  }
+
+  .refresh-spinner {
+    height: 24px;
+    width: 24px;
+    -webkit-transition: background-color 0.15s ease-in-out;
+    -moz-transition: background-color 0.15s ease-in-out;
+    -ms-transition: background-color 0.15s ease-in-out;
+    -o-transition: background-color 0.15s ease-in-out;
+    transition: background-color 0.15s ease-in-out;
+
+    // Because the element is loaded dynamically, we need to use ng-deep to force the css to apply
+    > ::ng-deep svg {
+      display: block;
+      margin: auto;
+      fill: #808080;
+    }
+  }
+}

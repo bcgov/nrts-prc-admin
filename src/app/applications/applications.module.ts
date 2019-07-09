@@ -6,6 +6,7 @@ import { SharedModule } from 'app/shared.module';
 import { NgxPaginationModule } from 'ngx-pagination';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { ApplicationsRoutingModule } from './applications-routing.module';
+import { InlineSVGModule } from 'ng-inline-svg';
 
 // components
 import { ApplicationListComponent } from './application-list/application-list.component';
@@ -27,6 +28,7 @@ import { ExcelService } from 'app/services/excel.service';
     SharedModule,
     NgxPaginationModule,
     NgbModule.forRoot(),
+    InlineSVGModule.forRoot(),
     ApplicationsRoutingModule
   ],
   declarations: [

@@ -36,8 +36,7 @@
         <button class="btn btn-icon" title="Refresh this application with the latest data from Tantalis"
           (click)="refreshApplication()"
           [disabled]="isRefreshing">
-          <i class="material-icons" [ngClass]="{'rotating': isRefreshing}">
-            refresh
+          <i class="material-icons refresh-spinner" [ngClass]="{'rotating': isRefreshing}" [inlineSVG]="'assets/images/baseline-refresh-24px.svg'">
           </i>
         </button>
         <span class="vert-pipe">&nbsp;</span>
