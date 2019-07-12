@@ -3,8 +3,9 @@
     <a class="navbar-brand" title="Applications, Comments & Reasons for Decision" routerLink="/home">
       <span class="navbar-brand__title">Applications, Comments <span class="wb"><span class="amp">&</span> Reasons for Decision</span></span>
     </a>
+    <span class="navbar-environment" *ngIf="api.env !== 'prod'">{{api.env}}</span>
     <button class="navbar-toggler" type="button" title="Toggle Main Navigation"
-      aria-controls="navbarText" 
+      aria-controls="navbarText"
       aria-expanded="false"
       aria-label="Toggle navigation"
       (click)="toggleNav()">
