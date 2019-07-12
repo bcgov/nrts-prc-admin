@@ -5,7 +5,6 @@ import { HttpClient, HttpResponse } from '@angular/common/http';
 // import { Observable } from 'rxjs';
 import { Observable, throwError } from 'rxjs';
 import { map } from 'rxjs/operators';
-import * as _ from 'lodash';
 
 import { KeycloakService } from 'app/services/keycloak.service';
 
@@ -162,6 +161,7 @@ export class ApiService {
       'publishDate',
       'purpose',
       'status',
+      'reason',
       'statusHistoryEffectiveDate',
       'subpurpose',
       'subtype',
@@ -196,6 +196,7 @@ export class ApiService {
       'publishDate',
       'purpose',
       'status',
+      'reason',
       'statusHistoryEffectiveDate',
       'subpurpose',
       'subtype',
@@ -234,6 +235,7 @@ export class ApiService {
       'publishDate',
       'purpose',
       'status',
+      'reason',
       'statusHistoryEffectiveDate',
       'subpurpose',
       'subtype',
@@ -261,6 +263,7 @@ export class ApiService {
       'publishDate',
       'purpose',
       'status',
+      'reason',
       'statusHistoryEffectiveDate',
       'subpurpose',
       'subtype',
@@ -608,15 +611,21 @@ export class ApiService {
     return this.http.post<User>(`${this.pathAPI}/${queryString}`, user, {});
   }
 
-  //
-  // Local helpers
-  //
-  private buildValues(collection: any[]): string {
-    let values = '';
-    _.each(collection, a => {
-      values += a + '|';
-    });
-    // trim the last |
-    return values.replace(/\|$/, '');
+  /**
+   * Converts an array of strings into a single string whose values are separated by a pipe '|' symbol.
+   *
+   * Example: ['bird','dog','cat'] -> 'bird|dog|cat'
+   *
+   * @private
+   * @param {string[]} collection
+   * @returns {string}
+   * @memberof ApiService
+   */
+  private buildValues(collection: string[]): string {
+    if (!collection || collection.length <= 0) {
+      return '';
+    }
+
+    return collection.join('|');
   }
 }

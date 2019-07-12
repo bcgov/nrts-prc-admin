@@ -35,7 +35,6 @@ import { DocumentService } from 'app/services/document.service';
 import { DecisionService } from 'app/services/decision.service';
 import { UserService } from 'app/services/user.service';
 import { CanDeactivateGuard } from 'app/services/can-deactivate-guard.service';
-import { ConfigService } from 'app/services/config.service';
 import { KeycloakService } from 'app/services/keycloak.service';
 
 // feature modules
@@ -94,8 +93,7 @@ export function kcFactory(keycloakService: KeycloakService) {
     DocumentService,
     DecisionService,
     UserService,
-    CanDeactivateGuard,
-    ConfigService
+    CanDeactivateGuard
   ],
   entryComponents: [ConfirmComponent, AddEditUserComponent],
   bootstrap: [AppComponent]

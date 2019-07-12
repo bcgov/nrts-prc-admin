@@ -312,7 +312,7 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
           })
           .pipe(takeUntil(this.ngUnsubscribe))
           .subscribe(
-            application => {
+            (application: Application) => {
               this.isPublishing = false;
               this.application = application;
             },
@@ -389,7 +389,7 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
           })
           .pipe(takeUntil(this.ngUnsubscribe))
           .subscribe(
-            application => {
+            (application: Application) => {
               this.isUnpublishing = false;
               this.application = application;
             },
