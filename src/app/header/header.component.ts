@@ -40,7 +40,7 @@ export class HeaderComponent implements OnInit {
     scopes: string[];
   };
 
-  constructor(private api: ApiService, private keycloakService: KeycloakService, public router: Router) {
+  constructor(public api: ApiService, private keycloakService: KeycloakService, public router: Router) {
     // this._api = api;
     router.events.subscribe(() => {
       const token = this.keycloakService.getToken();
