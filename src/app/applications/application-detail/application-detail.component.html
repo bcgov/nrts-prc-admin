@@ -117,7 +117,7 @@
                     </li>
                     <li>
                       <span class="name">Region:</span>
-                      <span class="value">{{applicationService.getRegionString(application.region) || '-'}}</span>
+                      <span class="value">{{application.region || '-'}}</span>
                     </li>
                     <li>
                       <span class="name">Location:</span>
@@ -211,7 +211,7 @@
         <div class="aside-card">
           <h3 class="title">Application Status</h3>
           <div class="body">
-            <div class="app-status">{{application.appStatus || '-'}}</div>
+            <div class="app-status">{{applicationService.getStatusStringLong(application) || '-'}}</div>
             <div class="app-status__date text-muted" *ngIf="application.statusHistoryEffectiveDate">
               Last updated on {{application.statusHistoryEffectiveDate | date:'longDate'}}
             </div>

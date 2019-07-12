@@ -6,14 +6,10 @@ import * as _ from 'lodash';
 import { ApiService } from './api';
 import { CommentPeriod } from 'app/models/commentperiod';
 
+import { CommentCodes } from 'app/utils/constants/comment';
+
 @Injectable()
 export class CommentPeriodService {
-  // statuses
-  readonly NOT_STARTED = 'NS';
-  readonly NOT_OPEN = 'NO';
-  readonly CLOSED = 'CL';
-  readonly OPEN = 'OP';
-
   constructor(private api: ApiService) {}
 
   // get all comment periods for the specified application id
@@ -85,9 +81,9 @@ export class CommentPeriodService {
   /**
    * Given a comment period, returns status code.
    */
-  getStatusCode(period: CommentPeriod): string {
+  getCode(period: CommentPeriod): string {
     if (!period || !period.startDate || !period.endDate) {
-      return this.NOT_OPEN;
+      return CommentCodes.NOT_OPEN.code;
     }
 
     const now = new Date();
@@ -96,46 +92,27 @@ export class CommentPeriodService {
     const endDate = new Date(period.endDate);
 
     if (endDate < today) {
-      return this.CLOSED;
+      return CommentCodes.CLOSED.code;
     } else if (startDate > today) {
-      return this.NOT_STARTED;
+      return CommentCodes.NOT_STARTED.code;
     } else {
-      return this.OPEN;
+      return CommentCodes.OPEN.code;
     }
   }
 
   isNotStarted(statusCode: string): boolean {
-    return statusCode === this.NOT_STARTED;
+    return statusCode === CommentCodes.NOT_STARTED.code;
   }
 
   isNotOpen(statusCode: string): boolean {
-    return statusCode === this.NOT_OPEN;
+    return statusCode === CommentCodes.NOT_OPEN.code;
   }
 
   isClosed(statusCode: string): boolean {
-    return statusCode === this.CLOSED;
+    return statusCode === CommentCodes.CLOSED.code;
   }
 
   isOpen(statusCode: string): boolean {
-    return statusCode === this.OPEN;
-  }
-
-  /**
-   * Given a status code, returns a user-friendly status string.
-   */
-  getStatusString(statusCode: string): string {
-    if (statusCode) {
-      switch (statusCode) {
-        case this.NOT_STARTED:
-          return 'Commenting Not Started';
-        case this.NOT_OPEN:
-          return 'Not Open For Commenting';
-        case this.CLOSED:
-          return 'Commenting Closed';
-        case this.OPEN:
-          return 'Commenting Open';
-      }
-    }
-    return null;
+    return statusCode === CommentCodes.OPEN.code;
   }
 }

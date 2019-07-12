@@ -9,6 +9,9 @@ import { ApplicationService } from 'app/services/application.service';
 import { SearchResults } from 'app/models/search';
 import { Application } from 'app/models/application';
 
+import { StatusCodes } from 'app/utils/constants/application';
+import { ConstantUtils, CodeType } from 'app/utils/constants/constantUtils';
+
 @Injectable()
 export class SearchService {
   public isError = false;
@@ -69,6 +72,7 @@ export class SearchService {
             type: searchResult.TENURE_TYPE,
             subtype: searchResult.TENURE_SUBTYPE,
             status: searchResult.TENURE_STATUS,
+            reason: searchResult.TENURE_REASON,
             tenureStage: searchResult.TENURE_STAGE,
             location: searchResult.TENURE_LOCATION,
             businessUnit: searchResult.RESPONSIBLE_BUSINESS_UNIT,
@@ -81,13 +85,6 @@ export class SearchService {
           // 7-digit CL File number for display
           app.clFile = searchResult.CROWN_LANDS_FILE.padStart(7, '0');
 
-          // user-friendly application status
-          const appStatusCode = this.applicationService.getStatusCode(searchResult.TENURE_STATUS);
-          app.appStatus = this.applicationService.getLongStatusString(appStatusCode);
-
-          // derive region code
-          app.region = this.applicationService.getRegionCode(app.businessUnit);
-
           // derive unique applicants
           if (app.client) {
             const clients = app.client.split(', ');
@@ -98,10 +95,10 @@ export class SearchService {
           if (
             app.statusHistoryEffectiveDate &&
             [
-              this.applicationService.DECISION_APPROVED,
-              this.applicationService.DECISION_NOT_APPROVED,
-              this.applicationService.ABANDONED
-            ].includes(appStatusCode)
+              StatusCodes.DECISION_APPROVED.code,
+              StatusCodes.DECISION_NOT_APPROVED.code,
+              StatusCodes.ABANDONED.code
+            ].includes(ConstantUtils.getParam(CodeType.STATUS, app.status))
           ) {
             app.retireDate = moment(app.statusHistoryEffectiveDate)
               .endOf('day')
@@ -171,6 +168,7 @@ export class SearchService {
             type: searchResult.TENURE_TYPE,
             subtype: searchResult.TENURE_SUBTYPE,
             status: searchResult.TENURE_STATUS,
+            reason: searchResult.TENURE_REASON,
             tenureStage: searchResult.TENURE_STAGE,
             location: searchResult.TENURE_LOCATION,
             businessUnit: searchResult.RESPONSIBLE_BUSINESS_UNIT,
@@ -183,13 +181,6 @@ export class SearchService {
           // 7-digit CL File number for display
           app.clFile = searchResult.CROWN_LANDS_FILE.padStart(7, '0');
 
-          // user-friendly application status
-          const appStatusCode = this.applicationService.getStatusCode(searchResult.TENURE_STATUS);
-          app.appStatus = this.applicationService.getLongStatusString(appStatusCode);
-
-          // derive region code
-          app.region = this.applicationService.getRegionCode(app.businessUnit);
-
           // derive unique applicants
           if (app.client) {
             const clients = app.client.split(', ');
@@ -200,10 +191,10 @@ export class SearchService {
           if (
             app.statusHistoryEffectiveDate &&
             [
-              this.applicationService.DECISION_APPROVED,
-              this.applicationService.DECISION_NOT_APPROVED,
-              this.applicationService.ABANDONED
-            ].includes(appStatusCode)
+              StatusCodes.DECISION_APPROVED.code,
+              StatusCodes.DECISION_NOT_APPROVED.code,
+              StatusCodes.ABANDONED.code
+            ].includes(ConstantUtils.getParam(CodeType.STATUS, app.status))
           ) {
             app.retireDate = moment(app.statusHistoryEffectiveDate)
               .endOf('day')
