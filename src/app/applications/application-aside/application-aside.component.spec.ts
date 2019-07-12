@@ -1,7 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ApplicationAsideComponent } from './application-aside.component';
-import { ConfigService } from 'app/services/config.service';
 import { FeatureService } from 'app/services/feature.service';
 import { Application } from '../../models/application';
 import { Feature } from '../../models/feature';
@@ -11,21 +10,12 @@ describe('ApplicationAsideComponent', () => {
   let component: ApplicationAsideComponent;
   let fixture: ComponentFixture<ApplicationAsideComponent>;
 
-  const mockConfigService = {
-    baseLayerName: () => {
-      return 'mock baseLayer name';
-    }
-  };
-
   const mockFeatureService = jasmine.createSpyObj('FeatureService', ['getByApplicationId', 'getByTantalisId']);
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [ApplicationAsideComponent],
-      providers: [
-        { provide: ConfigService, useValue: mockConfigService },
-        { provide: FeatureService, useValue: mockFeatureService }
-      ]
+      providers: [{ provide: FeatureService, useValue: mockFeatureService }]
     }).compileComponents();
   }));
 

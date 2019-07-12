@@ -11,18 +11,8 @@ import { KeycloakService } from 'app/services/keycloak.service';
   styleUrls: ['./header.component.scss'],
   animations: [
     trigger('toggleNav', [
-      state(
-        'navClosed',
-        style({
-          height: '0'
-        })
-      ),
-      state(
-        'navOpen',
-        style({
-          height: '*'
-        })
-      ),
+      state('navClosed', style({ height: '0' })),
+      state('navOpen', style({ height: '*' })),
       transition('navOpen => navClosed', [animate('0.2s')]),
       transition('navClosed => navOpen', [animate('0.2s')])
     ])

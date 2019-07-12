@@ -6,6 +6,8 @@ import * as moment from 'moment';
 
 import { ApplicationService } from 'app/services/application.service';
 import { Application } from 'app/models/application';
+import { StatusCodes } from 'app/utils/constants/application';
+import { ConstantUtils, CodeType } from 'app/utils/constants/constantUtils';
 
 @Injectable()
 export class ApplicationDetailResolver implements Resolve<Application> {
@@ -22,6 +24,7 @@ export class ApplicationDetailResolver implements Resolve<Application> {
         type: route.queryParamMap.get('type'),
         subtype: route.queryParamMap.get('subtype'),
         status: route.queryParamMap.get('status'),
+        reason: route.queryParamMap.get('reason'),
         tenureStage: route.queryParamMap.get('tenureStage'),
         location: route.queryParamMap.get('location'),
         businessUnit: route.queryParamMap.get('businessUnit'),
@@ -37,13 +40,6 @@ export class ApplicationDetailResolver implements Resolve<Application> {
         application.clFile = application.cl_file.toString().padStart(7, '0');
       }
 
-      // user-friendly application status
-      const appStatusCode = this.applicationService.getStatusCode(application.status);
-      application.appStatus = this.applicationService.getLongStatusString(appStatusCode);
-
-      // derive region code
-      application.region = this.applicationService.getRegionCode(application.businessUnit);
-
       // derive unique applicants
       if (application.client) {
         const clients = application.client.split(', ');
@@ -54,10 +50,10 @@ export class ApplicationDetailResolver implements Resolve<Application> {
       if (
         application.statusHistoryEffectiveDate &&
         [
-          this.applicationService.DECISION_APPROVED,
-          this.applicationService.DECISION_NOT_APPROVED,
-          this.applicationService.ABANDONED
-        ].includes(appStatusCode)
+          StatusCodes.DECISION_APPROVED.code,
+          StatusCodes.DECISION_NOT_APPROVED.code,
+          StatusCodes.ABANDONED.code
+        ].includes(ConstantUtils.getCode(CodeType.STATUS, application.status))
       ) {
         application.retireDate = moment(application.statusHistoryEffectiveDate)
           .endOf('day')
