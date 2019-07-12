@@ -25,6 +25,7 @@ export class SearchResults {
   TENURE_PURPOSE: string;
   TENURE_STAGE: string;
   TENURE_STATUS: string;
+  TENURE_REASON: string;
   TENURE_SUBPURPOSE: string;
   TENURE_SUBTYPE: string;
   TENURE_TYPE: string;
@@ -49,6 +50,7 @@ export class SearchResults {
     this.TENURE_PURPOSE = (search && search.TENURE_PURPOSE) || null;
     this.TENURE_STAGE = (search && search.TENURE_STAGE) || null;
     this.TENURE_STATUS = (search && search.TENURE_STATUS) || null;
+    this.TENURE_REASON = (search && search.TENURE_REASON) || null;
     this.TENURE_SUBPURPOSE = (search && search.TENURE_SUBPURPOSE) || null;
     this.TENURE_SUBTYPE = (search && search.TENURE_SUBTYPE) || null;
     this.TENURE_TYPE = (search && search.TENURE_TYPE) || null;
