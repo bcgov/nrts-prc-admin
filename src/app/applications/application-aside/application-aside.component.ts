@@ -5,7 +5,6 @@ import * as L from 'leaflet';
 import * as _ from 'lodash';
 
 import { Application } from 'app/models/application';
-import { ConfigService } from 'app/services/config.service';
 import { FeatureService } from 'app/services/feature.service';
 
 @Component({
@@ -21,8 +20,9 @@ export class ApplicationAsideComponent implements OnInit, OnDestroy {
   public map: L.Map;
   public layers: L.Layer[];
   private maxZoom = { maxZoom: 17 };
+  private mapBaseLayerName = 'World Topographic';
 
-  constructor(public configService: ConfigService, private featureService: FeatureService) {}
+  constructor(private featureService: FeatureService) {}
 
   ngOnInit() {
     const World_Topo_Map = L.tileLayer(
@@ -87,7 +87,7 @@ export class ApplicationAsideComponent implements OnInit, OnDestroy {
 
     // load base layer
     for (const key of Object.keys(baseLayers)) {
-      if (key === this.configService.baseLayerName) {
+      if (key === this.mapBaseLayerName) {
         this.map.addLayer(baseLayers[key]);
         break;
       }
@@ -97,7 +97,7 @@ export class ApplicationAsideComponent implements OnInit, OnDestroy {
     this.map.on(
       'baselayerchange',
       function(e: L.LayersControlEvent) {
-        this.configService.baseLayerName = e.name;
+        this.mapBaseLayerName = e.name;
       },
       this
     );

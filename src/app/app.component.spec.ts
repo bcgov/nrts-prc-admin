@@ -5,13 +5,11 @@ import { AppComponent } from './app.component';
 import { HeaderComponent } from './header/header.component';
 import { FooterComponent } from './footer/footer.component';
 import { ApiService } from 'app/services/api';
-import { ConfigService } from 'app/services/config.service';
 import { KeycloakService } from 'app/services/keycloak.service';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 describe('AppComponent', () => {
   beforeEach(async(() => {
-    const configService = new ConfigService();
     const mockKeycloakService = {
       isValidForSite: () => {
         return true;
@@ -21,11 +19,7 @@ describe('AppComponent', () => {
     TestBed.configureTestingModule({
       declarations: [AppComponent, HeaderComponent, FooterComponent],
       imports: [RouterTestingModule, BrowserAnimationsModule],
-      providers: [
-        { provide: ApiService },
-        { provide: ConfigService, useValue: configService },
-        { provide: KeycloakService, useValue: mockKeycloakService }
-      ]
+      providers: [{ provide: ApiService }, { provide: KeycloakService, useValue: mockKeycloakService }]
     }).compileComponents();
   }));
 

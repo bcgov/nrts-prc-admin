@@ -660,32 +660,6 @@ describe('ApplicationService', () => {
     });
   });
 
-  describe('getShortStatusString()', () => {
-    it('with "AB" code it returns "Abandoned" string', () => {
-      expect(service.getShortStatusString(service.ABANDONED)).toBe('Abandoned');
-    });
-
-    it('with "AUR" code it returns "Under Review" string', () => {
-      expect(service.getShortStatusString(service.APPLICATION_UNDER_REVIEW)).toBe('Under Review');
-    });
-
-    it('with "ARC" code it returns "Decision Pending" string', () => {
-      expect(service.getShortStatusString(service.APPLICATION_REVIEW_COMPLETE)).toBe('Decision Pending');
-    });
-
-    it('with "DA" code it returns "Approved" string', () => {
-      expect(service.getShortStatusString(service.DECISION_APPROVED)).toBe('Approved');
-    });
-
-    it('with "DNA" code it returns "Not Approved" string', () => {
-      expect(service.getShortStatusString(service.DECISION_NOT_APPROVED)).toBe('Not Approved');
-    });
-
-    it('with "UN" code it returns "Unknown" string', () => {
-      expect(service.getShortStatusString(service.UNKNOWN)).toBe('Unknown');
-    });
-  });
-
   describe('getLongStatusString()', () => {
     it('with "AB" code it returns "Abandoned" string', () => {
       expect(service.getLongStatusString(service.ABANDONED)).toBe('Abandoned');

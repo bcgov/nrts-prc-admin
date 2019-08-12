@@ -50,7 +50,7 @@
             {{application.purpose | titlecase}} / {{application.subpurpose | titlecase}}
           </td>
           <td>
-            {{application.appStatus || 'Unknown'}}
+            {{getStatusStringLong(application) || 'Unknown'}}
           </td>
           <td class="actions">
             <div class="btn-container">

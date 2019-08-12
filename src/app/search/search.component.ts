@@ -8,6 +8,8 @@ import * as _ from 'lodash';
 import { SearchService } from 'app/services/search.service';
 import { SearchTerms } from 'app/models/search';
 import { Application } from 'app/models/application';
+import { ConstantUtils, CodeType } from 'app/utils/constants/constantUtils';
+import { StatusCodes, ReasonCodes } from 'app/utils/constants/application';
 
 @Component({
   selector: 'app-search',
@@ -135,5 +137,43 @@ export class SearchComponent implements OnInit, OnDestroy {
       console.log('error, invalid application =', application);
       this.snackBarRef = this.snackBar.open('Error creating application ...', null, { duration: 3000 });
     }
+  }
+
+  /**
+   * Returns true if the application has an abandoned status AND an amendment reason.
+   *
+   * @param {Application} application
+   * @returns {boolean} true if the application has an abandoned status AND an amendment reason, false otherwise.
+   * @memberof SearchComponent
+   */
+  isAmendment(application: Application): boolean {
+    return (
+      application &&
+      application.status === StatusCodes.ABANDONED.code &&
+      (application.reason === ReasonCodes.AMENDMENT_APPROVED.code ||
+        application.reason === ReasonCodes.AMENDMENT_NOT_APPROVED.code)
+    );
+  }
+
+  /**
+   * Given an application, returns a long user-friendly status string.
+   *
+   * @param {Application} application
+   * @returns {string}
+   * @memberof SearchComponent
+   */
+  getStatusStringLong(application: Application): string {
+    if (!application) {
+      return StatusCodes.UNKNOWN.text.long;
+    }
+
+    // If the application was abandoned, but the reason is due to an amendment, then return an amendment string instead
+    if (this.isAmendment(application)) {
+      return ConstantUtils.getTextLong(CodeType.REASON, application.reason);
+    }
+
+    return (
+      (application && ConstantUtils.getTextLong(CodeType.STATUS, application.status)) || StatusCodes.UNKNOWN.text.long
+    );
   }
 }

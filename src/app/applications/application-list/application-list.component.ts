@@ -105,7 +105,7 @@ export class ApplicationListComponent implements OnInit, OnDestroy {
   }
 
   public showThisApp(item: Application) {
-    const statusCode = item && this.commentPeriodService.getStatusCode(item.currentPeriod);
+    const statusCode = item && this.commentPeriodService.getCode(item.currentPeriod);
     return (
       !this.showOnlyOpenApps ||
       this.commentPeriodService.isOpen(statusCode) ||
