@@ -16,15 +16,15 @@ podTemplate(label: sonarqubePodLabel, name: sonarqubePodLabel, serviceAccount: '
   )
 ]) {
   node(sonarqubePodLabel) {
-    stage('Checkout Code') {
+    stage('checkout code') {
       checkout scm
     }
-    stage('Exeucte Sonar') {
+    stage('exeucte sonar') {
       dir('sonar-runner') {
         try {
           sh 'npm install typescript && ./gradlew sonarqube -Dsonar.host.url=https://sonarqube-prc-tools.pathfinder.gov.bc.ca -Dsonar.verbose=true --stacktrace --info'
-        } catch(e) {
-          echo "Sonar: Failed: ${e}"
+        } finally {
+
         }
       }
     }
@@ -36,13 +36,18 @@ pipeline {
   options {
     skipDefaultCheckout()
   }
+  environment {
+    // this credential needs to exist in Jenkins (https://jenkins.io/doc/book/using/using-credentials)
+    // and should contain the RocketChat Integration Token
+    ROCKETCHAT_WEBHOOK_TOKEN = credentials('rocketchat_incoming_webhook_token')
+  }
   stages {
     stage('Building: admin (master branch)') {
       steps {
         script {
           try {
-            echo "Building: env.JOB_NAME=${env.JOB_NAME} env.BUILD_ID=${env.BUILD_ID}"
             notifyBuild("Building: ${env.JOB_NAME} #${env.BUILD_ID}", "YELLOW")
+            echo "Building: env.JOB_NAME=${env.JOB_NAME} env.BUILD_ID=${env.BUILD_ID}"
             openshiftBuild bldCfg: 'admin-angular-on-nginx-master-build-angular-app-build', showBuildLogs: 'true'
           } catch (e) {
             notifyBuild("BUILD ${env.JOB_NAME} #${env.BUILD_ID} ABORTED", "RED")
@@ -56,15 +61,15 @@ pipeline {
       steps {
         script {
           try {
-            echo "Deploying: env.JOB_NAME=${env.JOB_NAME} env.BUILD_ID=${env.BUILD_ID}"
             notifyBuild("Deploying: ${env.JOB_NAME} #${env.BUILD_ID}", "YELLOW")
+            echo "Deploying: env.JOB_NAME=${env.JOB_NAME} env.BUILD_ID=${env.BUILD_ID}"
             openshiftBuild bldCfg: 'admin-angular-on-nginx-master-build', showBuildLogs: 'true'
           } catch (e) {
             notifyBuild("BUILD ${env.JOB_NAME} #${env.BUILD_ID} ABORTED", "RED")
             error("Deploying: Failed: ${e}")
           }
-          echo "Deploying: Success"
           notifyBuild("Deployed ${env.JOB_NAME} #${env.BUILD_ID}", "GREEN")
+          echo "Deploying: Success"
         }
       }
     }
@@ -80,6 +85,14 @@ def notifyBuild(String msg = '', String colour = 'GREEN') {
     colorCode = '#FF0000'
   }
 
-  // Send notifications
-  rocketSend (channel: 'acrfd', message: msg, rawMessage: true)
+  String rocketChatMessage = "{ \"text\":\"${msg}\", \"attachments\": [{ \"text\":\"${msg}\", \"color\":\"${colorCode}\" }] }"
+
+  String rocketChatWebHookURL = "https://chat.pathfinder.gov.bc.ca/hooks/${ROCKETCHAT_WEBHOOK_TOKEN}"
+
+  // Send notifications to RocketChat
+  try {
+    sh "curl -X POST -H 'Content-type: application/json' --data '${rocketChatMessage}' ${rocketChatWebHookURL}"
+  } catch (e) {
+    echo "Notify: Failed: ${e}"
+  }
 }
