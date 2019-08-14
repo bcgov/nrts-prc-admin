@@ -73,7 +73,7 @@ export class ApiService {
   // private jwtHelper: JwtHelperService;
   pathAPI: string;
   // params: Params;
-  env: 'local' | 'dev' | 'test' | 'demo' | 'scale' | 'beta' | 'master' | 'prod';
+  env: 'local' | 'dev' | 'test' | 'master' | 'prod';
 
   constructor(private http: HttpClient) {
     // this.jwtHelper = new JwtHelperService();
@@ -95,34 +95,16 @@ export class ApiService {
         this.env = 'dev';
         break;
 
-      case 'nrts-prc-test.pathfinder.gov.bc.ca':
-        // Test
-        this.pathAPI = 'https://nrts-prc-test.pathfinder.gov.bc.ca/api';
-        this.env = 'test';
-        break;
-
-      case 'nrts-prc-demo.pathfinder.gov.bc.ca':
-        // Demo
-        this.pathAPI = 'https://nrts-prc-demo.pathfinder.gov.bc.ca/api';
-        this.env = 'demo';
-        break;
-
-      case 'nrts-prc-scale.pathfinder.gov.bc.ca':
-        // Scale
-        this.pathAPI = 'https://nrts-prc-scale.pathfinder.gov.bc.ca/api';
-        this.env = 'scale';
-        break;
-
-      case 'nrts-prc-beta.pathfinder.gov.bc.ca':
-        // Beta
-        this.pathAPI = 'https://nrts-prc-beta.pathfinder.gov.bc.ca/api';
-        this.env = 'beta';
-        break;
-
       case 'nrts-prc-master.pathfinder.gov.bc.ca':
         // Master
         this.pathAPI = 'https://nrts-prc-master.pathfinder.gov.bc.ca/api';
         this.env = 'master';
+        break;
+
+      case 'nrts-prc-test.pathfinder.gov.bc.ca':
+        // Test
+        this.pathAPI = 'https://nrts-prc-test.pathfinder.gov.bc.ca/api';
+        this.env = 'test';
         break;
 
       default:
@@ -676,7 +658,7 @@ export class ApiService {
    * @returns {string}
    * @memberof ApiService
    */
-  private buildValues(collection: string[]): string {
+  private convertArrayIntoPipeString(collection: string[]): string {
     if (!collection || collection.length <= 0) {
       return '';
     }
