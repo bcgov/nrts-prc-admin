@@ -77,7 +77,10 @@ export class StatusCodes implements ICodeSet {
 /**
  * Application Reason codes.
  *
- * Note: the reason code indicates additional information about the status code.
+ * Note:
+ *  - the reason code indicates additional information about the status code.
+ *  - the reason codes don't have unique text, instead they use the same text as their Status
+ *    counterpart: (Decision_Approved and Decision_Not_Approved).
  *
  * @export
  * @class ReasonCodes
@@ -87,14 +90,14 @@ export class ReasonCodes implements ICodeSet {
   public static readonly AMENDMENT_APPROVED: ICodeGroup = {
     code: 'AMENDMENT APPROVED - APPLICATION',
     param: 'AA',
-    text: { long: 'Amendment: Approved', short: 'Approved' },
+    text: { long: 'Decision: Approved - Tenure Issued', short: 'Approved' },
     mappedCodes: []
   };
 
   public static readonly AMENDMENT_NOT_APPROVED: ICodeGroup = {
     code: 'AMENDMENT NOT APPROVED - APPLICATION',
     param: 'ANA',
-    text: { long: 'Amendment: Not Approved', short: 'Not Approved' },
+    text: { long: 'Decision: Not Approved', short: 'Not Approved' },
     mappedCodes: []
   };
 

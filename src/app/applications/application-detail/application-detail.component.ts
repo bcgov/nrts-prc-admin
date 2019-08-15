@@ -187,10 +187,10 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
       .subscribe(
         updatedApplicationAndFeatures => {
           // update the application with the latest data
-          this.application = {
+          this.application = new Application({
             ...this.application,
             ...updatedApplicationAndFeatures.application
-          };
+          });
           // update the features with the latest data
           this.application.features = updatedApplicationAndFeatures.features;
         },
