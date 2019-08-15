@@ -2,8 +2,8 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { MatSnackBarRef, SimpleSnackBar, MatSnackBar } from '@angular/material';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DialogService } from 'ng2-bootstrap-modal';
-import { Subject, of } from 'rxjs';
-import { takeUntil, concat } from 'rxjs/operators';
+import { Subject, of, throwError } from 'rxjs';
+import { takeUntil, concat, mergeMap } from 'rxjs/operators';
 
 import { ConfirmComponent } from 'app/confirm/confirm.component';
 import { Application } from 'app/models/application';
@@ -183,16 +183,30 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
     this.isRefreshing = true;
     this.api
       .refreshApplication(this.application)
-      .pipe(takeUntil(this.ngUnsubscribe))
+      .pipe(
+        // Now that the application is refreshed, fetch it with all of its new data and features.
+        // Also fetch the documents, comment periods, and decisions so we don't have to manually merge them over from
+        // the current this.application.
+        mergeMap(updatedApplicationAndFeatures => {
+          if (updatedApplicationAndFeatures) {
+            return this.applicationService.getById(updatedApplicationAndFeatures.application._id, {
+              getFeatures: true,
+              getDocuments: true,
+              getCurrentPeriod: true,
+              getDecision: true
+            });
+          } else {
+            return throwError('Refresh application request returned invalid response.');
+          }
+        }),
+        takeUntil(this.ngUnsubscribe)
+      )
       .subscribe(
-        updatedApplicationAndFeatures => {
-          // update the application with the latest data
-          this.application = new Application({
-            ...this.application,
-            ...updatedApplicationAndFeatures.application
-          });
-          // update the features with the latest data
-          this.application.features = updatedApplicationAndFeatures.features;
+        refreshedApplication => {
+          if (refreshedApplication) {
+            // update the application with the latest data
+            this.application = refreshedApplication;
+          }
         },
         error => {
           this.isRefreshing = false;
