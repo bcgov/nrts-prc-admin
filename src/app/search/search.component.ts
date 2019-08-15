@@ -69,7 +69,7 @@ export class SearchComponent implements OnInit, OnDestroy {
       .subscribe(
         applications => {
           applications.forEach(application => {
-            // add if not already in list
+            // add application if not already in the list (no duplicates allowed)
             if (!_.find(this.applications, app => app.tantalisID === application.tantalisID)) {
               this.applications.push(application);
             }
