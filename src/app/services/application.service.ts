@@ -335,9 +335,9 @@ export class ApplicationService {
   isAmendment(application: Application): boolean {
     return (
       application &&
-      application.status === StatusCodes.ABANDONED.code &&
-      (application.reason === ReasonCodes.AMENDMENT_APPROVED.code ||
-        application.reason === ReasonCodes.AMENDMENT_NOT_APPROVED.code)
+      ConstantUtils.getCode(CodeType.STATUS, application.status) === StatusCodes.ABANDONED.code &&
+      (ConstantUtils.getCode(CodeType.REASON, application.reason) === ReasonCodes.AMENDMENT_APPROVED.code ||
+        ConstantUtils.getCode(CodeType.REASON, application.reason) === ReasonCodes.AMENDMENT_NOT_APPROVED.code)
     );
   }
 

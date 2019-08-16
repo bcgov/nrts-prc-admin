@@ -122,6 +122,7 @@ export class SearchComponent implements OnInit, OnDestroy {
         type: application.type,
         subtype: application.subtype,
         status: application.status,
+        reason: application.reason,
         tenureStage: application.tenureStage,
         location: application.location,
         businessUnit: application.businessUnit,
@@ -149,9 +150,9 @@ export class SearchComponent implements OnInit, OnDestroy {
   isAmendment(application: Application): boolean {
     return (
       application &&
-      application.status === StatusCodes.ABANDONED.code &&
-      (application.reason === ReasonCodes.AMENDMENT_APPROVED.code ||
-        application.reason === ReasonCodes.AMENDMENT_NOT_APPROVED.code)
+      ConstantUtils.getCode(CodeType.STATUS, application.status) === StatusCodes.ABANDONED.code &&
+      (ConstantUtils.getCode(CodeType.REASON, application.reason) === ReasonCodes.AMENDMENT_APPROVED.code ||
+        ConstantUtils.getCode(CodeType.REASON, application.reason) === ReasonCodes.AMENDMENT_NOT_APPROVED.code)
     );
   }
 

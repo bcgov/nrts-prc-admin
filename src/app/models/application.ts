@@ -55,13 +55,14 @@ export class Application {
     this.location = (obj && obj.location) || null;
     this.name = (obj && obj.name) || null;
     this.purpose = (obj && obj.purpose) || null;
-    this.status = (obj && obj.status && ConstantUtils.getCode(CodeType.STATUS, obj.status)) || null;
-    this.reason = (obj && obj.reason && ConstantUtils.getCode(CodeType.REASON, obj.reason)) || null;
+    this.status = (obj && obj.status) || null;
+    this.reason = (obj && obj.reason) || null;
     this.subpurpose = (obj && obj.subpurpose) || null;
     this.subtype = (obj && obj.subtype) || null;
     this.tantalisID = (obj && obj.tantalisID) || null; // not zero
     this.tenureStage = (obj && obj.tenureStage) || null;
     this.type = (obj && obj.type) || null;
+
     this.region = (obj && obj.businessUnit && ConstantUtils.getTextLong(CodeType.REGION, obj.businessUnit)) || null;
     this.cpStatus = (obj && obj.cpStatus) || null;
     this.clFile = (obj && obj.clFile) || null;
