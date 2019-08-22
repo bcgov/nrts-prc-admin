@@ -9,14 +9,14 @@
           <select class="form-control filter-select" (change)="setRegionFilter($event.target.value)"
             [disabled]="searching || exporting" title="Filter by region">
             <option value="">Filter by Region</option>
-            <option *ngFor="let regionCode of regionCodes" [value]="regionCode.code"
-              [selected]="regionCodeFilter === regionCode.code">{{regionCode.text.long}}</option>
+            <option *ngFor="let regionCode of regionCodes" [value]="regionCode.param"
+              [selected]="regionCodeFilter === regionCode.param">{{regionCode.text.long}}</option>
           </select>
           <select class="form-control filter-select" (change)="setCommentFilter($event.target.value)"
             [disabled]="searching || exporting" title="Filter by comment period">
             <option value="">Filter by Comment Period</option>
-            <option *ngFor="let commentCode of commentCodes" [value]="commentCode.text.long"
-              [selected]="commentCodeFilters[0] === commentCode.text.long">{{commentCode.text.long}}
+            <option *ngFor="let commentCode of commentCodes" [value]="commentCode.param"
+              [selected]="commentCodeFilters[0] === commentCode.param">{{commentCode.text.long}}
             </option>
           </select>
         </div>
@@ -25,14 +25,14 @@
           <select class="form-control filter-select" (change)="setStatusFilter($event.target.value)"
             [disabled]="searching || exporting" title="Filter by status">
             <option value="">Filter by Status</option>
-            <option *ngFor="let statusCode of statusCodes" [value]="statusCode.code"
-              [selected]="statusCodeFilters[0] === statusCode.code">{{statusCode.text.long}}</option>
+            <option *ngFor="let statusCode of statusCodes" [value]="statusCode.param"
+              [selected]="statusCodeFilters[0] === statusCode.param">{{statusCode.text.long}}</option>
           </select>
           <select class="form-control filter-select" (change)="setPurposeFilter($event.target.value)"
             [disabled]="searching || exporting" title="Filter by purpose">
             <option value="">Filter by Purpose</option>
-            <option *ngFor="let purposeCode of purposeCodes" [value]="purposeCode.code"
-              [selected]="purposeCodeFilters[0] === purposeCode.code">{{purposeCode.text.long}}</option>
+            <option *ngFor="let purposeCode of purposeCodes" [value]="purposeCode.param"
+              [selected]="purposeCodeFilters[0] === purposeCode.param">{{purposeCode.text.long}}</option>
           </select>
         </div>
 
@@ -97,41 +97,13 @@
       <table class="table-cards" id="table-card">
         <thead>
           <tr>
-            <th class="sortable" (click)="sort('applicants')">Applicant(s)
-              <i class="sort"
-                [ngClass]="{'sort-asc': (sorting.column == 'applicants' && sorting.direction < 0), 'sort-desc': (sorting.column == 'applicants' && sorting.direction > 0) }"
-                aria-hidden="true"></i>
-            </th>
-            <th class="sortable" (click)="sort('clFile')">CL File
-              <i class="sort"
-                [ngClass]="{'sort-asc': (sorting.column == 'clFile' && sorting.direction < 0), 'sort-desc': (sorting.column == 'clFile' && sorting.direction > 0) }"
-                aria-hidden="true"></i>
-            </th>
-            <th class="sortable" (click)="sort('purpose')">Purpose / Subpurpose
-              <i class="sort"
-                [ngClass]="{'sort-asc': (sorting.column == 'purpose' && sorting.direction < 0), 'sort-desc': (sorting.column == 'purpose' && sorting.direction > 0) }"
-                aria-hidden="true"></i>
-            </th>
-            <th class="sortable" (click)="sort('region')">Region
-              <i class="sort"
-                [ngClass]="{'sort-asc': (sorting.column == 'region' && sorting.direction < 0), 'sort-desc': (sorting.column == 'region' && sorting.direction > 0) }"
-                aria-hidden="true"></i>
-            </th>
-            <th class="sortable" (click)="sort('status')">Status
-              <i class="sort"
-                [ngClass]="{'sort-asc': (sorting.column == 'status' && sorting.direction < 0), 'sort-desc': (sorting.column == 'status' && sorting.direction > 0) }"
-                aria-hidden="true"></i>
-            </th>
-            <th class="sortable" (click)="sort('cpStatus')">CP Status
-              <i class="sort"
-                [ngClass]="{'sort-asc': (sorting.column == 'cpStatus' && sorting.direction < 0), 'sort-desc': (sorting.column == 'cpStatus' && sorting.direction > 0) }"
-                aria-hidden="true"></i>
-            </th>
-            <th class="sortable" (click)="sort('numComments')">Comments
-              <i class="sort"
-                [ngClass]="{'sort-asc': (sorting.column == 'numComments' && sorting.direction < 0), 'sort-desc': (sorting.column == 'numComments' && sorting.direction > 0) }"
-                aria-hidden="true"></i>
-            </th>
+            <th>Applicant(s)</th>
+            <th>CL File</th>
+            <th>Purpose / Subpurpose</th>
+            <th>Region</th>
+            <th>Status</th>
+            <th>Comment Period</th>
+            <th>Comments</th>
           </tr>
         </thead>
 
@@ -156,7 +128,7 @@
               <td data-label="Status">
                 <span>{{app.status || '-'}}</span>
               </td>
-              <td data-label="CP Status">
+              <td data-label="Comment Period">
                 <span>{{app.cpStatus}}</span>
               </td>
               <td data-label="Comments" class="text-align">

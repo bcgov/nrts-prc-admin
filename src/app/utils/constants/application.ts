@@ -191,6 +191,8 @@ export class RegionCodes implements ICodeSet {
 /**
  * Application Purpose codes.
  *
+ * Note: the mappedCodes are the subPurpose codes that belong to this parent code.
+ *
  * @export
  * @class PurposeCodes
  * @implements {ICodeSet}

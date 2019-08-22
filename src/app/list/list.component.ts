@@ -25,7 +25,9 @@ interface IPaginationParameters {
 })
 export class ListComponent implements OnInit, OnDestroy {
   private ngUnsubscribe: Subject<boolean> = new Subject<boolean>();
-  private paramMap: ParamMap = null;
+
+  // url parameters, used to set the initial state of the page on load
+  public paramMap: ParamMap = null;
 
   // indicates the page is loading
   public loading = true;
@@ -34,14 +36,17 @@ export class ListComponent implements OnInit, OnDestroy {
   // indicates an export is in progress
   public exporting = false;
 
+  // list of applications to display
   public applications: Application[] = [];
 
+  // drop down filter values
   public purposeCodes = new PurposeCodes().getCodeGroups();
   public regionCodes = new RegionCodes().getCodeGroups();
   public statusCodes = new StatusCodes().getCodeGroups();
-  // enforce specific comment filter order
+  // enforce specific comment filter order for esthetics
   public commentCodes = [CommentCodes.NOT_STARTED, CommentCodes.OPEN, CommentCodes.CLOSED, CommentCodes.NOT_OPEN];
 
+  // selected drop down filters
   public purposeCodeFilters: string[] = [];
   public regionCodeFilter = '';
   public statusCodeFilters: string[] = [];
@@ -50,14 +55,16 @@ export class ListComponent implements OnInit, OnDestroy {
   // need to reset pagination when a filter is changed, as we can't be sure how many pages of results will exist.
   public filterChanged = false;
 
+  // pagination values
   public pagination = {
     totalItems: 0,
     currentPage: 1,
     itemsPerPage: 20,
     pageCount: 1,
-    message: 'No applications found'
+    message: ''
   };
 
+  // sorting values
   public sorting = {
     column: null,
     direction: 0
@@ -126,13 +133,14 @@ export class ListComponent implements OnInit, OnDestroy {
 
   /**
    * Fetches all applications that match the filter criteria (ignores pagination) and parses the resulting json into
-   * a csv for download.
+   * a csv for download.  Includes more fields than are shown on the web-page.
    *
    * @memberof ListComponent
    */
   public export(): void {
     this.exporting = true;
     const queryParams = { ...this.getApplicationQueryParameters() };
+    // ignore pagination as we want to export ALL search results
     delete queryParams.pageNum;
     delete queryParams.pageSize;
 
@@ -141,6 +149,7 @@ export class ListComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(
         applications => {
+          // All fields that will be included in the csv, and optionally what the column header text will be.
           const fields: any[] = [
             'cl_file',
             { label: 'dispositionID', value: 'tantalisID' },
@@ -198,18 +207,20 @@ export class ListComponent implements OnInit, OnDestroy {
    * @memberof ListComponent
    */
   public getApplicationQueryParameters(): IApplicationParameters {
-    const queryparams: IApplicationParameters = {
+    const queryParams: IApplicationParameters = {
       isDeleted: false,
       pageNum: this.pagination.currentPage - 1, // API starts at 0, while this component starts at 1
       pageSize: this.pagination.itemsPerPage,
-      purpose: this.purposeCodeFilters,
+      purpose: _.flatMap(
+        this.purposeCodeFilters.map(purposeCode => ConstantUtils.getCode(CodeType.PURPOSE, purposeCode))
+      ),
       status: _.flatMap(
         this.statusCodeFilters.map(statusCode => ConstantUtils.getMappedCodes(CodeType.STATUS, statusCode))
       ),
-      businessUnit: this.regionCodeFilter
+      businessUnit: ConstantUtils.getCode(CodeType.REGION, this.regionCodeFilter)
     };
 
-    return queryparams;
+    return queryParams;
   }
 
   /**
@@ -326,7 +337,11 @@ export class ListComponent implements OnInit, OnDestroy {
       return applications;
     }
 
-    return applications.filter(application => this.commentCodeFilters.includes(application.cpStatus));
+    return applications.filter(application => {
+      return _.flatMap(
+        this.commentCodeFilters.map(commentCode => ConstantUtils.getTextLong(CodeType.COMMENT, commentCode))
+      ).includes(application.cpStatus);
+    });
   }
 
   // Sorting
@@ -378,9 +393,10 @@ export class ListComponent implements OnInit, OnDestroy {
     if (this.pagination.totalItems <= 0) {
       this.pagination.message = 'No applications found';
     } else if (this.pagination.currentPage > this.pagination.pageCount) {
-      // This is necessary due to a rare edge-case where the user has manually incremented the page parameter in the URL
-      // beyond what would normally be allowed. As a result when applications are fetched, there aren't enough to reach
-      // this page, and so the total applications found is > 0, but the applications displayed for this page is 0.
+      // This check is necessary due to a rare edge-case where the user has manually incremented the page parameter in
+      // the URL beyond what would normally be allowed. As a result when applications are fetched, there aren't enough
+      // to reach this page, and so the total applications found is > 0, but the applications displayed for this page
+      // is 0, which may confuse users.  Tell them to press clear button which will reset the pagination url parameter.
       this.pagination.message = 'Unable to display results, please clear and re-try';
     } else {
       const low = Math.max((this.pagination.currentPage - 1) * this.pagination.itemsPerPage + 1, 1);
