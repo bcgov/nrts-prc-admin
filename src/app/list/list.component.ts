@@ -159,9 +159,9 @@ export class ListComponent implements OnInit, OnDestroy {
             'client',
             'purpose',
             'subpurpose',
-            'reason',
             'status',
-            'businessUnit',
+            'reason',
+            'businessUnit (region)',
             'location',
             { label: 'area (hectares)', value: 'areaHectares' },
             'createdDate',
@@ -617,7 +617,7 @@ export class ListComponent implements OnInit, OnDestroy {
       return null;
     }
 
-    return moment(date).calendar();
+    return moment(date).format('YYYY-MM-DD');
   }
 
   /**
