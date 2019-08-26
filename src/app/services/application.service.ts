@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
-import { Observable, of, forkJoin } from 'rxjs';
+import { Observable, of, combineLatest, forkJoin } from 'rxjs';
 import { flatMap, map, catchError } from 'rxjs/operators';
 import * as moment from 'moment';
 import * as _ from 'lodash';
 
-import { ApiService, IApplicationParameters } from './api';
+import { ApiService, IApplicationQueryParamSet, QueryParamModifier } from './api';
 import { DocumentService } from './document.service';
 import { CommentPeriodService } from './commentperiod.service';
 import { CommentService } from './comment.service';
@@ -48,11 +48,21 @@ export class ApplicationService {
   /**
    * Get applications count.
    *
-   * @param {IApplicationParameters} [queryParams={ isDeleted: false }]
+   * @param {IApplicationQueryParamSet} [queryParams={ isDeleted: false }]
    * @memberof ApplicationService
    */
-  getCount(queryParams: IApplicationParameters = { isDeleted: false }): Observable<number> {
-    return this.api.getCountApplications(queryParams).pipe(catchError(error => this.api.handleError(error)));
+  getCount(queryParamSets: IApplicationQueryParamSet[] = null): Observable<number> {
+    if (!queryParamSets || !queryParamSets.length) {
+      queryParamSets = [{ isDeleted: { value: false, modifier: QueryParamModifier.Equal } }];
+    }
+
+    const observables: Array<Observable<number>> = queryParamSets.map(queryParamSet =>
+      this.api.getCountApplications(queryParamSet).pipe(catchError(this.api.handleError))
+    );
+
+    return combineLatest(observables, (...args: number[]) => args.reduce((sum, arg) => (sum += arg))).pipe(
+      catchError(this.api.handleError)
+    );
   }
 
   /**
@@ -64,23 +74,47 @@ export class ApplicationService {
    * @returns {Observable<Application[]>}
    * @memberof ApplicationService
    */
-  getAll(dataParams: IGetParameters = null, queryParams: IApplicationParameters = null): Observable<Application[]> {
+  getAll(
+    dataParams: IGetParameters = null,
+    queryParamSets: IApplicationQueryParamSet[] = null
+  ): Observable<Application[]> {
     // first get just the applications
-    return this.api.getApplications(queryParams).pipe(
-      flatMap(apps => {
-        if (!apps || apps.length === 0) {
-          // NB: forkJoin([]) will complete immediately
-          // so return empty observable instead
+    // return this.api.getApplications(queryParamSets).pipe(
+    //   flatMap(apps => {
+    //     if (!apps || apps.length === 0) {
+    //       // NB: forkJoin([]) will complete immediately
+    //       // so return empty observable instead
+    //       return of([] as Application[]);
+    //     }
+    //     const observables: Array<Observable<Application>> = [];
+    //     apps.forEach(app => {
+    //       // now get the rest of the data for each application
+    //       observables.push(this._getExtraAppData(new Application(app), dataParams || {}));
+    //     });
+    //     return forkJoin(observables);
+    //   }),
+    //   catchError(error => this.api.handleError(error))
+    // );
+
+    const observables: Array<Observable<Application[]>> = queryParamSets.map(queryParamSet =>
+      this.api.getApplications(queryParamSet)
+    );
+
+    return combineLatest(...observables).pipe(
+      flatMap((res: Application[]) => {
+        const resApps = _.flatten(res);
+        if (!resApps || resApps.length === 0) {
           return of([] as Application[]);
         }
-        const observables: Array<Observable<Application>> = [];
-        apps.forEach(app => {
+
+        const dataObservables: Array<Observable<Application>> = [];
+        resApps.forEach(app => {
           // now get the rest of the data for each application
-          observables.push(this._getExtraAppData(new Application(app), dataParams || {}));
+          dataObservables.push(this._getExtraAppData(new Application(app), dataParams || {}));
         });
-        return forkJoin(observables);
+        return forkJoin(dataObservables);
       }),
-      catchError(error => this.api.handleError(error))
+      catchError(this.api.handleError)
     );
   }
 
@@ -171,7 +205,7 @@ export class ApplicationService {
 
         // user-friendly comment period long status string
         const commentPeriodCode = this.commentPeriodService.getCode(application.currentPeriod);
-        application.cpStatus = ConstantUtils.getTextLong(CodeType.COMMENT, commentPeriodCode);
+        application.cpStatusStringLong = ConstantUtils.getTextLong(CodeType.COMMENT, commentPeriodCode);
 
         // derive days remaining for display
         // use moment to handle Daylight Saving Time changes

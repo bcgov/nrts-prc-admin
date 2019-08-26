@@ -97,39 +97,66 @@
       <table class="table-cards" id="table-card">
         <thead>
           <tr>
-            <th>Applicant(s)</th>
-            <th>CL File</th>
-            <th>Purpose / Subpurpose</th>
-            <th>Region</th>
+            <th class="sortable" (click)="sort('client')">Applicant(s)
+              <i class="sort"
+                [ngClass]="{'sort-asc': (sorting.column == 'client' && sorting.direction < 0), 'sort-desc': (sorting.column == 'client' && sorting.direction > 0) }"
+                aria-hidden="true"></i>
+            </th>
+            <th class="sortable" (click)="sort('cl_file')">CL File
+              <i class="sort"
+                [ngClass]="{'sort-asc': (sorting.column == 'cl_file' && sorting.direction < 0), 'sort-desc': (sorting.column == 'cl_file' && sorting.direction > 0) }"
+                aria-hidden="true"></i>
+            </th>
+            <th class="sortable" (click)="sort('businessUnit')">Region
+              <i class="sort"
+                [ngClass]="{'sort-asc': (sorting.column == 'businessUnit' && sorting.direction < 0), 'sort-desc': (sorting.column == 'businessUnit' && sorting.direction > 0) }"
+                aria-hidden="true"></i>
+            </th>
+            <th class="sortable" (click)="sort('createdDate')">Created
+              <i class="sort"
+                [ngClass]="{'sort-asc': (sorting.column == 'createdDate' && sorting.direction < 0), 'sort-desc': (sorting.column == 'createdDate' && sorting.direction > 0) }"
+                aria-hidden="true"></i>
+            </th>
+            <th class="sortable" (click)="sort('purpose')">Purpose / Subpurpose
+              <i class="sort"
+                [ngClass]="{'sort-asc': (sorting.column == 'purpose' && sorting.direction < 0), 'sort-desc': (sorting.column == 'purpose' && sorting.direction > 0) }"
+                aria-hidden="true"></i>
+            </th>
             <th>Status</th>
-            <th>Comment Period</th>
+            <th>Retired</th>
+            <th>Commenting</th>
             <th>Comments</th>
           </tr>
         </thead>
 
         <tbody>
-          <ng-container
-            *ngFor="let app of applications | orderBy: {property: sorting.column, direction: sorting.direction}">
+          <ng-container *ngFor="let app of applications">
             <tr>
               <td data-label="Applicant(s)">
-                <span>{{app.applicants || '-'}}</span>
+                <span>{{(app.applicants | titlecase) || '-'}}</span>
               </td>
               <td data-label="CL File">
                 <span>
                   <a [routerLink]="['/a', app._id]">{{app.clFile || '-'}}</a>
                 </span>
               </td>
-              <td data-label="Purpose / Subpurpose">
-                <span>{{app.purpose || '-'}} / {{app.subpurpose || '-'}}</span>
-              </td>
               <td data-label="Region">
                 <span>{{app.region || '-'}}</span>
               </td>
+              <td data-label="Created">
+                <span>{{getFormattedDate(app.createdDate) || '-'}}</span>
+              </td>
+              <td data-label="Purpose / Subpurpose">
+                <span>{{(app.purpose | titlecase) || '-'}} / {{(app.subpurpose | titlecase) || '-'}}</span>
+              </td>
               <td data-label="Status">
-                <span>{{app.status || '-'}}</span>
+                <span>{{getStatusStringLong(app) || '-'}}</span>
+              </td>
+              <td data-label="Retired">
+                <span>{{isApplicationRetired(app) && 'Yes' || '-'}}</span>
               </td>
               <td data-label="Comment Period">
-                <span>{{app.cpStatus}}</span>
+                <span>{{app.cpStatusStringLong}}</span>
               </td>
               <td data-label="Comments" class="text-align">
                 <span>{{app.numComments}}</span>

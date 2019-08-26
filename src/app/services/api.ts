@@ -15,6 +15,43 @@ import { Feature } from 'app/models/feature';
 import { SearchResults } from 'app/models/search';
 import { User } from 'app/models/user';
 
+/**
+ * Supported query param field modifiers used by the api to interpret the query param value.
+ *
+ * @export
+ * @enum {number}
+ */
+export enum QueryParamModifier {
+  Equal = 'eq', // value must be equal to this, if multiple value must match at least one
+  Not_Equal = 'ne', // value must not be equal to this, if multiple value must not match any
+  Since = 'since', // date must be on or after this date
+  Until = 'until' // date must be before this date
+}
+
+/**
+ * A complete set of query param fields used to make a single call to the api.
+ *
+ * Note: this can contain multiple properties as long as the keys are strings and the values are IQueryParamValue.
+ *
+ * @export
+ * @interface IQueryParamSet
+ */
+export interface IQueryParamSet {
+  [key: string]: IQueryParamValue<any>;
+}
+
+/**
+ * A single query param field with optional modifier.
+ *
+ * @export
+ * @interface IQueryParamValue
+ * @template T
+ */
+export interface IQueryParamValue<T> {
+  value: T;
+  modifier?: QueryParamModifier;
+}
+
 interface ILocalLoginResponse {
   _id: string;
   title: string;
@@ -41,29 +78,32 @@ interface IRefreshApplicationResponse {
  * Note: all parameters are optional.
  *
  * @export
- * @interface IApplicationParameters
+ * @interface IApplicationQueryParamSet
  */
-export interface IApplicationParameters {
+export interface IApplicationQueryParamSet {
   pageNum?: number;
   pageSize?: number;
-  cpStart?: Date;
-  cpEnd?: Date;
-  tantalisID?: number;
-  cl_file?: number;
-  purpose?: string[];
-  subpurpose?: string[];
-  status?: string[];
-  reason?: string[];
-  subtype?: string;
-  agency?: string;
-  businessUnit?: string;
-  client?: string;
-  tenureStage?: string;
-  areaHectares?: string;
-  statusHistoryEffectiveDate?: Date;
-  centroid?: string;
-  publishDate?: Date;
+  sortBy?: string;
+
   isDeleted?: boolean;
+
+  cpStart?: IQueryParamValue<Date>;
+  cpEnd?: IQueryParamValue<Date>;
+  tantalisID?: IQueryParamValue<number>;
+  cl_file?: IQueryParamValue<number>;
+  purpose?: IQueryParamValue<string[]>;
+  subpurpose?: IQueryParamValue<string[]>;
+  status?: IQueryParamValue<string[]>;
+  reason?: IQueryParamValue<string[]>;
+  subtype?: IQueryParamValue<string>;
+  agency?: IQueryParamValue<string>;
+  businessUnit?: IQueryParamValue<string>;
+  client?: IQueryParamValue<string>;
+  tenureStage?: IQueryParamValue<string>;
+  areaHectares?: IQueryParamValue<string>;
+  statusHistoryEffectiveDate?: IQueryParamValue<Date>;
+  centroid?: IQueryParamValue<string>;
+  publishDate?: IQueryParamValue<Date>;
 }
 
 @Injectable()
@@ -158,11 +198,11 @@ export class ApiService {
   /**
    * Fetch all applications that match the provided parameters.
    *
-   * @param {IApplicationParameters} [queryParams=null]
+   * @param {IApplicationQueryParamSet} [queryParams=null]
    * @returns {Observable<Application[]>}
    * @memberof ApiService
    */
-  getApplications(queryParams: IApplicationParameters = null): Observable<Application[]> {
+  getApplications(queryParams: IApplicationQueryParamSet = null): Observable<Application[]> {
     const fields = [
       'agency',
       'areaHectares',
@@ -174,6 +214,7 @@ export class ApiService {
       'legalDescription',
       'location',
       'name',
+      'createdDate',
       'publishDate',
       'purpose',
       'status',
@@ -207,6 +248,7 @@ export class ApiService {
       'legalDescription',
       'location',
       'name',
+      'createdDate',
       'publishDate',
       'purpose',
       'status',
@@ -225,11 +267,11 @@ export class ApiService {
   /**
    * Gets the number of applications that match the provided parameters.
    *
-   * @param {IApplicationParameters} [queryParams=null]
+   * @param {IApplicationQueryParamSet} [queryParams=null]
    * @returns {Observable<number>}
    * @memberof ApiService
    */
-  getCountApplications(queryParams: IApplicationParameters = null): Observable<number> {
+  getCountApplications(queryParams: IApplicationQueryParamSet = null): Observable<number> {
     const queryString = 'application?' + this.buildQueryParametersString(queryParams);
 
     return this.http.head<HttpResponse<object>>(`${this.pathAPI}/${queryString}`, { observe: 'response' }).pipe(
@@ -254,6 +296,7 @@ export class ApiService {
       'legalDescription',
       'location',
       'name',
+      'createdDate',
       'publishDate',
       'purpose',
       'status',
@@ -282,6 +325,7 @@ export class ApiService {
       'legalDescription',
       'location',
       'name',
+      'createdDate',
       'publishDate',
       'purpose',
       'status',
@@ -669,97 +713,103 @@ export class ApiService {
   /**
    * Checks each parameters of the given queryParams and builds a single query string.
    *
-   * @param {IApplicationParameters} queryParams
+   * @param {IApplicationQueryParamSet} queryParams
    * @returns {string}
    * @memberof ApiService
    */
-  public buildQueryParametersString(queryParams: IApplicationParameters): string {
-    if (!queryParams) {
+  public buildQueryParametersString(params: IApplicationQueryParamSet): string {
+    if (!params) {
       return '';
     }
 
     let queryString = '';
 
-    if (queryParams.pageNum >= 0) {
-      queryString += `pageNum=${queryParams.pageNum}&`;
+    if (params.pageNum >= 0) {
+      queryString += `pageNum=${params.pageNum}&`;
     }
 
-    if (queryParams.pageSize >= 0) {
-      queryString += `pageSize=${queryParams.pageSize}&`;
+    if (params.pageSize >= 0) {
+      queryString += `pageSize=${params.pageSize}&`;
     }
 
-    if (queryParams.cpStart) {
-      queryString += `cpStart=${queryParams.cpStart.toISOString()}&`;
+    if (params.cpStart && params.cpStart.value) {
+      queryString += `cpStart=${params.cpStart.value.toISOString()}&`;
     }
 
-    if (queryParams.cpEnd) {
-      queryString += `cpEnd=${queryParams.cpEnd.toISOString()}&`;
+    if (params.cpEnd && params.cpEnd.value) {
+      queryString += `cpEnd=${params.cpEnd.value.toISOString()}&`;
     }
 
-    if (queryParams.tantalisID >= 0) {
-      queryString += `tantalisID=${queryParams.tantalisID}&`;
+    if (params.tantalisID && params.tantalisID.value >= 0) {
+      queryString += `tantalisID=${params.tantalisID.value}&`;
     }
 
-    if (queryParams.cl_file >= 0) {
-      queryString += `cl_file=${queryParams.cl_file}&`;
+    if (params.cl_file && params.cl_file.value >= 0) {
+      queryString += `cl_file=${params.cl_file.value}&`;
     }
 
-    if (queryParams.purpose && queryParams.purpose.length) {
-      queryParams.purpose.forEach((purpose: string) => (queryString += `purpose[eq]=${encodeURIComponent(purpose)}&`));
+    if (params.purpose && params.purpose.value && params.purpose.value.length) {
+      params.purpose.value.forEach((purpose: string) => (queryString += `purpose[eq]=${encodeURIComponent(purpose)}&`));
     }
 
-    if (queryParams.subpurpose && queryParams.subpurpose.length) {
-      queryParams.subpurpose.forEach(
+    if (params.subpurpose && params.subpurpose.value && params.subpurpose.value.length) {
+      params.subpurpose.value.forEach(
         (subpurpose: string) => (queryString += `subpurpose[eq]=${encodeURIComponent(subpurpose)}&`)
       );
     }
 
-    if (queryParams.status && queryParams.status.length) {
-      queryParams.status.forEach((status: string) => (queryString += `status[eq]=${encodeURIComponent(status)}&`));
+    if (params.status && params.status.value && params.status.value.length) {
+      params.status.value.forEach((status: string) => (queryString += `status[eq]=${encodeURIComponent(status)}&`));
     }
 
-    if (queryParams.reason && queryParams.reason.length) {
-      queryParams.reason.forEach((reason: string) => (queryString += `reason[eq]=${encodeURIComponent(reason)}&`));
+    if (params.reason && params.reason.value && params.reason.value.length) {
+      params.reason.value.forEach(
+        (reason: string) => (queryString += `reason[${params.reason.modifier}]=${encodeURIComponent(reason)}&`)
+      );
     }
 
-    if (queryParams.subtype) {
-      queryString += `subtype=${encodeURIComponent(queryParams.subtype)}&`;
+    if (params.subtype && params.subtype.value) {
+      queryString += `subtype=${encodeURIComponent(params.subtype.value)}&`;
     }
 
-    if (queryParams.agency) {
-      queryString += `agency=${encodeURIComponent(queryParams.agency)}&`;
+    if (params.agency && params.agency.value) {
+      queryString += `agency=${encodeURIComponent(params.agency.value)}&`;
     }
 
-    if (queryParams.businessUnit) {
-      queryString += `businessUnit[eq]=${encodeURIComponent(queryParams.businessUnit)}&`;
+    if (params.businessUnit && params.businessUnit.value) {
+      queryString += `businessUnit[eq]=${encodeURIComponent(params.businessUnit.value)}&`;
     }
 
-    if (queryParams.client) {
-      queryString += `client=${encodeURIComponent(queryParams.client)}&`;
+    if (params.client && params.client.value) {
+      queryString += `client=${encodeURIComponent(params.client.value)}&`;
     }
 
-    if (queryParams.tenureStage) {
-      queryString += `tenureStage=${encodeURIComponent(queryParams.tenureStage)}&`;
+    if (params.tenureStage && params.tenureStage.value) {
+      queryString += `tenureStage=${encodeURIComponent(params.tenureStage.value)}&`;
     }
 
-    if (queryParams.areaHectares) {
-      queryString += `areaHectares=${encodeURIComponent(queryParams.areaHectares)}&`;
+    if (params.areaHectares && params.areaHectares.value) {
+      queryString += `areaHectares=${encodeURIComponent(params.areaHectares.value)}&`;
     }
 
-    if (queryParams.statusHistoryEffectiveDate) {
-      queryString += `statusHistoryEffectiveDate=${queryParams.statusHistoryEffectiveDate.toISOString()}&`;
+    if (params.statusHistoryEffectiveDate && params.statusHistoryEffectiveDate.value) {
+      queryString += `statusHistoryEffectiveDate=${params.statusHistoryEffectiveDate.value.toISOString()}&`;
     }
 
-    if (queryParams.centroid) {
-      queryString += `centroid=${queryParams.centroid}&`;
+    if (params.centroid && params.centroid.value) {
+      queryString += `centroid=${params.centroid.value}&`;
     }
 
-    if (queryParams.publishDate) {
-      queryString += `publishDate=${queryParams.publishDate.toISOString()}&`;
+    if (params.publishDate && params.publishDate.value) {
+      queryString += `publishDate=${params.publishDate.value.toISOString()}&`;
     }
 
-    if ([true, false].includes(queryParams.isDeleted)) {
-      queryString += `isDeleted=${queryParams.isDeleted}&`;
+    if ([true, false].includes(params.isDeleted)) {
+      queryString += `isDeleted=${params.isDeleted}&`;
+    }
+
+    if (params.sortBy) {
+      queryString += `sortBy=${params.sortBy}&`;
     }
 
     // trim the last &

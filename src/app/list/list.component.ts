@@ -2,9 +2,9 @@ import { Location } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, ParamMap, Params, Router } from '@angular/router';
 import { Application } from 'app/models/application';
-import { IApplicationParameters } from 'app/services/api';
+import { IApplicationQueryParamSet, QueryParamModifier } from 'app/services/api';
 import { ApplicationService } from 'app/services/application.service';
-import { PurposeCodes, RegionCodes, StatusCodes } from 'app/utils/constants/application';
+import { PurposeCodes, RegionCodes, StatusCodes, ReasonCodes } from 'app/utils/constants/application';
 import { CommentCodes } from 'app/utils/constants/comment';
 import { CodeType, ConstantUtils } from 'app/utils/constants/constantUtils';
 import * as _ from 'lodash';
@@ -59,7 +59,7 @@ export class ListComponent implements OnInit, OnDestroy {
   public pagination = {
     totalItems: 0,
     currentPage: 1,
-    itemsPerPage: 20,
+    itemsPerPage: 25,
     pageCount: 1,
     message: ''
   };
@@ -109,8 +109,8 @@ export class ListComponent implements OnInit, OnDestroy {
     }
 
     forkJoin(
-      this.applicationService.getAll({ getCurrentPeriod: true }, this.getApplicationQueryParameters()),
-      this.applicationService.getCount(this.getApplicationQueryParameters())
+      this.applicationService.getAll({ getCurrentPeriod: true }, this.getApplicationQueryParamSets()),
+      this.applicationService.getCount(this.getApplicationQueryParamSets())
     )
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(
@@ -139,10 +139,13 @@ export class ListComponent implements OnInit, OnDestroy {
    */
   public export(): void {
     this.exporting = true;
-    const queryParams = { ...this.getApplicationQueryParameters() };
+    const queryParams = { ...this.getApplicationQueryParamSets() };
+
     // ignore pagination as we want to export ALL search results
-    delete queryParams.pageNum;
-    delete queryParams.pageSize;
+    queryParams.forEach(element => {
+      delete element.pageNum;
+      delete element.pageSize;
+    });
 
     this.applicationService
       .getAll({ getCurrentPeriod: true }, queryParams)
@@ -165,7 +168,7 @@ export class ListComponent implements OnInit, OnDestroy {
             'publishDate',
             'statusHistoryEffectiveDate',
             'description',
-            { label: 'comment period status', value: 'cpStatus' },
+            { label: 'comment period status', value: 'cpStatusStringLong' },
             { label: 'comment period start date', value: 'currentPeriod.startDate' },
             { label: 'comment period end date', value: 'currentPeriod.endDate' },
             { label: 'comment period number of comments', value: 'numComments' }
@@ -191,8 +194,8 @@ export class ListComponent implements OnInit, OnDestroy {
   public setInitialQueryParameters(): void {
     this.pagination.currentPage = +this.paramMap.get('page') || 1;
 
-    this.sorting.column = this.paramMap.get('col') || null;
-    this.sorting.direction = +this.paramMap.get('dir') || 0;
+    this.sorting.column = (this.paramMap.get('sortBy') && this.paramMap.get('sortBy').slice(1)) || null;
+    this.sorting.direction = this.paramMap.get('sortBy') && this.paramMap.get('sortBy').charAt(0) === '-' ? -1 : 1 || 0;
 
     this.purposeCodeFilters = (this.paramMap.get('purpose') && this.paramMap.get('purpose').split('|')) || [];
     this.regionCodeFilter = this.paramMap.get('region') || '';
@@ -201,26 +204,101 @@ export class ListComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Returns an instance of IApplicationParameters populated with the current filter and pagination values.
+   * Builds an array of query parameter sets.
    *
-   * @returns {IApplicationParameters} instance of IApplicationParameters
+   * Each query parameter set in the array will return a distinct set of results.
+   *
+   * The combined results from all query parameter sets is needed to fully satisfy the filters.
+   *
+   * @returns {IApplicationQueryParamSet[]} An array of distinct query parameter sets.
    * @memberof ListComponent
    */
-  public getApplicationQueryParameters(): IApplicationParameters {
-    const queryParams: IApplicationParameters = {
+  public getApplicationQueryParamSets(): IApplicationQueryParamSet[] {
+    let applicationQueryParamSets: IApplicationQueryParamSet[] = [];
+
+    // None of these filters require manipulation or unique considerations
+    const basicQueryParams: IApplicationQueryParamSet = {
       isDeleted: false,
       pageNum: this.pagination.currentPage - 1, // API starts at 0, while this component starts at 1
       pageSize: this.pagination.itemsPerPage,
-      purpose: _.flatMap(
-        this.purposeCodeFilters.map(purposeCode => ConstantUtils.getCode(CodeType.PURPOSE, purposeCode))
-      ),
-      status: _.flatMap(
-        this.statusCodeFilters.map(statusCode => ConstantUtils.getMappedCodes(CodeType.STATUS, statusCode))
-      ),
-      businessUnit: ConstantUtils.getCode(CodeType.REGION, this.regionCodeFilter)
+      sortBy: `${this.sorting.direction === -1 ? '-' : '+'}${this.sorting.column}`,
+      purpose: {
+        value: _.flatMap(
+          this.purposeCodeFilters.map(purposeCode => ConstantUtils.getCode(CodeType.PURPOSE, purposeCode))
+        ),
+        modifier: QueryParamModifier.Equal
+      },
+      businessUnit: {
+        value: ConstantUtils.getCode(CodeType.REGION, this.regionCodeFilter),
+        modifier: QueryParamModifier.Equal
+      }
     };
 
-    return queryParams;
+    // Certain Statuses require unique considerations, which are accounted for here
+
+    const appStatusCodeGroups =
+      (this.statusCodeFilters &&
+        _.flatMap(this.statusCodeFilters, statusParam => ConstantUtils.getCodeGroup(CodeType.STATUS, statusParam))) ||
+      [];
+
+    appStatusCodeGroups.forEach(statusCodeGroup => {
+      if (statusCodeGroup === StatusCodes.ABANDONED) {
+        // Fetch applications with Abandoned Status that don't have a Reason indicating an amendment.
+        applicationQueryParamSets.push({
+          ...basicQueryParams,
+          status: { value: StatusCodes.ABANDONED.mappedCodes, modifier: QueryParamModifier.Equal },
+          reason: {
+            value: [ReasonCodes.AMENDMENT_APPROVED.code, ReasonCodes.AMENDMENT_NOT_APPROVED.code],
+            modifier: QueryParamModifier.Not_Equal
+          }
+        });
+      } else if (statusCodeGroup === StatusCodes.DECISION_APPROVED) {
+        // Fetch applications with Approved status
+        applicationQueryParamSets.push({
+          ...basicQueryParams,
+          status: { value: statusCodeGroup.mappedCodes, modifier: QueryParamModifier.Equal }
+        });
+
+        // Also fetch applications with an Abandoned status that also have a Reason indicating an approved amendment.
+        applicationQueryParamSets.push({
+          ...basicQueryParams,
+          status: { value: StatusCodes.ABANDONED.mappedCodes, modifier: QueryParamModifier.Equal },
+          reason: {
+            value: [ReasonCodes.AMENDMENT_APPROVED.code],
+            modifier: QueryParamModifier.Equal
+          }
+        });
+      } else if (statusCodeGroup === StatusCodes.DECISION_NOT_APPROVED) {
+        // Fetch applications with Not Approved status
+        applicationQueryParamSets.push({
+          ...basicQueryParams,
+          status: { value: statusCodeGroup.mappedCodes, modifier: QueryParamModifier.Equal }
+        });
+
+        // Also fetch applications with an Abandoned status that also have a Reason indicating a not approved amendment.
+        applicationQueryParamSets.push({
+          ...basicQueryParams,
+          status: { value: StatusCodes.ABANDONED.mappedCodes, modifier: QueryParamModifier.Equal },
+          reason: {
+            value: [ReasonCodes.AMENDMENT_NOT_APPROVED.code],
+            modifier: QueryParamModifier.Equal
+          }
+        });
+      } else {
+        // This status requires no special treatment, fetch as normal
+        applicationQueryParamSets.push({
+          ...basicQueryParams,
+          status: { value: statusCodeGroup.mappedCodes, modifier: QueryParamModifier.Equal }
+        });
+      }
+    });
+
+    // if no status filters selected, still add the basic query filters
+    if (applicationQueryParamSets.length === 0) {
+      applicationQueryParamSets = [{ ...basicQueryParams }];
+    }
+
+    return applicationQueryParamSets;
   }
 
   /**
@@ -234,8 +312,7 @@ export class ListComponent implements OnInit, OnDestroy {
     params['page'] = this.pagination.currentPage;
 
     if (this.sorting.column && this.sorting.direction) {
-      params['col'] = this.sorting.column;
-      params['dir'] = this.sorting.direction;
+      params['sortBy'] = `${this.sorting.direction === -1 ? '-' : '+'}${this.sorting.column}`;
     }
 
     if (this.purposeCodeFilters && this.purposeCodeFilters.length) {
@@ -340,7 +417,7 @@ export class ListComponent implements OnInit, OnDestroy {
     return applications.filter(application => {
       return _.flatMap(
         this.commentCodeFilters.map(commentCode => ConstantUtils.getTextLong(CodeType.COMMENT, commentCode))
-      ).includes(application.cpStatus);
+      ).includes(application.cpStatusStringLong);
     });
   }
 
@@ -357,9 +434,17 @@ export class ListComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.sorting.column = sortBy;
-    this.sorting.direction = this.sorting.direction > 0 ? -1 : 1;
+    if (this.sorting.column === sortBy) {
+      // when sorting on the same column, toggle sorting
+      this.sorting.direction = this.sorting.direction > 0 ? -1 : 1;
+    } else {
+      // when sorting on a new column, sort descending
+      this.sorting.column = sortBy;
+      this.sorting.direction = 1;
+    }
+
     this.saveQueryParameters();
+    this.getApplications();
   }
 
   // Pagination
@@ -471,6 +556,68 @@ export class ListComponent implements OnInit, OnDestroy {
     });
     // trim the last |
     return values.replace(/\|$/, '');
+  }
+
+  /**
+   * Returns true if the application has an abandoned status AND an amendment reason.
+   *
+   * @param {Application} application
+   * @returns {boolean} true if the application has an abandoned status AND an amendment reason, false otherwise.
+   * @memberof ApplicationService
+   */
+  isAmendment(application: Application): boolean {
+    return !!(
+      application &&
+      ConstantUtils.getCode(CodeType.STATUS, application.status) === StatusCodes.ABANDONED.code &&
+      (ConstantUtils.getCode(CodeType.REASON, application.reason) === ReasonCodes.AMENDMENT_APPROVED.code ||
+        ConstantUtils.getCode(CodeType.REASON, application.reason) === ReasonCodes.AMENDMENT_NOT_APPROVED.code)
+    );
+  }
+
+  /**
+   * Given an application, returns a long user-friendly status string.
+   *
+   * @param {Application} application
+   * @returns {string}
+   * @memberof ApplicationService
+   */
+  getStatusStringLong(application: Application): string {
+    if (!application) {
+      return StatusCodes.UNKNOWN.text.long;
+    }
+
+    // If the application was abandoned, but the reason is due to an amendment, then return an amendment string instead
+    if (this.isAmendment(application)) {
+      return ConstantUtils.getTextLong(CodeType.REASON, application.reason);
+    }
+
+    return (
+      (application && ConstantUtils.getTextLong(CodeType.STATUS, application.status)) || StatusCodes.UNKNOWN.text.long
+    );
+  }
+
+  isApplicationRetired(application: Application): boolean {
+    if (
+      application.statusHistoryEffectiveDate &&
+      [StatusCodes.DECISION_APPROVED.code, StatusCodes.DECISION_NOT_APPROVED.code, StatusCodes.ABANDONED.code].includes(
+        ConstantUtils.getCode(CodeType.STATUS, application.status)
+      )
+    ) {
+      return moment(application.statusHistoryEffectiveDate)
+        .endOf('day')
+        .add(6, 'months')
+        .isBefore();
+    }
+
+    return false;
+  }
+
+  getFormattedDate(date: Date = null): string {
+    if (!Date) {
+      return null;
+    }
+
+    return moment(date).calendar();
   }
 
   /**
