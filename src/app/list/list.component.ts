@@ -217,11 +217,11 @@ export class ListComponent implements OnInit, OnDestroy {
     let applicationQueryParamSets: IApplicationQueryParamSet[] = [];
 
     // None of these filters require manipulation or unique considerations
+
     const basicQueryParams: IApplicationQueryParamSet = {
       isDeleted: false,
       pageNum: this.pagination.currentPage - 1, // API starts at 0, while this component starts at 1
       pageSize: this.pagination.itemsPerPage,
-      sortBy: `${this.sorting.direction === -1 ? '-' : '+'}${this.sorting.column}`,
       purpose: {
         value: _.flatMap(
           this.purposeCodeFilters.map(purposeCode => ConstantUtils.getCode(CodeType.PURPOSE, purposeCode))
@@ -233,6 +233,10 @@ export class ListComponent implements OnInit, OnDestroy {
         modifier: QueryParamModifier.Equal
       }
     };
+
+    if (this.sorting.column && this.sorting.direction) {
+      basicQueryParams.sortBy = `${this.sorting.direction === -1 ? '-' : '+'}${this.sorting.column}`;
+    }
 
     // Certain Statuses require unique considerations, which are accounted for here
 
