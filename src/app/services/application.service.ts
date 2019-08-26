@@ -4,7 +4,7 @@ import { flatMap, map, catchError } from 'rxjs/operators';
 import * as moment from 'moment';
 import * as _ from 'lodash';
 
-import { ApiService, IApplicationQueryParamSet, QueryParamModifier } from './api';
+import { ApiService, IApplicationQueryParamSet } from './api';
 import { DocumentService } from './document.service';
 import { CommentPeriodService } from './commentperiod.service';
 import { CommentService } from './comment.service';
@@ -53,7 +53,7 @@ export class ApplicationService {
    */
   getCount(queryParamSets: IApplicationQueryParamSet[] = null): Observable<number> {
     if (!queryParamSets || !queryParamSets.length) {
-      queryParamSets = [{ isDeleted: { value: false, modifier: QueryParamModifier.Equal } }];
+      queryParamSets = [{ isDeleted: false }];
     }
 
     const observables: Array<Observable<number>> = queryParamSets.map(queryParamSet =>
