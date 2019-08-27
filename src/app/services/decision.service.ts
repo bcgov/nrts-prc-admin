@@ -28,7 +28,7 @@ export class DecisionService {
           if (params && params.getDocuments) {
             return this.documentService.getAllByDecisionId(decision._id).pipe(
               map(documents => {
-                decision.documents = documents;
+                decision.meta.documents = documents;
                 return decision;
               })
             );
@@ -55,7 +55,7 @@ export class DecisionService {
           if (params && params.getDocuments) {
             return this.documentService.getAllByDecisionId(decision._id).pipe(
               map(documents => {
-                decision.documents = documents;
+                decision.meta.documents = documents;
                 return decision;
               })
             );
@@ -77,7 +77,7 @@ export class DecisionService {
     delete decision._id;
 
     // don't send documents
-    delete decision.documents;
+    delete decision.meta.documents;
 
     return this.api.addDecision(decision).pipe(catchError(error => this.api.handleError(error)));
   }
@@ -87,7 +87,7 @@ export class DecisionService {
     const decision = _.cloneDeep(orig);
 
     // don't send documents
-    delete decision.documents;
+    delete decision.meta.documents;
 
     return this.api.saveDecision(decision).pipe(catchError(error => this.api.handleError(error)));
   }

@@ -201,32 +201,32 @@ export class ApplicationService {
   private _getExtraCommentData(application: Application) {
     return this.commentPeriodService.getAllByApplicationId(application._id).pipe(
       flatMap(periods => {
-        application.currentPeriod = this.commentPeriodService.getCurrent(periods);
+        application.meta.currentPeriod = this.commentPeriodService.getCurrent(periods);
 
         // user-friendly comment period long status string
-        const commentPeriodCode = this.commentPeriodService.getCode(application.currentPeriod);
-        application.cpStatusStringLong = ConstantUtils.getTextLong(CodeType.COMMENT, commentPeriodCode);
+        const commentPeriodCode = this.commentPeriodService.getCode(application.meta.currentPeriod);
+        application.meta.cpStatusStringLong = ConstantUtils.getTextLong(CodeType.COMMENT, commentPeriodCode);
 
         // derive days remaining for display
         // use moment to handle Daylight Saving Time changes
-        if (application.currentPeriod && this.commentPeriodService.isOpen(commentPeriodCode)) {
+        if (application.meta.currentPeriod && this.commentPeriodService.isOpen(commentPeriodCode)) {
           const now = new Date();
           const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-          application.currentPeriod['daysRemaining'] =
-            moment(application.currentPeriod.endDate).diff(moment(today), 'days') + 1; // including today
+          application.meta.currentPeriod.meta.daysRemaining =
+            moment(application.meta.currentPeriod.endDate).diff(moment(today), 'days') + 1; // including today
         }
 
         // get the number of comments for the current comment period only
         // multiple comment periods are currently not supported
-        if (!application.currentPeriod) {
-          application['numComments'] = 0;
+        if (!application.meta.currentPeriod) {
+          application.meta.numComments = 0;
           return of(application);
         }
 
         return forkJoin(
-          this.commentService.getCountByPeriodId(application.currentPeriod._id).pipe(
+          this.commentService.getCountByPeriodId(application.meta.currentPeriod._id).pipe(
             map(numComments => {
-              application['numComments'] = numComments;
+              application.meta.numComments = numComments;
               return of(application);
             })
           )
@@ -257,26 +257,26 @@ export class ApplicationService {
     ).pipe(
       map(payloads => {
         if (getFeatures) {
-          application.features = payloads[0];
+          application.meta.features = payloads[0];
         }
 
         if (getDocuments) {
-          application.documents = payloads[1];
+          application.meta.documents = payloads[1];
         }
 
         if (getDecision) {
-          application.decision = payloads[3];
+          application.meta.decision = payloads[3];
         }
 
         // 7-digit CL File number for display
         if (application.cl_file) {
-          application.clFile = application.cl_file.toString().padStart(7, '0');
+          application.meta.clFile = application.cl_file.toString().padStart(7, '0');
         }
 
         // derive unique applicants
         if (application.client) {
           const clients = application.client.split(', ');
-          application.applicants = _.uniq(clients).join(', ');
+          application.meta.applicants = _.uniq(clients).join(', ');
         }
 
         // derive retire date
@@ -288,12 +288,12 @@ export class ApplicationService {
             StatusCodes.ABANDONED.code
           ].includes(ConstantUtils.getCode(CodeType.STATUS, application.status))
         ) {
-          application.retireDate = moment(application.statusHistoryEffectiveDate)
+          application.meta.retireDate = moment(application.statusHistoryEffectiveDate)
             .endOf('day')
             .add(6, 'months')
             .toDate();
           // set flag if retire date is in the past
-          application.isRetired = moment(application.retireDate).isBefore();
+          application.meta.isRetired = moment(application.meta.retireDate).isBefore();
         }
 
         // finally update the object and return
@@ -320,10 +320,10 @@ export class ApplicationService {
     delete app._id;
 
     // don't send attached data (features, documents, etc)
-    delete app.features;
-    delete app.documents;
-    delete app.currentPeriod;
-    delete app.decision;
+    delete app.meta.features;
+    delete app.meta.documents;
+    delete app.meta.currentPeriod;
+    delete app.meta.decision;
 
     // replace newlines with \\n (JSON format)
     if (app.description) {
@@ -348,10 +348,10 @@ export class ApplicationService {
     const app = _.cloneDeep(orig);
 
     // don't send attached data (features, documents, etc)
-    delete app.features;
-    delete app.documents;
-    delete app.currentPeriod;
-    delete app.decision;
+    delete app.meta.features;
+    delete app.meta.documents;
+    delete app.meta.currentPeriod;
+    delete app.meta.decision;
 
     // replace newlines with \\n (JSON format)
     if (app.description) {

@@ -133,15 +133,15 @@
           <ng-container *ngFor="let app of applications">
             <tr>
               <td data-label="Applicant(s)">
-                <span>{{(app.applicants | titlecase) || '-'}}</span>
+                <span>{{(app.meta.applicants | titlecase) || '-'}}</span>
               </td>
               <td data-label="CL File">
                 <span>
-                  <a [routerLink]="['/a', app._id]">{{app.clFile || '-'}}</a>
+                  <a [routerLink]="['/a', app._id]">{{app.meta.clFile || '-'}}</a>
                 </span>
               </td>
               <td data-label="Region">
-                <span>{{app.region || '-'}}</span>
+                <span>{{app.meta.region || '-'}}</span>
               </td>
               <td data-label="Created">
                 <span>{{getFormattedDate(app.createdDate) || '-'}}</span>
@@ -156,10 +156,10 @@
                 <span>{{isApplicationRetired(app) && 'Yes' || '-'}}</span>
               </td>
               <td data-label="Comment Period">
-                <span>{{app.cpStatusStringLong}}</span>
+                <span>{{app.meta.cpStatusStringLong}}</span>
               </td>
               <td data-label="Comments" class="text-align">
-                <span>{{app.numComments}}</span>
+                <span>{{app.meta.numComments}}</span>
               </td>
             </tr>
           </ng-container>

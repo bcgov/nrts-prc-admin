@@ -4,7 +4,6 @@ import { Decision } from './decision';
 import { Document } from './document';
 import { Feature } from './feature';
 import { ConstantUtils, CodeType } from 'app/utils/constants/constantUtils';
-import { ICodeGroup } from 'app/utils/constants/interfaces';
 
 export class Application {
   // Database fields
@@ -32,26 +31,51 @@ export class Application {
   statusHistoryEffectiveDate: Date = null;
   tags: string[] = [];
 
-  // Non-database fields that may be manually added to this object for convenience.
-  region: string;
-  cpStatus: ICodeGroup;
-  cpStatusStringLong: string;
-  clFile: string;
-  applicants: string;
-  retireDate: Date = null;
-  isRetired = false;
-  isPublished = false;
-  numComments: number;
+  /**
+   * This field, and its internals, are not part of the database model.
+   *
+   * They are included here as a convenient way to store various bits of data that we don't keep in the database, but
+   * which get used by the app in multiple places.  This way, we don't need to generate them repeatedly.
+   *
+   * Example: the region field is just a user friendly version of the businessUnit.
+   *
+   * @memberof Application
+   */
+  meta: {
+    region: string;
+    cpStatusStringLong: string;
+    clFile: string;
+    applicants: string;
+    retireDate: Date;
+    isRetired: boolean;
+    isPublished: boolean;
+    numComments: number;
+    isCreated: boolean;
 
-  // Associated data from other database collections
-  currentPeriod: CommentPeriod = null;
-  decision: Decision = null;
-  documents: Document[] = [];
-  features: Feature[] = [];
+    // Associated data from other database collections
+    currentPeriod: CommentPeriod;
+    decision: Decision;
+    documents: Document[];
+    features: Feature[];
+  } = {
+    region: '',
+    cpStatusStringLong: '',
+    clFile: '',
+    applicants: '',
+    retireDate: null,
+    isRetired: false,
+    isPublished: false,
+    numComments: null,
+    isCreated: false,
+
+    currentPeriod: null,
+    decision: null,
+    documents: [],
+    features: []
+  };
 
   constructor(obj?: any) {
-    // Database fields.
-
+    // Database fields
     this._id = (obj && obj._id) || null;
     this.agency = (obj && obj.agency) || null;
     this.areaHectares = (obj && obj.areaHectares) || null;
@@ -104,46 +128,47 @@ export class Application {
 
     // Associated data from other database collections
 
-    if (obj && obj.currentPeriod) {
-      this.currentPeriod = new CommentPeriod(obj.currentPeriod);
+    if (obj && obj.meta && obj.meta.currentPeriod) {
+      this.meta.currentPeriod = new CommentPeriod(obj.meta.currentPeriod);
     }
 
-    if (obj && obj.decision) {
-      this.decision = new Decision(obj.decision);
+    if (obj && obj.meta && obj.meta.decision) {
+      this.meta.decision = new Decision(obj.meta.decision);
     }
 
-    if (obj && obj.documents) {
-      for (const doc of obj.documents) {
-        this.documents.push(doc);
+    if (obj && obj.meta && obj.meta.documents) {
+      for (const doc of obj.meta.documents) {
+        this.meta.documents.push(doc);
       }
     }
 
-    if (obj && obj.features) {
-      for (const feature of obj.features) {
-        this.features.push(feature);
+    if (obj && obj.meta && obj.meta.features) {
+      for (const feature of obj.meta.features) {
+        this.meta.features.push(feature);
       }
     }
 
     // Non-database fields that may be manually added to this object for convenience.
 
-    this.region = (obj && obj.businessUnit && ConstantUtils.getTextLong(CodeType.REGION, obj.businessUnit)) || null;
-    this.cpStatus = (obj && obj.cpStatus) || null;
-    this.cpStatusStringLong = (obj && obj.cpStatusStringLong) || null;
-    this.clFile = (obj && obj.clFile) || null;
-    this.applicants = (obj && obj.applicants) || null;
-    this.isRetired = (obj && obj.isRetired) || null;
-    if (obj && obj.retireDate) {
-      this.retireDate = new Date(obj.retireDate);
+    this.meta.region =
+      (obj && obj.businessUnit && ConstantUtils.getTextLong(CodeType.REGION, obj.businessUnit)) || null;
+    this.meta.cpStatusStringLong = (obj && obj.meta && obj.meta.cpStatusStringLong) || null;
+    this.meta.clFile = (obj && obj.meta && obj.meta.clFile) || null;
+    this.meta.applicants = (obj && obj.meta && obj.meta.applicants) || null;
+    this.meta.isRetired = (obj && obj.meta && obj.meta.isRetired) || null;
+    if (obj && obj.meta && obj.meta.retireDate) {
+      this.meta.retireDate = new Date(obj.retireDate);
     }
+    this.meta.isCreated = (obj && obj.meta && obj.meta.isCreated) || null;
     if (obj && obj.tags) {
       // isPublished is based on the presence of the 'public' tag
       for (const tag of obj.tags) {
         if (_.includes(tag, 'public')) {
-          this.isPublished = true;
+          this.meta.isPublished = true;
           break;
         }
       }
     }
-    this.numComments = (obj && obj.numComments) || null;
+    this.meta.numComments = (obj && obj.numComments) || null;
   }
 }

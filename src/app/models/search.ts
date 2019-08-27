@@ -11,7 +11,6 @@ export class SearchResults {
   hostname: string;
 
   features: Feature[] = [];
-  sidsFound: string[] = [];
 
   // New Data
   CROWN_LANDS_FILE: string;
@@ -73,13 +72,6 @@ export class SearchResults {
     if (search && search.interestedParties) {
       for (const party of search.interestedParties) {
         this.interestedParties.push(party);
-      }
-    }
-
-    // copy sidsFound
-    if (search && search.sidsFound) {
-      for (const sid of search.sidsFound) {
-        this.sidsFound.push(sid);
       }
     }
 

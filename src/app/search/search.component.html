@@ -40,13 +40,13 @@
       <ng-template ngFor let-application [ngForOf]="applications">
         <tr class="app-details">
           <td class="cl-file">
-            <span class="cl-arrow">{{application.clFile}}</span>
+            <span class="cl-arrow">{{application.meta.clFile}}</span>
           </td>
           <td class="disp">
             <strong>{{application.tantalisID}}</strong>
           </td>
           <td
-            [innerHTML]="application.applicants ? (application.applicants | titlecase) : '<em>No Applicant on this File</em>'">
+            [innerHTML]="application.meta.applicants ? (application.meta.applicants | titlecase) : '<em>No Applicant on this File</em>'">
           </td>
           <td>
             {{application.purpose | titlecase}} / {{application.subpurpose | titlecase}}
@@ -57,13 +57,13 @@
           <td class="actions">
             <div class="btn-container">
               <button class="btn btn-sm btn-primary" type="button" title="Create this application in ACFRD"
-                *ngIf="!application['isCreated']" (click)="onImport(application)" [disabled]="application.isRetired">
+                *ngIf="!application.meta.isCreated" (click)="onImport(application)" [disabled]="application.meta.isRetired">
                 <i class="material-icons">add</i>
                 Create
               </button>
               <span title="You cannot create a retired application"></span>
             </div>
-            <div ngbDropdown placement="bottom-right" *ngIf="application['isCreated']">
+            <div ngbDropdown placement="bottom-right" *ngIf="application.meta.isCreated">
               <button ngbDropdownToggle class="btn btn-sm btn-outline-primary" type="button">
                 Actions
               </button>
@@ -73,7 +73,7 @@
                   View Application
                 </button>
                 <button class="dropdown-item" type="button" [routerLink]="['/a', application._id, 'edit']"
-                  *ngIf="!application.isRetired">
+                  *ngIf="!application.meta.isRetired">
                   <i class="material-icons">edit</i>
                   Edit Details
                 </button>
@@ -85,25 +85,25 @@
             </div>
           </td>
         </tr>
-        <tr class="app-comment-details" *ngIf="application['isCreated']">
+        <tr class="app-comment-details" *ngIf="application.meta.isCreated">
           <td colspan="6">
             <span class="comment-info">
-              <span *ngIf="application['numComments'] > 0">
+              <span *ngIf="application.meta.numComments > 0">
                 <strong>
-                  <a [routerLink]="['/comments', application._id]">{{application['numComments']}}
-                    {{application['numComments'] === 1 ? 'comment' : 'comments'}}</a>
+                  <a [routerLink]="['/comments', application._id]">{{application.meta.numComments}}
+                    {{application.meta.numComments === 1 ? 'comment' : 'comments'}}</a>
                 </strong>
                 &nbsp;-&nbsp;
               </span>
               <span>
-                {{application.cpStatusStringLong || 'Unknown'}}
+                {{application.meta.cpStatusStringLong || 'Unknown'}}
               </span>
-              <span *ngIf="application.currentPeriod">
+              <span *ngIf="application.meta.currentPeriod">
                 &nbsp;-&nbsp;
-                {{application.currentPeriod.startDate | date:'longDate'}} to
-                {{application.currentPeriod.endDate | date:'longDate'}}
-                <span *ngIf="application.currentPeriod['daysRemaining']">
-                  &nbsp;({{application.currentPeriod['daysRemaining'] + (application.currentPeriod['daysRemaining'] === 1 ? ' day ' : ' days ') + 'remaining'}})
+                {{application.meta.currentPeriod.startDate | date:'longDate'}} to
+                {{application.meta.currentPeriod.endDate | date:'longDate'}}
+                <span *ngIf="application.meta.currentPeriod.meta.daysRemaining">
+                  &nbsp;({{application.meta.currentPeriod.meta.daysRemaining + (application.meta.currentPeriod.meta.daysRemaining === 1 ? ' day ' : ' days ') + 'remaining'}})
                 </span>
               </span>
             </span>

@@ -66,7 +66,7 @@ export class SearchService {
 
         // first look at PRC results
         applications.forEach(app => {
-          app['isCreated'] = true;
+          app.meta.isCreated = true;
           results.push(app);
         });
 
@@ -104,12 +104,12 @@ export class SearchService {
           });
 
           // 7-digit CL File number for display
-          app.clFile = searchResult.CROWN_LANDS_FILE.padStart(7, '0');
+          app.meta.clFile = searchResult.CROWN_LANDS_FILE.padStart(7, '0');
 
           // derive unique applicants
           if (app.client) {
             const clients = app.client.split(', ');
-            app.applicants = _.uniq(clients).join(', ');
+            app.meta.applicants = _.uniq(clients).join(', ');
           }
 
           // derive retire date
@@ -121,12 +121,12 @@ export class SearchService {
               StatusCodes.ABANDONED.code
             ].includes(ConstantUtils.getCode(CodeType.STATUS, app.status))
           ) {
-            app.retireDate = moment(app.statusHistoryEffectiveDate)
+            app.meta.retireDate = moment(app.statusHistoryEffectiveDate)
               .endOf('day')
               .add(6, 'months')
               .toDate();
             // set flag if retire date is in the past
-            app.isRetired = moment(app.retireDate).isBefore();
+            app.meta.isRetired = moment(app.meta.retireDate).isBefore();
           }
 
           results.push(app);
@@ -167,7 +167,7 @@ export class SearchService {
 
         // first look at PRC result
         if (application) {
-          application['isCreated'] = true;
+          application.meta.isCreated = true;
           // found a unique application in PRC -- no need to look at Tantalis results
           return [application];
         }
@@ -207,12 +207,12 @@ export class SearchService {
           });
 
           // 7-digit CL File number for display
-          app.clFile = searchResult.CROWN_LANDS_FILE.padStart(7, '0');
+          app.meta.clFile = searchResult.CROWN_LANDS_FILE.padStart(7, '0');
 
           // derive unique applicants
           if (app.client) {
             const clients = app.client.split(', ');
-            app.applicants = _.uniq(clients).join(', ');
+            app.meta.applicants = _.uniq(clients).join(', ');
           }
 
           // derive retire date
@@ -224,12 +224,12 @@ export class SearchService {
               StatusCodes.ABANDONED.code
             ].includes(ConstantUtils.getCode(CodeType.STATUS, app.status))
           ) {
-            app.retireDate = moment(app.statusHistoryEffectiveDate)
+            app.meta.retireDate = moment(app.statusHistoryEffectiveDate)
               .endOf('day')
               .add(6, 'months')
               .toDate();
             // set flag if retire date is in the past
-            app.isRetired = moment(app.retireDate).isBefore();
+            app.meta.isRetired = moment(app.meta.retireDate).isBefore();
           }
 
           results.push(app);

@@ -2,23 +2,23 @@
   <div class="container">
     <div class="title-container">
       <div class="title-container__title">
-        <h1>Crown land File: {{application.clFile}}</h1>
+        <h1>Crown land File: {{application.meta.clFile}}</h1>
         <span class="title-container__sub text-muted">Disposition Transaction: {{application.tantalisID}}</span>
       </div>
       <div class="title-container__actions">
         <div class="btn-container">
           <button class="btn btn-light" type="button" title="Edit application"
             [routerLink]="['/a', application._id, 'edit']"
-            [disabled]="application.isRetired">
+            [disabled]="application.meta.isRetired">
             Edit
           </button>
           <span title="You cannot edit a retired application"></span>
         </div>
         <div class="btn-container">
           <button class="btn btn-primary ml-1" type="button" title="Publish application"
-            *ngIf="!application.isPublished"
+            *ngIf="!application.meta.isPublished"
             (click)="publishApplication()"
-            [disabled]="isPublishing || application.isRetired">
+            [disabled]="isPublishing || application.meta.isRetired">
             <i class="spinner rotating" [hidden]="!isPublishing"></i>
             <span>{{isPublishing ? 'Publishing' : 'Publish'}}</span>
           </button>
@@ -26,7 +26,7 @@
         </div>
         <!-- NB: you CAN unpublish a retired application -->
         <button class="btn btn-primary ml-1" type="button" title="Unpublish application"
-          *ngIf="application.isPublished"
+          *ngIf="application.meta.isPublished"
           (click)="unPublishApplication()"
           [disabled]="isUnpublishing">
           <i class="spinner rotating" [hidden]="!isUnpublishing"></i>
@@ -54,19 +54,19 @@
 
 <div class="bottom-container" *ngIf="application">
   <div class="container">
-    <ngb-alert type="primary" [dismissible]="false" *ngIf="application.retireDate && !application.isRetired">
+    <ngb-alert type="primary" [dismissible]="false" *ngIf="application.meta.retireDate && !application.meta.isRetired">
       <div class="alert-contents">
         <i class="material-icons">warning</i>
         <div class="alert-msg">
-          This application will be visible on the public website until {{application.retireDate | date:'longDate'}}.
+          This application will be visible on the public website until {{application.meta.retireDate | date:'longDate'}}.
         </div>
       </div>
     </ngb-alert>
-    <ngb-alert type="warning" [dismissible]="false" *ngIf="application.retireDate && application.isRetired">
+    <ngb-alert type="warning" [dismissible]="false" *ngIf="application.meta.retireDate && application.meta.isRetired">
       <div class="alert-contents">
         <i class="material-icons">warning</i>
         <div class="alert-msg">
-          This application was removed from the public website on {{application.retireDate | date:'longDate'}}.
+          This application was removed from the public website on {{application.meta.retireDate | date:'longDate'}}.
         </div>
       </div>
     </ngb-alert>
@@ -93,7 +93,7 @@
                   <ul class="nv-list">
                     <li>
                       <span class="name">Applicant(s):</span>
-                      <span class="value">{{application.applicants || 'No Applicant on this File'}}</span>
+                      <span class="value">{{application.meta.applicants || 'No Applicant on this File'}}</span>
                     </li>
                     <li>
                       <span class="name">Purpose/Subpurpose:</span>
@@ -117,7 +117,7 @@
                     </li>
                     <li>
                       <span class="name">Region:</span>
-                      <span class="value">{{application.region || '-'}}</span>
+                      <span class="value">{{application.meta.region || '-'}}</span>
                     </li>
                     <li>
                       <span class="name">Location:</span>
@@ -136,7 +136,7 @@
                 <section>
                   <h2>Documents</h2>
                   <ul class="doc-list">
-                    <li *ngFor="let doc of application.documents">
+                    <li *ngFor="let doc of application.meta.documents">
                       <span class="cell icon">
                         <i class="material-icons link" (click)="api.openDocument(doc)">
                           insert_drive_file
@@ -153,7 +153,7 @@
                         </button>
                       </span>
                     </li>
-                    <li class="no-results" *ngIf="application.documents.length === 0">
+                    <li class="no-results" *ngIf="application.meta.documents.length === 0">
                       <em>No application documents</em>
                     </li>
                   </ul>
@@ -171,16 +171,16 @@
                 <section>
                   <app-application-aside [application]="application"></app-application-aside>
                 </section>
-                <section *ngIf="!application.features || application.features.length === 0">
+                <section *ngIf="!application.meta.features || application.meta.features.length === 0">
                   <!-- if no features, display Legal Description here -->
                   <!-- otherwise it's displayed in shape section below -->
                   <h2>Legal Description</h2>
                   <p [innerHTML]="(application.legalDescription | newlines) || '-'"></p>
                 </section>
-                <section *ngIf="application.features && application.features.length !== 0">
-                  <h2>Geographic Shape Information ({{application.features.length}})</h2>
+                <section *ngIf="application.meta.features && application.meta.features.length !== 0">
+                  <h2>Geographic Shape Information ({{application.meta.features.length}})</h2>
                   <ul class="shapefile-list">
-                    <li class="interest-id" *ngFor="let shape of application.features">
+                    <li class="interest-id" *ngFor="let shape of application.meta.features">
                       <span class="title">Shape ID: {{shape.properties.INTRID_SID}}</span>
                       <ul class="nv-list">
                         <li>
@@ -220,32 +220,32 @@
 
         <div class="aside-card">
           <h3 class="title">Comment Period Details</h3>
-          <div class="body" *ngIf="!application.currentPeriod">
+          <div class="body" *ngIf="!application.meta.currentPeriod">
             Not Open For Commenting
           </div>
-          <div class="body" *ngIf="application.currentPeriod">
+          <div class="body" *ngIf="application.meta.currentPeriod">
             <ul class="nv-list">
               <li>
                 <span class="name">Status:</span>
-                <span class="value">{{application.cpStatusStringLong}}</span>
+                <span class="value">{{application.meta.cpStatusStringLong}}</span>
               </li>
               <li>
                 <span class="name">Start Date:</span>
-                <span class="value">{{application.currentPeriod.startDate | date:'longDate'}}</span>
+                <span class="value">{{application.meta.currentPeriod.startDate | date:'longDate'}}</span>
               </li>
               <li>
                 <span class="name">End Date:</span>
-                <span class="value">{{application.currentPeriod.endDate | date:'longDate'}}</span>
+                <span class="value">{{application.meta.currentPeriod.endDate | date:'longDate'}}</span>
               </li>
-              <li *ngIf="application.currentPeriod['daysRemaining']">
+              <li *ngIf="application.meta.currentPeriod.meta.daysRemaining">
                 <span class="name">Days Remaining:</span>
-                <span class="value">{{application.currentPeriod['daysRemaining']}}</span>
+                <span class="value">{{application.meta.currentPeriod.meta.daysRemaining}}</span>
               </li>
             </ul>
             <div class="btn-container">
               <button class="cta-btn btn btn-sm btn-outline-primary" type="button" title="Review comments"
                 [routerLink]="['/comments', application._id]">
-                Review Comments<span *ngIf="application['numComments'] >= 0">&nbsp;({{application['numComments']}})</span>
+                Review Comments<span *ngIf="application.meta.numComments >= 0">&nbsp;({{application.meta.numComments}})</span>
               </button>
             </div>
           </div>
@@ -253,12 +253,12 @@
         <div class="aside-card">
           <h3 class="title">Application Decision Documents</h3>
           <div class="body">
-            <div *ngIf="!application.decision">
+            <div *ngIf="!application.meta.decision">
               <p class="mb-0">No decision documents have been added to this application.</p>
             </div>
-            <div *ngIf="application.decision">
+            <div *ngIf="application.meta.decision">
               <ul class="doc-list">
-                <li *ngFor="let doc of application.decision.documents">
+                <li *ngFor="let doc of application.meta.decision.meta.documents">
                   <span class="cell icon">
                     <i class="material-icons link" (click)="api.openDocument(doc)">
                       insert_drive_file
@@ -275,7 +275,7 @@
                     </button>
                   </span>
                 </li>
-                <li class="no-results" *ngIf="application.decision.documents.length === 0">
+                <li class="no-results" *ngIf="application.meta.decision.meta.documents.length === 0">
                   <em>No decision documents</em>
                 </li>
               </ul>
@@ -283,7 +283,7 @@
             <div class="btn-container">
               <button class="cta-btn btn btn-sm btn-outline-primary" type="button" title="Edit decision documents"
                 [routerLink]="['/a', application._id, 'edit']"
-                [disabled]="application.isRetired"
+                [disabled]="application.meta.isRetired"
                 fragment="appDecision">
                 Edit Decision Documents
               </button>

@@ -61,7 +61,7 @@ export class ReviewCommentsComponent implements OnInit, OnDestroy {
         this.application = data.application;
 
         this.commentService
-          .getCountByPeriodId(this.application.currentPeriod._id)
+          .getCountByPeriodId(this.application.meta.currentPeriod._id)
           .pipe(takeUntil(this.ngUnsubscribe))
           .subscribe(value => {
             this.pageCount = value ? Math.ceil(value / this.PAGE_SIZE) : 1;
@@ -161,13 +161,13 @@ export class ReviewCommentsComponent implements OnInit, OnDestroy {
               delete document.isDeleted;
             });
             // add necessary properties
-            // comment.applicants = this.application.applicants; // FUTURE
-            comment['cl_file'] = this.application.clFile;
+            // comment.meta.applicants = this.application.meta.applicants; // FUTURE
+            comment['cl_file'] = this.application.meta.clFile;
             return this.flatten_fastest(comment);
           });
 
           const excelFileName =
-            'comments-' + this.application.applicants.replace(/\s/g, '_') + moment(new Date()).format('-YYYYMMDD');
+            'comments-' + this.application.meta.applicants.replace(/\s/g, '_') + moment(new Date()).format('-YYYYMMDD');
           const columnOrder: string[] = [
             'cl_file',
             '_id',

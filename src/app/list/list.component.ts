@@ -139,16 +139,16 @@ export class ListComponent implements OnInit, OnDestroy {
    */
   public export(): void {
     this.exporting = true;
-    const queryParams = { ...this.getApplicationQueryParamSets() };
+    const queryParamsSet = this.getApplicationQueryParamSets();
 
     // ignore pagination as we want to export ALL search results
-    queryParams.forEach(element => {
+    queryParamsSet.forEach(element => {
       delete element.pageNum;
       delete element.pageSize;
     });
 
     this.applicationService
-      .getAll({ getCurrentPeriod: true }, queryParams)
+      .getAll({ getCurrentPeriod: true }, queryParamsSet)
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(
         applications => {
@@ -168,10 +168,10 @@ export class ListComponent implements OnInit, OnDestroy {
             'publishDate',
             'statusHistoryEffectiveDate',
             'description',
-            { label: 'comment period status', value: 'cpStatusStringLong' },
-            { label: 'comment period start date', value: 'currentPeriod.startDate' },
-            { label: 'comment period end date', value: 'currentPeriod.endDate' },
-            { label: 'comment period number of comments', value: 'numComments' }
+            { label: 'comment period status', value: 'meta.cpStatusStringLong' },
+            { label: 'comment period start date', value: 'meta.currentPeriod.startDate' },
+            { label: 'comment period end date', value: 'meta.currentPeriod.endDate' },
+            { label: 'comment period number of comments', value: 'meta.numComments' }
           ];
           this.exportService.exportAsCSV(applications, `ACRFD_Applications_Export_${moment().format()}`, fields);
           this.exporting = false;
@@ -421,7 +421,7 @@ export class ListComponent implements OnInit, OnDestroy {
     return applications.filter(application => {
       return _.flatMap(
         this.commentCodeFilters.map(commentCode => ConstantUtils.getTextLong(CodeType.COMMENT, commentCode))
-      ).includes(application.cpStatusStringLong);
+      ).includes(application.meta.cpStatusStringLong);
     });
   }
 

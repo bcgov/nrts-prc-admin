@@ -65,7 +65,7 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
   }
 
   public deleteApplication() {
-    if (this.application['numComments'] > 0) {
+    if (this.application.meta.numComments > 0) {
       this.dialogService
         .addDialog(
           ConfirmComponent,
@@ -82,7 +82,7 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (this.application.isPublished) {
+    if (this.application.meta.isPublished) {
       this.dialogService
         .addDialog(
           ConfirmComponent,
@@ -124,25 +124,25 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
     let observables = of(null);
 
     // delete comment period
-    if (this.application.currentPeriod) {
-      observables = observables.pipe(concat(this.commentPeriodService.delete(this.application.currentPeriod)));
+    if (this.application.meta.currentPeriod) {
+      observables = observables.pipe(concat(this.commentPeriodService.delete(this.application.meta.currentPeriod)));
     }
 
     // delete decision documents
-    if (this.application.decision && this.application.decision.documents) {
-      for (const doc of this.application.decision.documents) {
+    if (this.application.meta.decision && this.application.meta.decision.meta.documents) {
+      for (const doc of this.application.meta.decision.meta.documents) {
         observables = observables.pipe(concat(this.documentService.delete(doc)));
       }
     }
 
     // delete decision
-    if (this.application.decision) {
-      observables = observables.pipe(concat(this.decisionService.delete(this.application.decision)));
+    if (this.application.meta.decision) {
+      observables = observables.pipe(concat(this.decisionService.delete(this.application.meta.decision)));
     }
 
     // delete application documents
-    if (this.application.documents) {
-      for (const doc of this.application.documents) {
+    if (this.application.meta.documents) {
+      for (const doc of this.application.meta.documents) {
         observables = observables.pipe(concat(this.documentService.delete(doc)));
       }
     }
@@ -263,28 +263,28 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
     let observables = of(null);
 
     // publish comment period
-    if (this.application.currentPeriod && !this.application.currentPeriod.isPublished) {
-      observables = observables.pipe(concat(this.commentPeriodService.publish(this.application.currentPeriod)));
+    if (this.application.meta.currentPeriod && !this.application.meta.currentPeriod.meta.isPublished) {
+      observables = observables.pipe(concat(this.commentPeriodService.publish(this.application.meta.currentPeriod)));
     }
 
     // publish decision documents
-    if (this.application.decision && this.application.decision.documents) {
-      for (const doc of this.application.decision.documents) {
-        if (!doc.isPublished) {
+    if (this.application.meta.decision && this.application.meta.decision.meta.documents) {
+      for (const doc of this.application.meta.decision.meta.documents) {
+        if (!doc.meta.isPublished) {
           observables = observables.pipe(concat(this.documentService.publish(doc)));
         }
       }
     }
 
     // publish decision
-    if (this.application.decision && !this.application.decision.isPublished) {
-      observables = observables.pipe(concat(this.decisionService.publish(this.application.decision)));
+    if (this.application.meta.decision && !this.application.meta.decision.meta.isPublished) {
+      observables = observables.pipe(concat(this.decisionService.publish(this.application.meta.decision)));
     }
 
     // publish application documents
-    if (this.application.documents) {
-      for (const doc of this.application.documents) {
-        if (!doc.isPublished) {
+    if (this.application.meta.documents) {
+      for (const doc of this.application.meta.documents) {
+        if (!doc.meta.isPublished) {
           observables = observables.pipe(concat(this.documentService.publish(doc)));
         }
       }
@@ -292,7 +292,7 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
 
     // publish application
     // do this last in case of prior failures
-    if (!this.application.isPublished) {
+    if (!this.application.meta.isPublished) {
       observables = observables.pipe(concat(this.applicationService.publish(this.application)));
     }
 
@@ -346,28 +346,28 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
     let observables = of(null);
 
     // unpublish comment period
-    if (this.application.currentPeriod && this.application.currentPeriod.isPublished) {
-      observables = observables.pipe(concat(this.commentPeriodService.unPublish(this.application.currentPeriod)));
+    if (this.application.meta.currentPeriod && this.application.meta.currentPeriod.meta.isPublished) {
+      observables = observables.pipe(concat(this.commentPeriodService.unPublish(this.application.meta.currentPeriod)));
     }
 
     // unpublish decision documents
-    if (this.application.decision && this.application.decision.documents) {
-      for (const doc of this.application.decision.documents) {
-        if (doc.isPublished) {
+    if (this.application.meta.decision && this.application.meta.decision.meta.documents) {
+      for (const doc of this.application.meta.decision.meta.documents) {
+        if (doc.meta.isPublished) {
           observables = observables.pipe(concat(this.documentService.unPublish(doc)));
         }
       }
     }
 
     // unpublish decision
-    if (this.application.decision && this.application.decision.isPublished) {
-      observables = observables.pipe(concat(this.decisionService.unPublish(this.application.decision)));
+    if (this.application.meta.decision && this.application.meta.decision.meta.isPublished) {
+      observables = observables.pipe(concat(this.decisionService.unPublish(this.application.meta.decision)));
     }
 
     // unpublish application documents
-    if (this.application.documents) {
-      for (const doc of this.application.documents) {
-        if (doc.isPublished) {
+    if (this.application.meta.documents) {
+      for (const doc of this.application.meta.documents) {
+        if (doc.meta.isPublished) {
           observables = observables.pipe(concat(this.documentService.unPublish(doc)));
         }
       }
@@ -375,7 +375,7 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
 
     // unpublish application
     // do this last in case of prior failures
-    if (this.application.isPublished) {
+    if (this.application.meta.isPublished) {
       observables = observables.pipe(concat(this.applicationService.unPublish(this.application)));
     }
 

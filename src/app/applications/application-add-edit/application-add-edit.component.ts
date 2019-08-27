@@ -109,8 +109,8 @@ export class ApplicationAddEditComponent implements OnInit, AfterViewInit, OnDes
   // this is needed because we don't have a form control that is marked as dirty
   private anyUnsavedItems(): boolean {
     // look for application documents not yet uploaded to db
-    if (this.application.documents) {
-      for (const doc of this.application.documents) {
+    if (this.application.meta.documents) {
+      for (const doc of this.application.meta.documents) {
         if (!doc._id) {
           return true;
         }
@@ -118,8 +118,8 @@ export class ApplicationAddEditComponent implements OnInit, AfterViewInit, OnDes
     }
 
     // look for decision documents not yet uploaded to db
-    if (this.application.decision && this.application.decision.documents) {
-      for (const doc of this.application.decision.documents) {
+    if (this.application.meta.decision && this.application.meta.decision.meta.documents) {
+      for (const doc of this.application.meta.decision.meta.documents) {
         if (!doc._id) {
           return true;
         }
@@ -159,20 +159,20 @@ export class ApplicationAddEditComponent implements OnInit, AfterViewInit, OnDes
 
         // add comment period if there isn't one already (not just on create but also on edit --
         // this will fix the situation where existing applications don't have a comment period)
-        if (!this.application.currentPeriod) {
-          this.application.currentPeriod = new CommentPeriod();
+        if (!this.application.meta.currentPeriod) {
+          this.application.meta.currentPeriod = new CommentPeriod();
           // set startDate
           const now = new Date();
           const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-          this.application.currentPeriod.startDate = today;
-          this.startDate = this.dateToNgbDate(this.application.currentPeriod.startDate);
+          this.application.meta.currentPeriod.startDate = today;
+          this.startDate = this.dateToNgbDate(this.application.meta.currentPeriod.startDate);
           // set delta and endDate
           this.onDeltaChg(DEFAULT_DAYS);
         } else {
           // set startDate
-          this.startDate = this.dateToNgbDate(this.application.currentPeriod.startDate);
+          this.startDate = this.dateToNgbDate(this.application.meta.currentPeriod.startDate);
           // set endDate and delta
-          this.endDate = this.dateToNgbDate(this.application.currentPeriod.endDate);
+          this.endDate = this.dateToNgbDate(this.application.meta.currentPeriod.endDate);
           this.onEndDateChg(this.endDate);
         }
       } else {
@@ -219,7 +219,7 @@ export class ApplicationAddEditComponent implements OnInit, AfterViewInit, OnDes
 
   public onStartDateChg(startDate: NgbDateStruct) {
     if (startDate !== null) {
-      this.application.currentPeriod.startDate = this.ngbDateToDate(startDate);
+      this.application.meta.currentPeriod.startDate = this.ngbDateToDate(startDate);
       // to set dates, we also need delta
       if (this.delta) {
         this.setDates(true, false, false);
@@ -231,7 +231,7 @@ export class ApplicationAddEditComponent implements OnInit, AfterViewInit, OnDes
     if (delta !== null) {
       this.delta = delta;
       // to set dates, we also need start date
-      if (this.application.currentPeriod.startDate) {
+      if (this.application.meta.currentPeriod.startDate) {
         this.setDates(false, true, false);
       }
     }
@@ -239,9 +239,9 @@ export class ApplicationAddEditComponent implements OnInit, AfterViewInit, OnDes
 
   public onEndDateChg(endDate: NgbDateStruct) {
     if (endDate !== null) {
-      this.application.currentPeriod.endDate = this.ngbDateToDate(endDate);
+      this.application.meta.currentPeriod.endDate = this.ngbDateToDate(endDate);
       // to set dates, we also need start date
-      if (this.application.currentPeriod.startDate) {
+      if (this.application.meta.currentPeriod.startDate) {
         this.setDates(false, false, true);
       }
     }
@@ -250,46 +250,48 @@ export class ApplicationAddEditComponent implements OnInit, AfterViewInit, OnDes
   private setDates(start?: boolean, delta?: boolean, end?: boolean) {
     if (start) {
       // when start changes, adjust end accordingly
-      this.application.currentPeriod.endDate = new Date(this.application.currentPeriod.startDate);
-      this.application.currentPeriod.endDate.setDate(
-        this.application.currentPeriod.startDate.getDate() + this.delta - 1
+      this.application.meta.currentPeriod.endDate = new Date(this.application.meta.currentPeriod.startDate);
+      this.application.meta.currentPeriod.endDate.setDate(
+        this.application.meta.currentPeriod.startDate.getDate() + this.delta - 1
       );
-      this.endDate = this.dateToNgbDate(this.application.currentPeriod.endDate);
+      this.endDate = this.dateToNgbDate(this.application.meta.currentPeriod.endDate);
     } else if (delta) {
       // when delta changes, adjust end accordingly
-      this.application.currentPeriod.endDate = new Date(this.application.currentPeriod.startDate);
-      this.application.currentPeriod.endDate.setDate(
-        this.application.currentPeriod.startDate.getDate() + this.delta - 1
+      this.application.meta.currentPeriod.endDate = new Date(this.application.meta.currentPeriod.startDate);
+      this.application.meta.currentPeriod.endDate.setDate(
+        this.application.meta.currentPeriod.startDate.getDate() + this.delta - 1
       );
-      this.endDate = this.dateToNgbDate(this.application.currentPeriod.endDate);
+      this.endDate = this.dateToNgbDate(this.application.meta.currentPeriod.endDate);
     } else if (end) {
       // when end changes, adjust delta accordingly
       // use moment to handle Daylight Saving Time changes
       this.delta =
-        moment(this.application.currentPeriod.endDate).diff(moment(this.application.currentPeriod.startDate), 'days') +
-        1;
+        moment(this.application.meta.currentPeriod.endDate).diff(
+          moment(this.application.meta.currentPeriod.startDate),
+          'days'
+        ) + 1;
     }
   }
 
   public addDecision() {
-    this.application.decision = new Decision();
+    this.application.meta.decision = new Decision();
   }
 
   public deleteDecision() {
-    if (this.application.decision) {
+    if (this.application.meta.decision) {
       // stage decision documents to delete
-      if (this.application.decision.documents) {
-        for (const doc of this.application.decision.documents) {
-          this.deleteDocument(doc, this.application.decision.documents);
+      if (this.application.meta.decision.meta.documents) {
+        for (const doc of this.application.meta.decision.meta.documents) {
+          this.deleteDocument(doc, this.application.meta.decision.meta.documents);
         }
       }
 
       // if decision exists in db, stage it for deletion
-      if (this.application.decision._id) {
-        this.decisionToDelete = this.application.decision;
+      if (this.application.meta.decision._id) {
+        this.decisionToDelete = this.application.meta.decision;
       }
 
-      this.application.decision = null;
+      this.application.meta.decision = null;
     }
   }
 
@@ -382,23 +384,23 @@ export class ApplicationAddEditComponent implements OnInit, AfterViewInit, OnDes
     let observables = of(null);
 
     // add all application documents
-    if (this.application.documents) {
-      for (const doc of this.application.documents) {
+    if (this.application.meta.documents) {
+      for (const doc of this.application.meta.documents) {
         doc['formData'].append('_application', application2._id); // set back-reference
         observables = observables.pipe(concat(this.documentService.add(doc['formData'])));
       }
     }
 
     // add comment period
-    if (this.application.currentPeriod) {
-      this.application.currentPeriod._application = application2._id; // set back-reference
-      observables = observables.pipe(concat(this.commentPeriodService.add(this.application.currentPeriod)));
+    if (this.application.meta.currentPeriod) {
+      this.application.meta.currentPeriod._application = application2._id; // set back-reference
+      observables = observables.pipe(concat(this.commentPeriodService.add(this.application.meta.currentPeriod)));
     }
 
     // add decision
-    if (this.application.decision) {
-      this.application.decision._application = application2._id; // set back-reference
-      observables = observables.pipe(concat(this.decisionService.add(this.application.decision)));
+    if (this.application.meta.decision) {
+      this.application.meta.decision._application = application2._id; // set back-reference
+      observables = observables.pipe(concat(this.decisionService.add(this.application.meta.decision)));
     }
 
     observables.pipe(takeUntil(this.ngUnsubscribe)).subscribe(
@@ -437,9 +439,9 @@ export class ApplicationAddEditComponent implements OnInit, AfterViewInit, OnDes
     let observables = of(null);
 
     // add all decision documents
-    if (this.application.decision && this.application.decision.documents) {
-      for (const doc of this.application.decision.documents) {
-        doc['formData'].append('_decision', application3.decision._id); // set back-reference
+    if (this.application.meta.decision && this.application.meta.decision.meta.documents) {
+      for (const doc of this.application.meta.decision.meta.documents) {
+        doc['formData'].append('_decision', application3.meta.decision._id); // set back-reference
         observables = observables.pipe(concat(this.documentService.add(doc['formData'])));
       }
     }
@@ -461,11 +463,11 @@ export class ApplicationAddEditComponent implements OnInit, AfterViewInit, OnDes
         // this.snackBarRef = this.snackBar.open('Application created...', null, { duration: 2000 }); // not displayed due to navigate below
 
         this.applicationForm.form.markAsPristine();
-        if (this.application.documents) {
-          this.application.documents = []; // negate unsaved document check
+        if (this.application.meta.documents) {
+          this.application.meta.documents = []; // negate unsaved document check
         }
-        if (this.application.decision && this.application.decision.documents) {
-          this.application.decision.documents = []; // negate unsaved document check
+        if (this.application.meta.decision && this.application.meta.decision.meta.documents) {
+          this.application.meta.decision.meta.documents = []; // negate unsaved document check
         }
 
         // add succeeded --> navigate to details page
@@ -480,7 +482,7 @@ export class ApplicationAddEditComponent implements OnInit, AfterViewInit, OnDes
     this.isSubmitSaveClicked = true;
 
     if (this.applicationForm.invalid) {
-      if (this.application.isPublished) {
+      if (this.application.meta.isPublished) {
         this.dialogService
           .addDialog(
             ConfirmComponent,
@@ -513,7 +515,7 @@ export class ApplicationAddEditComponent implements OnInit, AfterViewInit, OnDes
       }
     }
 
-    if (this.application.isPublished && !this.application.description) {
+    if (this.application.meta.isPublished && !this.application.description) {
       this.dialogService
         .addDialog(
           ConfirmComponent,
@@ -543,8 +545,8 @@ export class ApplicationAddEditComponent implements OnInit, AfterViewInit, OnDes
     this.docsToDelete = []; // assume delete succeeds
 
     // add any new application documents
-    if (this.application.documents) {
-      for (const doc of this.application.documents) {
+    if (this.application.meta.documents) {
+      for (const doc of this.application.meta.documents) {
         if (!doc._id) {
           doc['formData'].append('_application', this.application._id); // set back-reference
           observables = observables.pipe(concat(this.documentService.add(doc['formData'])));
@@ -553,12 +555,12 @@ export class ApplicationAddEditComponent implements OnInit, AfterViewInit, OnDes
     }
 
     // add/save comment period
-    if (this.application.currentPeriod) {
-      if (!this.application.currentPeriod._id) {
-        this.application.currentPeriod._application = this.application._id; // set back-reference
-        observables = observables.pipe(concat(this.commentPeriodService.add(this.application.currentPeriod)));
+    if (this.application.meta.currentPeriod) {
+      if (!this.application.meta.currentPeriod._id) {
+        this.application.meta.currentPeriod._application = this.application._id; // set back-reference
+        observables = observables.pipe(concat(this.commentPeriodService.add(this.application.meta.currentPeriod)));
       } else {
-        observables = observables.pipe(concat(this.commentPeriodService.save(this.application.currentPeriod)));
+        observables = observables.pipe(concat(this.commentPeriodService.save(this.application.meta.currentPeriod)));
       }
     }
 
@@ -571,12 +573,12 @@ export class ApplicationAddEditComponent implements OnInit, AfterViewInit, OnDes
     this.decisionToDelete = null; // assume delete succeeds
 
     // add/save decision
-    if (this.application.decision) {
-      if (!this.application.decision._id) {
-        this.application.decision._application = this.application._id; // set back-reference
-        observables = observables.pipe(concat(this.decisionService.add(this.application.decision)));
+    if (this.application.meta.decision) {
+      if (!this.application.meta.decision._id) {
+        this.application.meta.decision._application = this.application._id; // set back-reference
+        observables = observables.pipe(concat(this.decisionService.add(this.application.meta.decision)));
       } else {
-        observables = observables.pipe(concat(this.decisionService.save(this.application.decision)));
+        observables = observables.pipe(concat(this.decisionService.save(this.application.meta.decision)));
       }
     }
 
@@ -616,33 +618,33 @@ export class ApplicationAddEditComponent implements OnInit, AfterViewInit, OnDes
     let observables = of(null);
 
     // auto-publish application documents
-    if (application2.isPublished && application2.documents) {
-      for (const doc of application2.documents) {
-        if (!doc.isPublished) {
+    if (application2.meta.isPublished && application2.meta.documents) {
+      for (const doc of application2.meta.documents) {
+        if (!doc.meta.isPublished) {
           observables = observables.pipe(concat(this.documentService.publish(doc)));
         }
       }
     }
 
     // auto-publish comment period
-    if (application2.isPublished && application2.currentPeriod) {
-      if (!application2.currentPeriod.isPublished) {
-        observables = observables.pipe(concat(this.commentPeriodService.publish(application2.currentPeriod)));
+    if (application2.meta.isPublished && application2.meta.currentPeriod) {
+      if (!application2.meta.currentPeriod.meta.isPublished) {
+        observables = observables.pipe(concat(this.commentPeriodService.publish(application2.meta.currentPeriod)));
       }
     }
 
     // auto-publish decision
-    if (application2.isPublished && application2.decision) {
-      if (!application2.decision.isPublished) {
-        observables = observables.pipe(concat(this.decisionService.publish(application2.decision)));
+    if (application2.meta.isPublished && application2.meta.decision) {
+      if (!application2.meta.decision.meta.isPublished) {
+        observables = observables.pipe(concat(this.decisionService.publish(application2.meta.decision)));
       }
     }
 
     // add any new decision documents
-    if (this.application.decision && this.application.decision.documents) {
-      for (const doc of this.application.decision.documents) {
+    if (this.application.meta.decision && this.application.meta.decision.meta.documents) {
+      for (const doc of this.application.meta.decision.meta.documents) {
         if (!doc._id) {
-          doc['formData'].append('_decision', application2.decision._id); // set back-reference
+          doc['formData'].append('_decision', application2.meta.decision._id); // set back-reference
           observables = observables.pipe(concat(this.documentService.add(doc['formData'])));
         }
       }
@@ -684,9 +686,9 @@ export class ApplicationAddEditComponent implements OnInit, AfterViewInit, OnDes
     let observables = of(null);
 
     // auto-publish decision documents
-    if (application3.decision && application3.decision.documents) {
-      for (const doc of application3.decision.documents) {
-        if (!doc.isPublished) {
+    if (application3.meta.decision && application3.meta.decision.meta.documents) {
+      for (const doc of application3.meta.decision.meta.documents) {
+        if (!doc.meta.isPublished) {
           observables = observables.pipe(concat(this.documentService.publish(doc)));
         }
       }
@@ -713,8 +715,8 @@ export class ApplicationAddEditComponent implements OnInit, AfterViewInit, OnDes
 
         this.applicationForm.form.markAsPristine();
 
-        if (this.application.documents) {
-          for (const doc of this.application.documents) {
+        if (this.application.meta.documents) {
+          for (const doc of this.application.meta.documents) {
             // assign 'arbitrary' id to docs so that:
             // 1) unsaved document check passes
             // 2) page doesn't jump around
@@ -722,8 +724,8 @@ export class ApplicationAddEditComponent implements OnInit, AfterViewInit, OnDes
           }
         }
 
-        if (this.application.decision && this.application.decision.documents) {
-          for (const doc of this.application.decision.documents) {
+        if (this.application.meta.decision && this.application.meta.decision.meta.documents) {
+          for (const doc of this.application.meta.decision.meta.documents) {
             // assign 'arbitrary' id to docs so that:
             // 1) unsaved document check passes
             // 2) page doesn't jump around

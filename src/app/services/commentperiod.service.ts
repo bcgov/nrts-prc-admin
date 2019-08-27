@@ -72,8 +72,15 @@ export class CommentPeriodService {
     return this.api.unPublishCommentPeriod(period).pipe(catchError(error => this.api.handleError(error)));
   }
 
-  // returns first period
-  // multiple comment periods are currently not supported
+  /**
+   * Returns the first period in the array.
+   *
+   * Note: multiple comment periods are not supported.
+   *
+   * @param {CommentPeriod[]} periods
+   * @returns {CommentPeriod}
+   * @memberof CommentPeriodService
+   */
   getCurrent(periods: CommentPeriod[]): CommentPeriod {
     return periods.length > 0 ? periods[0] : null;
   }
