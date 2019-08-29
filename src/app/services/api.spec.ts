@@ -37,7 +37,7 @@ describe('ApiService', () => {
     });
   });
 
-  describe('buildQueryParametersString', () => {
+  describe('buildApplicationQueryParametersString', () => {
     let service;
 
     beforeEach(() => {
@@ -45,13 +45,13 @@ describe('ApiService', () => {
     });
 
     it('given undefined query params returns empty string', () => {
-      const result = service.buildQueryParametersString(undefined);
+      const result = service.buildApplicationQueryParametersString(undefined);
 
       expect(result).toEqual('');
     });
 
     it('given null query params returns empty string', () => {
-      const result = service.buildQueryParametersString(null);
+      const result = service.buildApplicationQueryParametersString(null);
 
       expect(result).toEqual('');
     });
@@ -80,7 +80,7 @@ describe('ApiService', () => {
         isDeleted: false
       };
 
-      const result = service.buildQueryParametersString(queryParams);
+      const result = service.buildApplicationQueryParametersString(queryParams);
 
       const expectedResult =
         'pageNum=0&' +

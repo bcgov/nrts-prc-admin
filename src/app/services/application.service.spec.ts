@@ -133,7 +133,7 @@ describe('ApplicationService', () => {
         existingApplication.cl_file = 7777;
         service.getAll().subscribe(applications => {
           const application = applications[0];
-          expect(application.clFile).toBe('0007777');
+          expect(application.meta.clFile).toBe('0007777');
         });
       });
 
@@ -141,7 +141,7 @@ describe('ApplicationService', () => {
         existingApplication.cl_file = null;
         service.getAll().subscribe(applications => {
           const application = applications[0];
-          expect(application.clFile).toBeUndefined();
+          expect(application.meta.clFile).toBeUndefined();
         });
       });
 
@@ -149,8 +149,8 @@ describe('ApplicationService', () => {
         existingApplication.businessUnit = 'SK - LAND MGMNT - SKEENA FIELD OFFICE';
         service.getAll().subscribe(applications => {
           const application = applications[0];
-          expect(application.region).toBeDefined();
-          expect(application.region).toEqual(RegionCodes.SKEENA.text.long);
+          expect(application.meta.region).toBeDefined();
+          expect(application.meta.region).toEqual(RegionCodes.SKEENA.text.long);
         });
       });
     });
@@ -188,21 +188,14 @@ describe('ApplicationService', () => {
       it('makes a call to commentPeriodService.getAllByApplicationId for each application and retrieves the comment period', () => {
         service.getAll({ getCurrentPeriod: true }).subscribe(applications => {
           const firstApplication = applications[0];
-          expect(firstApplication.currentPeriod).toBeDefined();
-          expect(firstApplication.currentPeriod).not.toBeNull();
-          expect(firstApplication.currentPeriod._id).toBe('CP_FOR_FIRST_APP');
+          expect(firstApplication.meta.currentPeriod).toBeDefined();
+          expect(firstApplication.meta.currentPeriod).not.toBeNull();
+          expect(firstApplication.meta.currentPeriod._id).toBe('CP_FOR_FIRST_APP');
 
           const secondApplication = applications[1];
-          expect(secondApplication.currentPeriod).toBeDefined();
-          expect(secondApplication.currentPeriod).not.toBeNull();
-          expect(secondApplication.currentPeriod._id).toBe('CP_FOR_SECOND_APP');
-        });
-      });
-
-      it('sets the cpStatus to the commentPeriodService.getStatusString result', () => {
-        service.getAll({ getCurrentPeriod: true }).subscribe(applications => {
-          const firstApplication = applications[0];
-          expect(firstApplication.cpStatus).toBe('Commenting Open');
+          expect(secondApplication.meta.currentPeriod).toBeDefined();
+          expect(secondApplication.meta.currentPeriod).not.toBeNull();
+          expect(secondApplication.meta.currentPeriod._id).toBe('CP_FOR_SECOND_APP');
         });
       });
 
@@ -229,9 +222,9 @@ describe('ApplicationService', () => {
           service.getAll({ getCurrentPeriod: true }).subscribe(applications => {
             const firstApplication = applications[0];
 
-            expect(firstApplication.currentPeriod.daysRemaining).toBeDefined();
+            expect(firstApplication.meta.currentPeriod.meta.daysRemaining).toBeDefined();
 
-            expect(firstApplication.currentPeriod.daysRemaining).toEqual(10);
+            expect(firstApplication.meta.currentPeriod.meta.daysRemaining).toEqual(10);
           });
         });
       });
@@ -246,8 +239,8 @@ describe('ApplicationService', () => {
         // TODO: Stub isOpen method properly to get this to pass.
         xit('does not set the daysRemaining value', () => {
           service.getAll({ getCurrentPeriod: true }).subscribe(applications => {
-            expect(applications[0].currentPeriod.daysRemaining).not.toBeDefined();
-            expect(applications[1].currentPeriod.daysRemaining).not.toBeDefined();
+            expect(applications[0].meta.currentPeriod.meta.daysRemaining).not.toBeDefined();
+            expect(applications[1].meta.currentPeriod.meta.daysRemaining).not.toBeDefined();
           });
         });
       });
@@ -261,8 +254,8 @@ describe('ApplicationService', () => {
 
         it('sets the numComments value to the commentService.getCountByPeriodId function', () => {
           service.getAll({ getCurrentPeriod: true }).subscribe(applications => {
-            expect(applications[0].numComments).toEqual(42);
-            expect(applications[1].numComments).toEqual(42);
+            expect(applications[0].meta.numComments).toEqual(42);
+            expect(applications[1].meta.numComments).toEqual(42);
           });
         });
       });
@@ -277,8 +270,8 @@ describe('ApplicationService', () => {
 
       it('has no attached comment period', () => {
         service.getAll({ getCurrentPeriod: false }).subscribe(applications => {
-          expect(applications[0].currentPeriod).toBeNull();
-          expect(applications[1].currentPeriod).toBeNull();
+          expect(applications[0].meta.currentPeriod).toBeNull();
+          expect(applications[1].meta.currentPeriod).toBeNull();
         });
       });
     });
@@ -306,22 +299,22 @@ describe('ApplicationService', () => {
       it('clFile property is padded to be seven digits', () => {
         existingApplication.cl_file = 7777;
         service.getById('AAAA').subscribe(application => {
-          expect(application.clFile).toBe('0007777');
+          expect(application.meta.clFile).toBe('0007777');
         });
       });
 
       it('clFile property is null if there is no cl_file property', () => {
         existingApplication.cl_file = null;
         service.getById('AAAA').subscribe(application => {
-          expect(application.clFile).toBeUndefined();
+          expect(application.meta.clFile).toBeUndefined();
         });
       });
 
       it('sets the region property', () => {
         existingApplication.businessUnit = 'SK - LAND MGMNT - SKEENA FIELD OFFICE';
         service.getById('AAAA').subscribe(application => {
-          expect(application.region).toBeDefined();
-          expect(application.region).toEqual(RegionCodes.SKEENA.text.long);
+          expect(application.meta.region).toBeDefined();
+          expect(application.meta.region).toEqual(RegionCodes.SKEENA.text.long);
         });
       });
     });
@@ -329,10 +322,10 @@ describe('ApplicationService', () => {
     describe('with the getFeatures Parameter', () => {
       it('makes a call to featureService.getByApplicationId and attaches the resulting features', () => {
         service.getById('AAAA', { getFeatures: true }).subscribe(application => {
-          expect(application.features).toBeDefined();
-          expect(application.features).not.toBeNull();
-          expect(application.features[0].id).toBe('FFFFF');
-          expect(application.features[1].id).toBe('GGGGG');
+          expect(application.meta.features).toBeDefined();
+          expect(application.meta.features).not.toBeNull();
+          expect(application.meta.features[0].id).toBe('FFFFF');
+          expect(application.meta.features[1].id).toBe('GGGGG');
         });
       });
     });
@@ -346,8 +339,8 @@ describe('ApplicationService', () => {
 
       it('has no attached features', () => {
         service.getById('AAAA', { getFeatures: false }).subscribe(application => {
-          expect(application.features).toBeDefined();
-          expect(application.features).toEqual([]);
+          expect(application.meta.features).toBeDefined();
+          expect(application.meta.features).toEqual([]);
         });
       });
     });
@@ -355,10 +348,10 @@ describe('ApplicationService', () => {
     describe('with the getDocuments Parameter', () => {
       it('makes a call to documentService.getAllByApplicationId and attaches the resulting documents', () => {
         service.getById('AAAA', { getDocuments: true }).subscribe(application => {
-          expect(application.documents).toBeDefined();
-          expect(application.documents).not.toBeNull();
-          expect(application.documents[0]._id).toBe('DDDDD');
-          expect(application.documents[1]._id).toBe('EEEEE');
+          expect(application.meta.documents).toBeDefined();
+          expect(application.meta.documents).not.toBeNull();
+          expect(application.meta.documents[0]._id).toBe('DDDDD');
+          expect(application.meta.documents[1]._id).toBe('EEEEE');
         });
       });
     });
@@ -372,8 +365,8 @@ describe('ApplicationService', () => {
 
       it('has no attached documents', () => {
         service.getById('AAAA', { getDocuments: false }).subscribe(application => {
-          expect(application.documents).toBeDefined();
-          expect(application.documents).toEqual([]);
+          expect(application.meta.documents).toBeDefined();
+          expect(application.meta.documents).toEqual([]);
         });
       });
     });
@@ -382,15 +375,9 @@ describe('ApplicationService', () => {
       // tslint:disable-next-line:max-line-length
       it('makes a call to commentPeriodService.getAllByApplicationId and attaches the first resulting comment period', () => {
         service.getById('AAAA', { getCurrentPeriod: true }).subscribe(application => {
-          expect(application.currentPeriod).toBeDefined();
-          expect(application.currentPeriod).not.toBeNull();
-          expect(application.currentPeriod._id).toBe('DDDDD');
-        });
-      });
-
-      it('sets the cpStatus to the commentPeriodService.getStatusString result', () => {
-        service.getById('AAAA', { getCurrentPeriod: true }).subscribe(application => {
-          expect(application.cpStatus).toBe('Commenting Open');
+          expect(application.meta.currentPeriod).toBeDefined();
+          expect(application.meta.currentPeriod).not.toBeNull();
+          expect(application.meta.currentPeriod._id).toBe('DDDDD');
         });
       });
 
@@ -419,8 +406,8 @@ describe('ApplicationService', () => {
 
         it('sets the daysRemaining value to the endDate minus the current time', () => {
           service.getById('AAAA', { getCurrentPeriod: true }).subscribe(application => {
-            expect(application.currentPeriod.daysRemaining).toBeDefined();
-            expect(application.currentPeriod.daysRemaining).toEqual(10);
+            expect(application.meta.currentPeriod.meta.daysRemaining).toBeDefined();
+            expect(application.meta.currentPeriod.meta.daysRemaining).toEqual(10);
           });
         });
       });
@@ -434,7 +421,7 @@ describe('ApplicationService', () => {
 
         it('does not set the daysRemaining value', () => {
           service.getById('AAAA', { getCurrentPeriod: true }).subscribe(application => {
-            expect(application.currentPeriod.daysRemaining).not.toBeDefined();
+            expect(application.meta.currentPeriod.meta.daysRemaining).not.toBeDefined();
           });
         });
       });
@@ -448,7 +435,7 @@ describe('ApplicationService', () => {
 
         it('sets the numComments value to the commentService.getCountByPeriodId function', () => {
           service.getById('AAAA', { getCurrentPeriod: true }).subscribe(application => {
-            expect(application.numComments).toEqual(42);
+            expect(application.meta.numComments).toEqual(42);
           });
         });
       });
@@ -463,7 +450,7 @@ describe('ApplicationService', () => {
 
       it('has no attached comment period', () => {
         service.getById('AAAA', { getCurrentPeriod: false }).subscribe(application => {
-          expect(application.currentPeriod).toBeNull();
+          expect(application.meta.currentPeriod).toBeNull();
         });
       });
     });
@@ -471,9 +458,9 @@ describe('ApplicationService', () => {
     describe('with the getDecision Parameter', () => {
       it('makes a call to decisionService.getByApplicationId and attaches the resulting decision', () => {
         service.getById('AAAA', { getDecision: true }).subscribe(application => {
-          expect(application.decision).toBeDefined();
-          expect(application.decision).not.toBeNull();
-          expect(application.decision._id).toBe('IIIII');
+          expect(application.meta.decision).toBeDefined();
+          expect(application.meta.decision).not.toBeNull();
+          expect(application.meta.decision._id).toBe('IIIII');
         });
       });
     });
@@ -487,8 +474,8 @@ describe('ApplicationService', () => {
 
       it('has no attached decision', () => {
         service.getById('AAAA', { getDecision: false }).subscribe(application => {
-          expect(application.decision).toBeDefined();
-          expect(application.decision).toBeNull();
+          expect(application.meta.decision).toBeDefined();
+          expect(application.meta.decision).toBeNull();
         });
       });
     });

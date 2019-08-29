@@ -695,10 +695,10 @@ describe('ListComponent', () => {
     });
 
     const applications: Application[] = [
-      new Application({ _id: 1, cpStatus: CommentCodes.CLOSED.code }),
-      new Application({ _id: 2, cpStatus: CommentCodes.NOT_STARTED.code }),
-      new Application({ _id: 3, cpStatus: CommentCodes.NOT_OPEN.code }),
-      new Application({ _id: 4, cpStatus: CommentCodes.OPEN.code })
+      new Application({ _id: 1, meta: { cpStatusStringLong: CommentCodes.CLOSED.code } }),
+      new Application({ _id: 2, meta: { cpStatusStringLong: CommentCodes.NOT_STARTED.code } }),
+      new Application({ _id: 3, meta: { cpStatusStringLong: CommentCodes.NOT_OPEN.code } }),
+      new Application({ _id: 4, meta: { cpStatusStringLong: CommentCodes.OPEN.code } })
     ];
 
     it('returns original applications array if array is undefined', () => {
@@ -736,33 +736,37 @@ describe('ListComponent', () => {
       expect(filteredApplications).toEqual(applications);
     });
 
-    it('filters out applications that are missing the cpStatus field', () => {
+    it('filters out applications that are missing the cpStatusStringLong field', () => {
       component.commentCodeFilters = [CommentCodes.NOT_STARTED.code];
 
       const applicationsMissingCPStatus = [
         new Application({ _id: 1 }),
-        new Application({ _id: 2, cpStatus: CommentCodes.NOT_STARTED.code }),
+        new Application({ _id: 2, meta: { cpStatusStringLong: CommentCodes.NOT_STARTED.code } }),
         new Application({ _id: 3 })
       ];
 
       const filteredApplications = component.applyCommentPeriodFilter(applicationsMissingCPStatus);
-      expect(filteredApplications).toEqual([new Application({ _id: 2, cpStatus: CommentCodes.NOT_STARTED.code })]);
+      expect(filteredApplications).toEqual([
+        new Application({ _id: 2, meta: { cpStatusStringLong: CommentCodes.NOT_STARTED.code } })
+      ]);
     });
 
-    it('filters out applications whose cpStatus does not match the commentCodeFilters', () => {
+    it('filters out applications whose cpStatusStringLong does not match the commentCodeFilters', () => {
       component.commentCodeFilters = [CommentCodes.CLOSED.code];
 
       const filteredApplications = component.applyCommentPeriodFilter(applications);
-      expect(filteredApplications).toEqual([new Application({ _id: 1, cpStatus: CommentCodes.CLOSED.code })]);
+      expect(filteredApplications).toEqual([
+        new Application({ _id: 1, meta: { cpStatusStringLong: CommentCodes.CLOSED.code } })
+      ]);
     });
 
-    it('filters out applications whose cpStatus does not match the commentCodeFilters', () => {
+    it('filters out applications whose cpStatusStringLong does not match the commentCodeFilters', () => {
       component.commentCodeFilters = [CommentCodes.CLOSED.code, CommentCodes.OPEN.code];
 
       const filteredApplications = component.applyCommentPeriodFilter(applications);
       expect(filteredApplications).toEqual([
-        new Application({ _id: 1, cpStatus: CommentCodes.CLOSED.code }),
-        new Application({ _id: 4, cpStatus: CommentCodes.OPEN.code })
+        new Application({ _id: 1, meta: { cpStatusStringLong: CommentCodes.CLOSED.code } }),
+        new Application({ _id: 4, meta: { cpStatusStringLong: CommentCodes.OPEN.code } })
       ]);
     });
   });

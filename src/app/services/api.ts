@@ -87,24 +87,45 @@ export interface IApplicationQueryParamSet {
 
   isDeleted?: boolean;
 
-  cpStart?: IQueryParamValue<Date>;
-  cpEnd?: IQueryParamValue<Date>;
-  tantalisID?: IQueryParamValue<number>;
-  cl_file?: IQueryParamValue<number>;
-  purpose?: IQueryParamValue<string[]>;
-  subpurpose?: IQueryParamValue<string[]>;
-  status?: IQueryParamValue<string[]>;
-  reason?: IQueryParamValue<string[]>;
-  subtype?: IQueryParamValue<string>;
   agency?: IQueryParamValue<string>;
-  businessUnit?: IQueryParamValue<string>;
-  client?: IQueryParamValue<string>;
-  tenureStage?: IQueryParamValue<string>;
   areaHectares?: IQueryParamValue<string>;
-  statusHistoryEffectiveDate?: IQueryParamValue<Date>;
+  businessUnit?: IQueryParamValue<string>;
   centroid?: IQueryParamValue<string>;
+  cl_file?: IQueryParamValue<number>;
+  client?: IQueryParamValue<string>;
+  cpEnd?: IQueryParamValue<Date>;
+  cpStart?: IQueryParamValue<Date>;
   publishDate?: IQueryParamValue<Date>;
+  purpose?: IQueryParamValue<string[]>;
+  reason?: IQueryParamValue<string[]>;
+  status?: IQueryParamValue<string[]>;
+  statusHistoryEffectiveDate?: IQueryParamValue<Date>;
+  subpurpose?: IQueryParamValue<string[]>;
+  subtype?: IQueryParamValue<string>;
+  tantalisID?: IQueryParamValue<number>;
+  tenureStage?: IQueryParamValue<string>;
 }
+
+// /**
+//  * Supported query parameters for comment period requests.
+//  *
+//  * Note: all parameters are optional.
+//  *
+//  * @export
+//  * @interface ICommentPeriodQueryParamSet
+//  */
+// export interface ICommentPeriodQueryParamSet {
+//   pageNum?: number;
+//   pageSize?: number;
+//   sortBy?: string;
+
+//   isDeleted?: boolean;
+
+//   _application?: IQueryParamValue<string>; // objectId
+//   _addedBy?: IQueryParamValue<string>;
+//   startDate?: IQueryParamValue<Date>;
+//   endDate?: IQueryParamValue<Date>;
+// }
 
 @Injectable()
 export class ApiService {
@@ -229,7 +250,7 @@ export class ApiService {
 
     const queryString =
       'application?' +
-      `${this.buildQueryParametersString(queryParams)}&` +
+      `${this.buildApplicationQueryParametersString(queryParams)}&` +
       `fields=${this.convertArrayIntoPipeString(fields)}`;
 
     return this.http.get<Application[]>(`${this.pathAPI}/${queryString}`, {});
@@ -272,7 +293,7 @@ export class ApiService {
    * @memberof ApiService
    */
   getCountApplications(queryParams: IApplicationQueryParamSet = null): Observable<number> {
-    const queryString = 'application?' + this.buildQueryParametersString(queryParams);
+    const queryString = 'application?' + this.buildApplicationQueryParametersString(queryParams);
 
     return this.http.head<HttpResponse<object>>(`${this.pathAPI}/${queryString}`, { observe: 'response' }).pipe(
       map(res => {
@@ -376,6 +397,7 @@ export class ApiService {
   //
   // Features
   //
+
   getFeaturesByTantalisId(tantalisId: number): Observable<Feature[]> {
     const fields = ['type', 'tags', 'geometry', 'properties', 'isDeleted', 'applicationID'];
     const queryString = `feature?isDeleted=false&tantalisId=${tantalisId}&fields=${this.convertArrayIntoPipeString(
@@ -411,15 +433,16 @@ export class ApiService {
   //
   // Decisions
   //
-  getDecisionsByAppId(appId: string): Observable<Decision[]> {
-    const fields = ['_addedBy', '_application', 'name', 'description'];
+
+  getDecisionsByApplicationId(appId: string): Observable<Decision[]> {
+    const fields = ['_addedBy', '_application', 'description'];
     const queryString = `decision?_application=${appId}&fields=${this.convertArrayIntoPipeString(fields)}`;
     return this.http.get<Decision[]>(`${this.pathAPI}/${queryString}`, {});
   }
 
   // NB: returns array with 1 element
   getDecision(id: string): Observable<Decision[]> {
-    const fields = ['_addedBy', '_application', 'name', 'description'];
+    const fields = ['_addedBy', '_application', 'description'];
     const queryString = `decision/${id}?fields=${this.convertArrayIntoPipeString(fields)}`;
     return this.http.get<Decision[]>(`${this.pathAPI}/${queryString}`, {});
   }
@@ -452,7 +475,19 @@ export class ApiService {
   //
   // Comment Periods
   //
-  getPeriodsByAppId(appId: string): Observable<CommentPeriod[]> {
+
+  // getCommentPeriods(queryParams: ICommentPeriodQueryParamSet = null): Observable<CommentPeriod[]> {
+  //   const fields = ['_addedBy', '_application', 'description', 'startDate', 'endDate'];
+
+  //   const queryString =
+  //     'commentperiod?' +
+  //     `${this.buildCommentPeriodQueryParametersString(queryParams)}&` +
+  //     `fields=${this.convertArrayIntoPipeString(fields)}`;
+
+  //   return this.http.get<CommentPeriod[]>(`${this.pathAPI}/${queryString}`, {});
+  // }
+
+  getCommentPeriodsByApplicationId(appId: string): Observable<CommentPeriod[]> {
     const fields = ['_addedBy', '_application', 'startDate', 'endDate'];
     const queryString = `commentperiod?isDeleted=false&_application=${appId}&fields=${this.convertArrayIntoPipeString(
       fields
@@ -461,7 +496,7 @@ export class ApiService {
   }
 
   // NB: returns array with 1 element
-  getPeriod(id: string): Observable<CommentPeriod[]> {
+  getCommentPeriod(id: string): Observable<CommentPeriod[]> {
     const fields = ['_addedBy', '_application', 'startDate', 'endDate'];
     const queryString = `commentperiod/${id}?fields=${this.convertArrayIntoPipeString(fields)}`;
     return this.http.get<CommentPeriod[]>(`${this.pathAPI}/${queryString}`, {});
@@ -495,7 +530,8 @@ export class ApiService {
   //
   // Comments
   //
-  getCountCommentsByPeriodId(periodId: string): Observable<number> {
+
+  getCountCommentsByCommentPeriodId(periodId: string): Observable<number> {
     // NB: count only pending comments
     const queryString = `comment?isDeleted=false&commentStatus='Pending'&_commentPeriod=${periodId}`;
     return this.http.head<HttpResponse<object>>(`${this.pathAPI}/${queryString}`, { observe: 'response' }).pipe(
@@ -506,7 +542,12 @@ export class ApiService {
     );
   }
 
-  getCommentsByPeriodId(periodId: string, pageNum: number, pageSize: number, sortBy: string): Observable<Comment[]> {
+  getCommentsByCommentPeriodId(
+    periodId: string,
+    pageNum: number,
+    pageSize: number,
+    sortBy: string
+  ): Observable<Comment[]> {
     const fields = [
       '_addedBy',
       '_commentPeriod',
@@ -572,7 +613,8 @@ export class ApiService {
   //
   // Documents
   //
-  getDocumentsByAppId(appId: string): Observable<Document[]> {
+
+  getDocumentsByApplicationId(appId: string): Observable<Document[]> {
     const fields = ['_application', 'documentFileName', 'displayName', 'internalURL', 'internalMime'];
     const queryString = `document?isDeleted=false&_application=${appId}&fields=${this.convertArrayIntoPipeString(
       fields
@@ -663,12 +705,13 @@ export class ApiService {
   //
   // Searching
   //
-  searchAppsByCLID(clid: string): Observable<SearchResults[]> {
+
+  searchAppsByCLFile(clid: string): Observable<SearchResults[]> {
     const queryString = `ttlsapi/crownLandFileNumber/${clid}`;
     return this.http.get<SearchResults[]>(`${this.pathAPI}/${queryString}`, {});
   }
 
-  searchAppsByDTID(dtid: number): Observable<SearchResults> {
+  searchAppsByDispositionID(dtid: number): Observable<SearchResults> {
     const queryString = `ttlsapi/dispositionTransactionId/${dtid}`;
     return this.http.get<SearchResults>(`${this.pathAPI}/${queryString}`, {});
   }
@@ -676,6 +719,7 @@ export class ApiService {
   //
   // Users
   //
+
   getUsers(): Observable<User[]> {
     const fields = ['displayName', 'username', 'firstName', 'lastName'];
     const queryString = `user?fields=${this.convertArrayIntoPipeString(fields)}`;
@@ -702,7 +746,7 @@ export class ApiService {
    * @returns {string}
    * @memberof ApiService
    */
-  private convertArrayIntoPipeString(collection: string[]): string {
+  public convertArrayIntoPipeString(collection: string[]): string {
     if (!collection || collection.length <= 0) {
       return '';
     }
@@ -711,13 +755,13 @@ export class ApiService {
   }
 
   /**
-   * Checks each parameters of the given queryParams and builds a single query string.
+   * Checks each application query parameter of the given queryParams and builds a single query string.
    *
    * @param {IApplicationQueryParamSet} queryParams
    * @returns {string}
    * @memberof ApiService
    */
-  public buildQueryParametersString(params: IApplicationQueryParamSet): string {
+  public buildApplicationQueryParametersString(params: IApplicationQueryParamSet): string {
     if (!params) {
       return '';
     }
@@ -815,4 +859,56 @@ export class ApiService {
     // trim the last &
     return queryString.replace(/\&$/, '');
   }
+
+  // /**
+  //  * Checks each comment period query parameter of the given queryParams and builds a single query string.
+  //  *
+  //  * @param {ICommentPeriodQueryParamSet} queryParams
+  //  * @returns {string}
+  //  * @memberof ApiService
+  //  */
+  // public buildCommentPeriodQueryParametersString(params: ICommentPeriodQueryParamSet): string {
+  //   if (!params) {
+  //     return '';
+  //   }
+
+  //   let queryString = '';
+
+  //   if (params.pageNum >= 0) {
+  //     queryString += `pageNum=${params.pageNum}&`;
+  //   }
+
+  //   if (params.pageSize >= 0) {
+  //     queryString += `pageSize=${params.pageSize}&`;
+  //   }
+
+  //   if (params.sortBy) {
+  //     queryString += `sortBy=${params.sortBy}&`;
+  //   }
+
+  //   if ([true, false].includes(params.isDeleted)) {
+  //     queryString += `isDeleted=${params.isDeleted}&`;
+  //   }
+
+  //   if (params._application && params._application.value) {
+  //     queryString += `_application=${params._application.value}&`;
+  //   }
+
+  //   if (params._addedBy && params._addedBy.value) {
+  //     queryString += `_addedBy=${params._addedBy}&`;
+  //   }
+
+  //   if (params.startDate && params.startDate.value) {
+  //     queryString += `startDate=${params.startDate}&`;
+  //   }
+
+  //   if (params.endDate && params.endDate.value) {
+  //     queryString += `endDate=${params.endDate}&`;
+  //   }
+
+  //   console.log('queryString', queryString);
+
+  //   // trim the last &
+  //   return queryString.replace(/\&$/, '');
+  // }
 }

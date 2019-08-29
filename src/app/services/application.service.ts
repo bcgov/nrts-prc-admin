@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, of, combineLatest, forkJoin } from 'rxjs';
-import { flatMap, map, catchError } from 'rxjs/operators';
+import { mergeMap, map, catchError } from 'rxjs/operators';
 import * as moment from 'moment';
 import * as _ from 'lodash';
 
@@ -68,9 +68,8 @@ export class ApplicationService {
   /**
    * Get all applications.
    *
-   * @param {IGetParameters} [params=null]
-   * @param {number} [pageNum=0]
-   * @param {number} [pageSize=1000]
+   * @param {IGetParameters} [dataParams=null]
+   * @param {IApplicationQueryParamSet[]} [queryParamSets=null]
    * @returns {Observable<Application[]>}
    * @memberof ApplicationService
    */
@@ -80,7 +79,7 @@ export class ApplicationService {
   ): Observable<Application[]> {
     // first get just the applications
     // return this.api.getApplications(queryParamSets).pipe(
-    //   flatMap(apps => {
+    //   mergeMap(apps => {
     //     if (!apps || apps.length === 0) {
     //       // NB: forkJoin([]) will complete immediately
     //       // so return empty observable instead
@@ -96,12 +95,16 @@ export class ApplicationService {
     //   catchError(error => this.api.handleError(error))
     // );
 
-    const observables: Array<Observable<Application[]>> = queryParamSets.map(queryParamSet =>
-      this.api.getApplications(queryParamSet)
-    );
+    let observables: Array<Observable<Application[]>>;
+
+    if (queryParamSets) {
+      observables = queryParamSets.map(queryParamSet => this.api.getApplications(queryParamSet));
+    } else {
+      observables = [this.api.getApplications()];
+    }
 
     return combineLatest(...observables).pipe(
-      flatMap((res: Application[]) => {
+      mergeMap((res: Application[]) => {
         const resApps = _.flatten(res);
         if (!resApps || resApps.length === 0) {
           return of([] as Application[]);
@@ -129,7 +132,7 @@ export class ApplicationService {
   getByCrownLandID(clid: string, params: IGetParameters = null): Observable<Application[]> {
     // first get just the applications
     return this.api.getApplicationsByCrownLandID(clid).pipe(
-      flatMap(apps => {
+      mergeMap(apps => {
         if (!apps || apps.length === 0) {
           // NB: forkJoin([]) will complete immediately
           // so return empty observable instead
@@ -157,7 +160,7 @@ export class ApplicationService {
   getByTantalisID(tantalisID: number, params: IGetParameters = null): Observable<Application> {
     // first get just the application
     return this.api.getApplicationByTantalisId(tantalisID).pipe(
-      flatMap(apps => {
+      mergeMap(apps => {
         if (!apps || apps.length === 0) {
           return of(null as Application);
         }
@@ -179,7 +182,7 @@ export class ApplicationService {
   getById(appId: string, params: IGetParameters = null): Observable<Application> {
     // first get just the application
     return this.api.getApplication(appId).pipe(
-      flatMap(apps => {
+      mergeMap(apps => {
         if (!apps || apps.length === 0) {
           return of(null as Application);
         }
@@ -200,7 +203,7 @@ export class ApplicationService {
    */
   private _getExtraCommentData(application: Application) {
     return this.commentPeriodService.getAllByApplicationId(application._id).pipe(
-      flatMap(periods => {
+      mergeMap(periods => {
         application.meta.currentPeriod = this.commentPeriodService.getCurrent(periods);
 
         // user-friendly comment period long status string

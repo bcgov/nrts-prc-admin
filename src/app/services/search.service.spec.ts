@@ -15,7 +15,11 @@ describe('SearchService', () => {
         SearchService,
         {
           provide: ApiService,
-          useValue: jasmine.createSpyObj('ApiService', ['searchAppsByCLID', 'searchAppsByDTID', 'handleError'])
+          useValue: jasmine.createSpyObj('ApiService', [
+            'searchAppsByCLFile',
+            'searchAppsByDispositionID',
+            'handleError'
+          ])
         },
         {
           provide: ApplicationService,
@@ -56,7 +60,7 @@ describe('SearchService', () => {
         it('returns an empty array of applications', async(() => {
           ApplicationServiceSpy.getByCrownLandID.and.returnValue(of([] as Application[]));
 
-          apiSpy.searchAppsByCLID.and.returnValue(of([] as SearchResults[]));
+          apiSpy.searchAppsByCLFile.and.returnValue(of([] as SearchResults[]));
 
           service.getApplicationsByCLFileAndTantalisID(['123']).subscribe(result => {
             expect(result).toEqual([] as Application[]);
@@ -73,7 +77,7 @@ describe('SearchService', () => {
             of([new Application({ _id: '1' }), new Application({ _id: '2' })])
           );
 
-          apiSpy.searchAppsByCLID.and.returnValue(of([] as SearchResults[]));
+          apiSpy.searchAppsByCLFile.and.returnValue(of([] as SearchResults[]));
 
           service.getApplicationsByCLFileAndTantalisID(['123']).subscribe(res => {
             result.push(res);
@@ -124,7 +128,7 @@ describe('SearchService', () => {
 
           ApplicationServiceSpy.getByCrownLandID.and.returnValue(of([] as Application[]));
 
-          apiSpy.searchAppsByCLID.and.returnValue(
+          apiSpy.searchAppsByCLFile.and.returnValue(
             of([
               new SearchResults({
                 type: 'type',
@@ -218,7 +222,7 @@ describe('SearchService', () => {
             expect(prcResult[0].businessUnit).toBe('KO - LAND MGMNT - KOOTENAY FIELD OFFICE');
             expect(prcResult[0].cl_file).toBe(11);
             expect(prcResult[0].tantalisID).toBe(33);
-            expect(prcResult[0].region).toBe('Kootenay, Cranbrook');
+            expect(prcResult[0].meta.region).toBe('Kootenay, Cranbrook');
 
             expect(prcResult[1].purpose).toBe('tenure-purpose-2');
             expect(prcResult[1].subpurpose).toBe('tenure-subpurpose-2');
@@ -231,7 +235,7 @@ describe('SearchService', () => {
             expect(prcResult[1].businessUnit).toBe('OM - LAND MGMNT - NORTHERN SERVICE REGION');
             expect(prcResult[1].cl_file).toBe(22);
             expect(prcResult[1].tantalisID).toBe(55);
-            expect(prcResult[0].region).toBe('Kootenay, Cranbrook');
+            expect(prcResult[0].meta.region).toBe('Kootenay, Cranbrook');
           });
 
           it('builds and sets a client string', () => {
@@ -250,8 +254,8 @@ describe('SearchService', () => {
           });
 
           it('has a clFile property padded to 7 digits', () => {
-            expect(prcResult[0].clFile).toBe('0000011');
-            expect(prcResult[1].clFile).toBe('0000022');
+            expect(prcResult[0].meta.clFile).toBe('0000011');
+            expect(prcResult[1].meta.clFile).toBe('0000022');
           });
         });
       });
@@ -267,7 +271,7 @@ describe('SearchService', () => {
         it('returns an empty array of applications', async(() => {
           ApplicationServiceSpy.getByTantalisID.and.returnValue(of(null as Application));
 
-          apiSpy.searchAppsByDTID.and.returnValue(of(null as SearchResults));
+          apiSpy.searchAppsByDispositionID.and.returnValue(of(null as SearchResults));
 
           service.getApplicationsByCLFileAndTantalisID(['123']).subscribe(result => {
             expect(result).toEqual([] as Application[]);
@@ -282,7 +286,7 @@ describe('SearchService', () => {
 
           ApplicationServiceSpy.getByTantalisID.and.returnValue(of(new Application({ _id: '2' })));
 
-          apiSpy.searchAppsByDTID.and.returnValue(of(null as SearchResults));
+          apiSpy.searchAppsByDispositionID.and.returnValue(of(null as SearchResults));
 
           service.getApplicationsByCLFileAndTantalisID(['123']).subscribe(res => {
             result.push(res);
@@ -318,7 +322,7 @@ describe('SearchService', () => {
 
           ApplicationServiceSpy.getByTantalisID.and.returnValue(of(null as Application));
 
-          apiSpy.searchAppsByDTID.and.returnValue(
+          apiSpy.searchAppsByDispositionID.and.returnValue(
             of(
               new SearchResults({
                 type: 'type',
@@ -389,7 +393,7 @@ describe('SearchService', () => {
             expect(tantalisResult[0].businessUnit).toBe('CA - LAND MGMNT - CARIBOO FIELD OFFICE');
             expect(tantalisResult[0].cl_file).toBe(11);
             expect(tantalisResult[0].tantalisID).toBe(33);
-            expect(tantalisResult[0].region).toBe('Cariboo, Williams Lake');
+            expect(tantalisResult[0].meta.region).toBe('Cariboo, Williams Lake');
           });
 
           it('builds and sets a client string', () => {
@@ -405,7 +409,7 @@ describe('SearchService', () => {
           });
 
           it('has a clFile property padded to 7 digits', () => {
-            expect(tantalisResult[0].clFile).toBe('0000011');
+            expect(tantalisResult[0].meta.clFile).toBe('0000011');
           });
         });
       });

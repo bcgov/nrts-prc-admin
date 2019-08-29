@@ -12,9 +12,44 @@ import { CommentCodes } from 'app/utils/constants/comment';
 export class CommentPeriodService {
   constructor(private api: ApiService) {}
 
-  // get all comment periods for the specified application id
+  // /**
+  //  * Get all comment periods.
+  //  *
+  //  * @param {ICommentPeriodQueryParamSet[]} [queryParamSets=null]
+  //  * @returns {Observable<CommentPeriod[]>}
+  //  * @memberof CommentPeriodService
+  //  */
+  // getAll(queryParamSets: ICommentPeriodQueryParamSet[] = null): Observable<CommentPeriod[]> {
+  //   let observables: Array<Observable<CommentPeriod[]>>;
+
+  //   if (queryParamSets) {
+  //     observables = queryParamSets.map(queryParamSet => this.api.getCommentPeriods(queryParamSet));
+  //   } else {
+  //     observables = [this.api.getCommentPeriods()];
+  //   }
+
+  //   return combineLatest(...observables).pipe(
+  //     mergeMap((res: CommentPeriod[]) => {
+  //       const resCommentPeriods = _.flatten(res);
+  //       if (!resCommentPeriods || resCommentPeriods.length === 0) {
+  //         return of([] as CommentPeriod[]);
+  //       }
+
+  //       return of(resCommentPeriods);
+  //     }),
+  //     catchError(this.api.handleError)
+  //   );
+  // }
+
+  /**
+   * Get all comment periods for the specified application id
+   *
+   * @param {string} appId
+   * @returns {Observable<CommentPeriod[]>}
+   * @memberof CommentPeriodService
+   */
   getAllByApplicationId(appId: string): Observable<CommentPeriod[]> {
-    return this.api.getPeriodsByAppId(appId).pipe(
+    return this.api.getCommentPeriodsByApplicationId(appId).pipe(
       map(res => {
         if (res && res.length > 0) {
           const periods: CommentPeriod[] = [];
@@ -29,9 +64,15 @@ export class CommentPeriodService {
     );
   }
 
-  // get a specific comment period by its id
+  /**
+   * get a specific comment period by its id
+   *
+   * @param {string} periodId
+   * @returns {Observable<CommentPeriod>}
+   * @memberof CommentPeriodService
+   */
   getById(periodId: string): Observable<CommentPeriod> {
-    return this.api.getPeriod(periodId).pipe(
+    return this.api.getCommentPeriod(periodId).pipe(
       map(res => {
         if (res && res.length > 0) {
           // return the first (only) comment period

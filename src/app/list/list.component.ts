@@ -4,8 +4,7 @@ import { ActivatedRoute, ParamMap, Params, Router } from '@angular/router';
 import { Application } from 'app/models/application';
 import { IApplicationQueryParamSet, QueryParamModifier } from 'app/services/api';
 import { ApplicationService } from 'app/services/application.service';
-import { PurposeCodes, RegionCodes, StatusCodes, ReasonCodes } from 'app/utils/constants/application';
-import { CommentCodes } from 'app/utils/constants/comment';
+import { RegionCodes, StatusCodes, ReasonCodes, PurposeCodes } from 'app/utils/constants/application';
 import { CodeType, ConstantUtils } from 'app/utils/constants/constantUtils';
 import * as _ from 'lodash';
 import * as moment from 'moment';
@@ -44,13 +43,13 @@ export class ListComponent implements OnInit, OnDestroy {
   public regionCodes = new RegionCodes().getCodeGroups();
   public statusCodes = new StatusCodes().getCodeGroups();
   // enforce specific comment filter order for esthetics
-  public commentCodes = [CommentCodes.NOT_STARTED, CommentCodes.OPEN, CommentCodes.CLOSED, CommentCodes.NOT_OPEN];
+  // public commentCodes = [CommentCodes.NOT_STARTED, CommentCodes.OPEN, CommentCodes.CLOSED, CommentCodes.NOT_OPEN];
 
   // selected drop down filters
   public purposeCodeFilters: string[] = [];
   public regionCodeFilter = '';
   public statusCodeFilters: string[] = [];
-  public commentCodeFilters: string[] = [];
+  // public commentCodeFilters: string[] = [];
 
   // need to reset pagination when a filter is changed, as we can't be sure how many pages of results will exist.
   public filterChanged = false;
@@ -115,8 +114,8 @@ export class ListComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(
         ([applications, count]) => {
-          this.applications = this.applyCommentPeriodFilter(applications);
           this.updatePagination({ totalItems: count });
+          this.applications = applications;
 
           this.searching = false;
           this.loading = false;
@@ -153,27 +152,38 @@ export class ListComponent implements OnInit, OnDestroy {
       .subscribe(
         applications => {
           // All fields that will be included in the csv, and optionally what the column header text will be.
+          // See www.npmjs.com/package/json2csv for details on the format of the fields array.
           const fields: any[] = [
             'cl_file',
             { label: 'dispositionID', value: 'tantalisID' },
             'client',
+            { label: 'businessUnit', value: 'businessUnit' },
+            'location',
+            { label: 'area (hectares)', value: 'areaHectares' },
+            { label: 'created date', ...this.getExportDateFormatter('createdDate') },
+            { label: 'publish date', ...this.getExportDateFormatter('publishDate') },
             'purpose',
             'subpurpose',
             'status',
             'reason',
-            'businessUnit (region)',
-            'location',
-            { label: 'area (hectares)', value: 'areaHectares' },
-            'createdDate',
-            'publishDate',
-            'statusHistoryEffectiveDate',
+            { label: 'last status update date', ...this.getExportDateFormatter('statusHistoryEffectiveDate') },
+            'type',
+            'subtype',
+            { label: 'tenure stage', value: 'tenureStage' },
             'description',
-            { label: 'comment period status', value: 'meta.cpStatusStringLong' },
-            { label: 'comment period start date', value: 'meta.currentPeriod.startDate' },
-            { label: 'comment period end date', value: 'meta.currentPeriod.endDate' },
-            { label: 'comment period number of comments', value: 'meta.numComments' }
+            { label: 'legal description', value: 'legalDescription' },
+            { label: 'is retired', value: 'meta.isRetired' },
+            { label: 'retire date', ...this.getExportDateFormatter('meta.retireDate') },
+            { label: 'comment period: status', value: 'meta.cpStatusStringLong' },
+            { label: 'comment period: start date', ...this.getExportDateFormatter('meta.currentPeriod.startDate') },
+            { label: 'comment period: end date', ...this.getExportDateFormatter('meta.currentPeriod.endDate') },
+            { label: 'comment period: number of comments', value: 'meta.numComments' }
           ];
-          this.exportService.exportAsCSV(applications, `ACRFD_Applications_Export_${moment().format()}`, fields);
+          this.exportService.exportAsCSV(
+            applications,
+            `ACRFD_Applications_Export_${moment().format('YYYY-MM-DD_HH-mm')}`,
+            fields
+          );
           this.exporting = false;
         },
         error => {
@@ -182,6 +192,37 @@ export class ListComponent implements OnInit, OnDestroy {
           alert("Uh-oh, couldn't export applications");
         }
       );
+  }
+
+  /**
+   * Convenience method for converting an export date field to a formatted date string that is recognized by Excel as
+   * a Date.
+   *
+   * Note: See www.npmjs.com/package/json2csv for details on what this function is supporting.
+   *
+   * @param {string} property the object property for the date (not the date value itself). Can be the path to a nested
+   *                          date field: 'some.nested.date'
+   * @returns an object with the necessary functions to convert the specific row field into a formatted date string.
+   * @memberof ListComponent
+   */
+  public getExportDateFormatter(property: string): object {
+    return {
+      value: row => {
+        const prop = _.get(row, property);
+
+        if (!prop) {
+          return null;
+        }
+
+        const date = moment(prop);
+
+        if (!date.isValid()) {
+          return prop;
+        }
+
+        return date.format('YYYY-MM-DD');
+      }
+    };
   }
 
   // URL Parameters
@@ -200,7 +241,7 @@ export class ListComponent implements OnInit, OnDestroy {
     this.purposeCodeFilters = (this.paramMap.get('purpose') && this.paramMap.get('purpose').split('|')) || [];
     this.regionCodeFilter = this.paramMap.get('region') || '';
     this.statusCodeFilters = (this.paramMap.get('status') && this.paramMap.get('status').split('|')) || [];
-    this.commentCodeFilters = (this.paramMap.get('comment') && this.paramMap.get('comment').split('|')) || [];
+    // this.commentCodeFilters = (this.paramMap.get('comment') && this.paramMap.get('comment').split('|')) || [];
   }
 
   /**
@@ -328,9 +369,9 @@ export class ListComponent implements OnInit, OnDestroy {
     if (this.statusCodeFilters && this.statusCodeFilters.length) {
       params['status'] = this.convertArrayIntoPipeString(this.statusCodeFilters);
     }
-    if (this.commentCodeFilters && this.commentCodeFilters.length) {
-      params['comment'] = this.convertArrayIntoPipeString(this.commentCodeFilters);
-    }
+    // if (this.commentCodeFilters && this.commentCodeFilters.length) {
+    //   params['comment'] = this.convertArrayIntoPipeString(this.commentCodeFilters);
+    // }
 
     // change browser URL without reloading page (so any query params are saved in history)
     this.location.go(this.router.createUrlTree([], { relativeTo: this.route, queryParams: params }).toString());
@@ -351,7 +392,7 @@ export class ListComponent implements OnInit, OnDestroy {
     this.purposeCodeFilters = [];
     this.regionCodeFilter = '';
     this.statusCodeFilters = [];
-    this.commentCodeFilters = [];
+    // this.commentCodeFilters = [];
 
     this.location.go(this.router.createUrlTree([], { relativeTo: this.route }).toString());
   }
@@ -394,36 +435,36 @@ export class ListComponent implements OnInit, OnDestroy {
     this.saveQueryParameters();
   }
 
-  /**
-   * Set comment period status filter.
-   *
-   * @param {string} commentCode
-   * @memberof ListComponent
-   */
-  public setCommentFilter(commentCode: string): void {
-    this.commentCodeFilters = commentCode ? [commentCode] : [];
-    this.filterChanged = true;
-    this.saveQueryParameters();
-  }
+  // /**
+  //  * Set comment period status filter.
+  //  *
+  //  * @param {string} commentCode
+  //  * @memberof ListComponent
+  //  */
+  // public setCommentFilter(commentCode: string): void {
+  //   this.commentCodeFilters = commentCode ? [commentCode] : [];
+  //   this.filterChanged = true;
+  //   this.saveQueryParameters();
+  // }
 
-  /**
-   * Given an array of Applications, filter out those whos comment periods dont match the comment period status filter.
-   *
-   * @param {Application[]} applications
-   * @returns
-   * @memberof ListComponent
-   */
-  public applyCommentPeriodFilter(applications: Application[]): Application[] {
-    if (!applications || !this.commentCodeFilters || !this.commentCodeFilters.length) {
-      return applications;
-    }
+  // /**
+  //  * Given an array of Applications, filter out comment periods that don't match the comment period status filter.
+  //  *
+  //  * @param {Application[]} applications
+  //  * @returns
+  //  * @memberof ListComponent
+  //  */
+  // public applyCommentPeriodFilter(applications: Application[]): Application[] {
+  //   if (!applications || !this.commentCodeFilters || !this.commentCodeFilters.length) {
+  //     return applications;
+  //   }
 
-    return applications.filter(application => {
-      return _.flatMap(
-        this.commentCodeFilters.map(commentCode => ConstantUtils.getTextLong(CodeType.COMMENT, commentCode))
-      ).includes(application.meta.cpStatusStringLong);
-    });
-  }
+  //   return applications.filter(application => {
+  //     return _.flatMap(
+  //       this.commentCodeFilters.map(commentCode => ConstantUtils.getTextLong(CodeType.COMMENT, commentCode))
+  //     ).includes(application.meta.cpStatusStringLong);
+  //   });
+  // }
 
   // Sorting
 

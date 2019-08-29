@@ -12,13 +12,13 @@
             <option *ngFor="let regionCode of regionCodes" [value]="regionCode.param"
               [selected]="regionCodeFilter === regionCode.param">{{regionCode.text.long}}</option>
           </select>
-          <select class="form-control filter-select" (change)="setCommentFilter($event.target.value)"
-            [disabled]="searching || exporting" title="Filter by comment period">
-            <option value="">Filter by Comment Period</option>
-            <option *ngFor="let commentCode of commentCodes" [value]="commentCode.param"
-              [selected]="commentCodeFilters[0] === commentCode.param">{{commentCode.text.long}}
-            </option>
+          <select class="form-control filter-select" (change)="setPurposeFilter($event.target.value)"
+            [disabled]="searching || exporting" title="Filter by purpose">
+            <option value="">Filter by Purpose</option>
+            <option *ngFor="let purposeCode of purposeCodes" [value]="purposeCode.param"
+              [selected]="purposeCodeFilters[0] === purposeCode.param">{{purposeCode.text.long}}</option>
           </select>
+
         </div>
 
         <div>
@@ -28,12 +28,13 @@
             <option *ngFor="let statusCode of statusCodes" [value]="statusCode.param"
               [selected]="statusCodeFilters[0] === statusCode.param">{{statusCode.text.long}}</option>
           </select>
-          <select class="form-control filter-select" (change)="setPurposeFilter($event.target.value)"
-            [disabled]="searching || exporting" title="Filter by purpose">
-            <option value="">Filter by Purpose</option>
-            <option *ngFor="let purposeCode of purposeCodes" [value]="purposeCode.param"
-              [selected]="purposeCodeFilters[0] === purposeCode.param">{{purposeCode.text.long}}</option>
-          </select>
+          <!-- <select class="form-control filter-select" (change)="setCommentFilter($event.target.value)"
+            [disabled]="searching || exporting" title="Filter by comment period">
+            <option value="">Filter by Comment Period</option>
+            <option *ngFor="let commentCode of commentCodes" [value]="commentCode.param"
+              [selected]="commentCodeFilters[0] === commentCode.param">{{commentCode.text.long}}
+            </option>
+          </select> -->
         </div>
 
         <div class="filter-buttons">

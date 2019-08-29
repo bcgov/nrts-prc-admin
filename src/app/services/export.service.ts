@@ -37,8 +37,8 @@ export class ExportService {
    * @param {string[]} [fields=[]] data fields include in csv, in order
    * @memberof ExportService
    */
-  public exportAsCSV(data: any[], fileName: string, columns: any[] = []): void {
-    const csvData: string = new Parser({ fields: columns }).parse(data);
+  public exportAsCSV(data: any[], fileName: string, fields: any[] = []): void {
+    const csvData: string = new Parser({ fields: fields }).parse(data);
     const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8' });
     saveAs(blob, `${fileName}.csv`);
   }

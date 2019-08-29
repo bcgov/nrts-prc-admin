@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
-import { map, flatMap, catchError } from 'rxjs/operators';
+import { map, mergeMap, catchError } from 'rxjs/operators';
 import * as _ from 'lodash';
 
 import { ApiService } from './api';
@@ -18,8 +18,8 @@ export class DecisionService {
   // get decision for the specified application id
   getByApplicationId(appId: string, params: IGetParameters = null): Observable<Decision> {
     // first get the decision data
-    return this.api.getDecisionsByAppId(appId).pipe(
-      flatMap(res => {
+    return this.api.getDecisionsByApplicationId(appId).pipe(
+      mergeMap(res => {
         if (res && res.length > 0) {
           // return the first (only) decision
           const decision = new Decision(res[0]);
@@ -46,7 +46,7 @@ export class DecisionService {
   getById(decisionId, params: IGetParameters = null): Observable<Decision> {
     // first get the decision data
     return this.api.getDecision(decisionId).pipe(
-      flatMap(res => {
+      mergeMap(res => {
         if (res && res.length > 0) {
           // return the first (only) decision
           const decision = new Decision(res[0]);

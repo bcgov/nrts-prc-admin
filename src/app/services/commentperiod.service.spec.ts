@@ -15,8 +15,8 @@ describe('CommentPeriodService', () => {
         {
           provide: ApiService,
           useValue: jasmine.createSpyObj('ApiService', [
-            'getPeriodsByAppId',
-            'getPeriod',
+            'getCommentPeriodsByApplicationId',
+            'getCommentPeriod',
             'addCommentPeriod',
             'saveCommentPeriod',
             'deleteCommentPeriod',
@@ -42,7 +42,7 @@ describe('CommentPeriodService', () => {
 
     describe('when no comment periods are returned by the Api', () => {
       it('returns an empty CommentPeriod array', async(() => {
-        apiSpy.getPeriodsByAppId.and.returnValue(of([] as CommentPeriod[]));
+        apiSpy.getCommentPeriodsByApplicationId.and.returnValue(of([] as CommentPeriod[]));
 
         service.getAllByApplicationId('123').subscribe(result => expect(result).toEqual([] as CommentPeriod[]));
       }));
@@ -52,7 +52,7 @@ describe('CommentPeriodService', () => {
       it('returns an array with one CommentPeriod element', async(() => {
         const today = new Date();
         const commentPeriods: CommentPeriod[] = [new CommentPeriod({ _id: '1', startDate: today, endDate: today })];
-        apiSpy.getPeriodsByAppId.and.returnValue(of(commentPeriods));
+        apiSpy.getCommentPeriodsByApplicationId.and.returnValue(of(commentPeriods));
 
         service.getAllByApplicationId('123').subscribe(result => {
           expect(result).toEqual(commentPeriods);
@@ -69,7 +69,7 @@ describe('CommentPeriodService', () => {
           new CommentPeriod({ _id: '3', startDate: today, endDate: today })
         ];
 
-        apiSpy.getPeriodsByAppId.and.returnValue(of(commentPeriods));
+        apiSpy.getCommentPeriodsByApplicationId.and.returnValue(of(commentPeriods));
 
         service.getAllByApplicationId('123').subscribe(result => {
           expect(result).toEqual(commentPeriods);
@@ -79,7 +79,7 @@ describe('CommentPeriodService', () => {
 
     describe('when an exception is thrown', () => {
       it('ApiService.handleError is called and the error is re-thrown', async(() => {
-        apiSpy.getPeriodsByAppId.and.returnValue(throwError(new Error('someError')));
+        apiSpy.getCommentPeriodsByApplicationId.and.returnValue(throwError(new Error('someError')));
 
         apiSpy.handleError.and.callFake(error => {
           expect(error).toEqual(Error('someError'));
@@ -106,7 +106,7 @@ describe('CommentPeriodService', () => {
 
     describe('when no comment period is returned by the Api', () => {
       it('returns an empty CommentPeriod array', async(() => {
-        apiSpy.getPeriod.and.returnValue(of(null as CommentPeriod));
+        apiSpy.getCommentPeriod.and.returnValue(of(null as CommentPeriod));
 
         service.getById('123').subscribe(result => expect(result).toEqual(null));
       }));
@@ -120,7 +120,7 @@ describe('CommentPeriodService', () => {
           startDate: today,
           endDate: today
         });
-        apiSpy.getPeriod.and.returnValue(of());
+        apiSpy.getCommentPeriod.and.returnValue(of());
 
         service.getById('123').subscribe(result => {
           expect(result).toEqual(commentPeriod);
@@ -137,7 +137,7 @@ describe('CommentPeriodService', () => {
           new CommentPeriod({ _id: '3', startDate: today, endDate: today })
         ];
 
-        apiSpy.getPeriod.and.returnValue(of(commentPeriod));
+        apiSpy.getCommentPeriod.and.returnValue(of(commentPeriod));
 
         service.getById('123').subscribe(result => {
           expect(result).toEqual(commentPeriod[0]);
@@ -147,7 +147,7 @@ describe('CommentPeriodService', () => {
 
     describe('when an exception is thrown', () => {
       it('ApiService.handleError is called and the error is re-thrown', async(() => {
-        apiSpy.getPeriod.and.returnValue(throwError(new Error('someError')));
+        apiSpy.getCommentPeriod.and.returnValue(throwError(new Error('someError')));
 
         apiSpy.handleError.and.callFake(error => {
           expect(error).toEqual(Error('someError'));
@@ -227,7 +227,7 @@ describe('CommentPeriodService', () => {
 
     describe('when an exception is thrown', () => {
       it('ApiService.handleError is called and the error is re-thrown', async(() => {
-        apiSpy.getPeriod.and.returnValue(throwError(new Error('someError')));
+        apiSpy.getCommentPeriod.and.returnValue(throwError(new Error('someError')));
 
         apiSpy.handleError.and.callFake(error => {
           expect(error).toEqual(Error('someError'));

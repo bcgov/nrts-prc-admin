@@ -50,7 +50,7 @@ export class SearchService {
   private getApplicationsByCLFile(clid: string): Observable<Application[]> {
     const getByCrownLandID = this.applicationService.getByCrownLandID(clid, { getCurrentPeriod: true });
 
-    const searchAppsByCLID = this.api.searchAppsByCLID(clid).pipe(
+    const searchAppsByCLFile = this.api.searchAppsByCLFile(clid).pipe(
       catchError(() => {
         this.isError = true;
         // if search call fails, return null results
@@ -58,7 +58,7 @@ export class SearchService {
       })
     );
 
-    return forkJoin(getByCrownLandID, searchAppsByCLID).pipe(
+    return forkJoin(getByCrownLandID, searchAppsByCLFile).pipe(
       map(payloads => {
         const applications: Application[] = payloads[0];
         const searchResults: SearchResults[] = payloads[1];
@@ -149,7 +149,7 @@ export class SearchService {
   private getApplicationsByDispositionID(dtid: number): Observable<Application[]> {
     const getByTantalisID = this.applicationService.getByTantalisID(dtid, { getCurrentPeriod: true });
 
-    const searchAppsByDTID = this.api.searchAppsByDTID(dtid).pipe(
+    const searchAppsByDispositionID = this.api.searchAppsByDispositionID(dtid).pipe(
       map(res => {
         return res ? new SearchResults(res) : null;
       }),
@@ -160,7 +160,7 @@ export class SearchService {
       })
     );
 
-    return forkJoin(getByTantalisID, searchAppsByDTID).pipe(
+    return forkJoin(getByTantalisID, searchAppsByDispositionID).pipe(
       map(payloads => {
         const application: Application = payloads[0];
         const searchResult: SearchResults = payloads[1];
