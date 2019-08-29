@@ -7,9 +7,10 @@ import { of, throwError } from 'rxjs';
 import { OrderByPipe } from 'app/pipes/order-by.pipe';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Application } from 'app/models/application';
-import { CommentCodes } from 'app/utils/constants/comment';
+// import { CommentCodes } from 'app/utils/constants/comment';
 import ActivatedRouteStub from 'app/spec/helpers';
 import { ExportService } from 'app/services/export.service';
+import { QueryParamModifier } from 'app/services/api';
 
 describe('ListComponent', () => {
   // component constructor mocks
@@ -83,7 +84,7 @@ describe('ListComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  describe('getApplicationQueryParameters', () => {
+  describe('getApplicationQueryParamSets', () => {
     let component;
     beforeEach(() => {
       ({ component } = createComponent());
@@ -92,18 +93,24 @@ describe('ListComponent', () => {
     it('returns application query parameters', () => {
       component.pagination.currentPage = 7;
       component.pagination.itemsPerPage = 17;
-      component.purposeCodeFilters = ['purposeFilterE'];
+      component.purposeCodeFilters = ['AGRICULTURE'];
       component.statusCodeFilters = ['APPLICATION REVIEW COMPLETE'];
-      component.regionCodeFilter = 'regionFilterE';
+      component.regionCodeFilter = 'SK - LAND MGMNT - SKEENA FIELD OFFICE';
 
-      const queryParameters = component.getApplicationQueryParameters();
+      const queryParameters = component.getApplicationQueryParamSets()[0];
 
       expect(queryParameters.isDeleted).toEqual(false);
       expect(queryParameters.pageNum).toEqual(6);
       expect(queryParameters.pageSize).toEqual(17);
-      expect(queryParameters.purpose).toEqual(['purposeFilterE']);
-      expect(queryParameters.status).toEqual(['OFFER ACCEPTED', 'OFFERED']);
-      expect(queryParameters.businessUnit).toEqual('regionFilterE');
+      expect(queryParameters.purpose).toEqual({ value: ['AGRICULTURE'], modifier: QueryParamModifier.Equal });
+      expect(queryParameters.status).toEqual({
+        value: ['OFFER ACCEPTED', 'OFFERED'],
+        modifier: QueryParamModifier.Equal
+      });
+      expect(queryParameters.businessUnit).toEqual({
+        value: 'SK - LAND MGMNT - SKEENA FIELD OFFICE',
+        modifier: QueryParamModifier.Equal
+      });
     });
   });
 
@@ -134,12 +141,12 @@ describe('ListComponent', () => {
       it('calls ApplicationService.getAll', () => {
         expect(applicationServiceMock.getAll).toHaveBeenCalledWith(
           { getCurrentPeriod: true },
-          component.getApplicationQueryParameters()
+          component.getApplicationQueryParamSets()
         );
       });
 
       it('calls ApplicationService.getCount', () => {
-        expect(applicationServiceMock.getCount).toHaveBeenCalledWith(component.getApplicationQueryParameters());
+        expect(applicationServiceMock.getCount).toHaveBeenCalledWith(component.getApplicationQueryParamSets());
       });
 
       it('updates applications', () => {
@@ -257,7 +264,7 @@ describe('ListComponent', () => {
       component.purposeCodeFilters = ['purposeFilterC'];
       component.statusCodeFilters = ['statusFilterC'];
       component.regionCodeFilter = 'regionFilterC';
-      component.commentCodeFilters = ['commentFilterC'];
+      // component.commentCodeFilters = ['commentFilterC'];
 
       component.setInitialQueryParameters();
 
@@ -267,15 +274,14 @@ describe('ListComponent', () => {
       expect(component.purposeCodeFilters).toEqual([]);
       expect(component.statusCodeFilters).toEqual([]);
       expect(component.regionCodeFilter).toEqual('');
-      expect(component.commentCodeFilters).toEqual([]);
+      // expect(component.commentCodeFilters).toEqual([]);
     });
 
     it('sets default query parameters when parameters are saved to the url', () => {
       const activatedRouteStub: ActivatedRouteStub = TestBed.get(ActivatedRoute);
       activatedRouteStub.setQueryParamMap({
         page: 3,
-        col: 'columnD',
-        dir: 1,
+        sortBy: '+columnD',
         purpose: 'purpose1|purpose2',
         status: 'status1|status2|status3',
         region: 'region1',
@@ -290,7 +296,7 @@ describe('ListComponent', () => {
       component.purposeCodeFilters = ['purposeFilterCC'];
       component.statusCodeFilters = ['statusFilterCC'];
       component.regionCodeFilter = 'regionFilterCC';
-      component.commentCodeFilters = ['commentFilterCC'];
+      // component.commentCodeFilters = ['commentFilterCC'];
 
       component.setInitialQueryParameters();
 
@@ -300,7 +306,7 @@ describe('ListComponent', () => {
       expect(component.purposeCodeFilters).toEqual(['purpose1', 'purpose2']);
       expect(component.statusCodeFilters).toEqual(['status1', 'status2', 'status3']);
       expect(component.regionCodeFilter).toEqual('region1');
-      expect(component.commentCodeFilters).toEqual(['comment1']);
+      // expect(component.commentCodeFilters).toEqual(['comment1']);
     });
   });
 
@@ -314,12 +320,11 @@ describe('ListComponent', () => {
       spyRouter.createUrlTree.and.callFake((...args) => {
         expect(args[1].queryParams).toEqual({
           page: 4,
-          col: 'columnA',
-          dir: 1,
+          sortBy: '-columnA',
           purpose: 'purposeFilterA',
           region: 'regionFilterA',
-          status: 'statusFilterA',
-          comment: 'commentFilterA'
+          status: 'statusFilterA'
+          // comment: 'commentFilterA'
         });
         return 'I was called 1';
       });
@@ -333,11 +338,11 @@ describe('ListComponent', () => {
     it('saves all query parameters to the url', () => {
       component.pagination.currentPage = 4;
       component.sorting.column = 'columnA';
-      component.sorting.direction = 1;
+      component.sorting.direction = -1;
       component.purposeCodeFilters = ['purposeFilterA'];
       component.statusCodeFilters = ['statusFilterA'];
       component.regionCodeFilter = 'regionFilterA';
-      component.commentCodeFilters = ['commentFilterA'];
+      // component.commentCodeFilters = ['commentFilterA'];
 
       component.saveQueryParameters();
 
@@ -371,7 +376,7 @@ describe('ListComponent', () => {
       component.purposeCodeFilters = ['purposeFilterB'];
       component.statusCodeFilters = ['statusFilterB'];
       component.regionCodeFilter = 'regionFilterB';
-      component.commentCodeFilters = ['commentFilterB'];
+      // component.commentCodeFilters = ['commentFilterB'];
 
       component.clearQueryParameters();
 
@@ -382,7 +387,7 @@ describe('ListComponent', () => {
       expect(component.purposeCodeFilters).toEqual([]);
       expect(component.statusCodeFilters).toEqual([]);
       expect(component.regionCodeFilter).toEqual('');
-      expect(component.commentCodeFilters).toEqual([]);
+      // expect(component.commentCodeFilters).toEqual([]);
 
       expect(spyLocation.go).toHaveBeenCalledWith('I was called 2');
     });
@@ -613,163 +618,163 @@ describe('ListComponent', () => {
     });
   });
 
-  describe('setCommentFilter', () => {
-    let component;
-    beforeEach(() => {
-      ({ component } = createComponent());
-    });
+  // describe('setCommentFilter', () => {
+  //   let component;
+  //   beforeEach(() => {
+  //     ({ component } = createComponent());
+  //   });
 
-    describe('commentCode is undefined', () => {
-      beforeEach(() => {
-        component.commentCodeFilters = ['oldFilter'];
-        component.filterChanged = false;
+  //   describe('commentCode is undefined', () => {
+  //     beforeEach(() => {
+  //       component.commentCodeFilters = ['oldFilter'];
+  //       component.filterChanged = false;
 
-        component.setCommentFilter(undefined);
-      });
+  //       component.setCommentFilter(undefined);
+  //     });
 
-      it('sets commentCodeFilters to empty array', () => {
-        expect(component.commentCodeFilters).toEqual([]);
-      });
+  //     it('sets commentCodeFilters to empty array', () => {
+  //       expect(component.commentCodeFilters).toEqual([]);
+  //     });
 
-      it('sets filterChanged to true', () => {
-        expect(component.filterChanged).toEqual(true);
-      });
-    });
+  //     it('sets filterChanged to true', () => {
+  //       expect(component.filterChanged).toEqual(true);
+  //     });
+  //   });
 
-    describe('commentCode is null', () => {
-      beforeEach(() => {
-        component.commentCodeFilters = ['oldFilter'];
-        component.filterChanged = false;
+  //   describe('commentCode is null', () => {
+  //     beforeEach(() => {
+  //       component.commentCodeFilters = ['oldFilter'];
+  //       component.filterChanged = false;
 
-        component.setCommentFilter(null);
-      });
+  //       component.setCommentFilter(null);
+  //     });
 
-      it('sets commentCodeFilters to empty array', () => {
-        expect(component.commentCodeFilters).toEqual([]);
-      });
+  //     it('sets commentCodeFilters to empty array', () => {
+  //       expect(component.commentCodeFilters).toEqual([]);
+  //     });
 
-      it('sets filterChanged to true', () => {
-        expect(component.filterChanged).toEqual(true);
-      });
-    });
+  //     it('sets filterChanged to true', () => {
+  //       expect(component.filterChanged).toEqual(true);
+  //     });
+  //   });
 
-    describe('commentCode is empty string', () => {
-      beforeEach(() => {
-        component.commentCodeFilters = ['oldFilter'];
-        component.filterChanged = false;
+  //   describe('commentCode is empty string', () => {
+  //     beforeEach(() => {
+  //       component.commentCodeFilters = ['oldFilter'];
+  //       component.filterChanged = false;
 
-        component.setCommentFilter('');
-      });
+  //       component.setCommentFilter('');
+  //     });
 
-      it('sets commentCodeFilters to empty array', () => {
-        expect(component.commentCodeFilters).toEqual([]);
-      });
+  //     it('sets commentCodeFilters to empty array', () => {
+  //       expect(component.commentCodeFilters).toEqual([]);
+  //     });
 
-      it('sets filterChanged to true', () => {
-        expect(component.filterChanged).toEqual(true);
-      });
-    });
+  //     it('sets filterChanged to true', () => {
+  //       expect(component.filterChanged).toEqual(true);
+  //     });
+  //   });
 
-    describe('commentCode is valid', () => {
-      beforeEach(() => {
-        component.commentCodeFilters = ['oldFilter'];
-        component.filterChanged = false;
+  //   describe('commentCode is valid', () => {
+  //     beforeEach(() => {
+  //       component.commentCodeFilters = ['oldFilter'];
+  //       component.filterChanged = false;
 
-        component.setCommentFilter('newFilter');
-      });
+  //       component.setCommentFilter('newFilter');
+  //     });
 
-      it('sets commentCodeFilters to array containing new filter', () => {
-        expect(component.commentCodeFilters).toEqual(['newFilter']);
-      });
+  //     it('sets commentCodeFilters to array containing new filter', () => {
+  //       expect(component.commentCodeFilters).toEqual(['newFilter']);
+  //     });
 
-      it('sets filterChanged to true', () => {
-        expect(component.filterChanged).toEqual(true);
-      });
-    });
-  });
+  //     it('sets filterChanged to true', () => {
+  //       expect(component.filterChanged).toEqual(true);
+  //     });
+  //   });
+  // });
 
-  describe('applyCommentPeriodFilter', () => {
-    let component;
-    beforeEach(() => {
-      ({ component } = createComponent());
-    });
+  // describe('applyCommentPeriodFilter', () => {
+  //   let component;
+  //   beforeEach(() => {
+  //     ({ component } = createComponent());
+  //   });
 
-    const applications: Application[] = [
-      new Application({ _id: 1, meta: { cpStatusStringLong: CommentCodes.CLOSED.code } }),
-      new Application({ _id: 2, meta: { cpStatusStringLong: CommentCodes.NOT_STARTED.code } }),
-      new Application({ _id: 3, meta: { cpStatusStringLong: CommentCodes.NOT_OPEN.code } }),
-      new Application({ _id: 4, meta: { cpStatusStringLong: CommentCodes.OPEN.code } })
-    ];
+  //   const applications: Application[] = [
+  //     new Application({ _id: 1, meta: { cpStatusStringLong: CommentCodes.CLOSED.code } }),
+  //     new Application({ _id: 2, meta: { cpStatusStringLong: CommentCodes.NOT_STARTED.code } }),
+  //     new Application({ _id: 3, meta: { cpStatusStringLong: CommentCodes.NOT_OPEN.code } }),
+  //     new Application({ _id: 4, meta: { cpStatusStringLong: CommentCodes.OPEN.code } })
+  //   ];
 
-    it('returns original applications array if array is undefined', () => {
-      component.commentCodeFilters = [CommentCodes.CLOSED.code];
+  //   it('returns original applications array if array is undefined', () => {
+  //     component.commentCodeFilters = [CommentCodes.CLOSED.code];
 
-      const filteredApplications = component.applyCommentPeriodFilter(undefined);
-      expect(filteredApplications).toEqual(undefined);
-    });
+  //     const filteredApplications = component.applyCommentPeriodFilter(undefined);
+  //     expect(filteredApplications).toEqual(undefined);
+  //   });
 
-    it('returns original applications array if array is null', () => {
-      component.commentCodeFilters = [CommentCodes.CLOSED.code];
+  //   it('returns original applications array if array is null', () => {
+  //     component.commentCodeFilters = [CommentCodes.CLOSED.code];
 
-      const filteredApplications = component.applyCommentPeriodFilter(null);
-      expect(filteredApplications).toEqual(null);
-    });
+  //     const filteredApplications = component.applyCommentPeriodFilter(null);
+  //     expect(filteredApplications).toEqual(null);
+  //   });
 
-    it('returns original applications array if commentCodeFilters is undefined', () => {
-      component.commentCodeFilters = undefined;
+  //   it('returns original applications array if commentCodeFilters is undefined', () => {
+  //     component.commentCodeFilters = undefined;
 
-      const filteredApplications = component.applyCommentPeriodFilter(applications);
-      expect(filteredApplications).toEqual(applications);
-    });
+  //     const filteredApplications = component.applyCommentPeriodFilter(applications);
+  //     expect(filteredApplications).toEqual(applications);
+  //   });
 
-    it('returns original applications array if commentCodeFilters is null', () => {
-      component.commentCodeFilters = null;
+  //   it('returns original applications array if commentCodeFilters is null', () => {
+  //     component.commentCodeFilters = null;
 
-      const filteredApplications = component.applyCommentPeriodFilter(applications);
-      expect(filteredApplications).toEqual(applications);
-    });
+  //     const filteredApplications = component.applyCommentPeriodFilter(applications);
+  //     expect(filteredApplications).toEqual(applications);
+  //   });
 
-    it('returns original applications array if commentCodeFilters is empty', () => {
-      component.commentCodeFilters = [];
+  //   it('returns original applications array if commentCodeFilters is empty', () => {
+  //     component.commentCodeFilters = [];
 
-      const filteredApplications = component.applyCommentPeriodFilter(applications);
-      expect(filteredApplications).toEqual(applications);
-    });
+  //     const filteredApplications = component.applyCommentPeriodFilter(applications);
+  //     expect(filteredApplications).toEqual(applications);
+  //   });
 
-    it('filters out applications that are missing the cpStatusStringLong field', () => {
-      component.commentCodeFilters = [CommentCodes.NOT_STARTED.code];
+  //   it('filters out applications that are missing the cpStatusStringLong field', () => {
+  //     component.commentCodeFilters = [CommentCodes.NOT_STARTED.code];
 
-      const applicationsMissingCPStatus = [
-        new Application({ _id: 1 }),
-        new Application({ _id: 2, meta: { cpStatusStringLong: CommentCodes.NOT_STARTED.code } }),
-        new Application({ _id: 3 })
-      ];
+  //     const applicationsMissingCPStatus = [
+  //       new Application({ _id: 1 }),
+  //       new Application({ _id: 2, meta: { cpStatusStringLong: CommentCodes.NOT_STARTED.code } }),
+  //       new Application({ _id: 3 })
+  //     ];
 
-      const filteredApplications = component.applyCommentPeriodFilter(applicationsMissingCPStatus);
-      expect(filteredApplications).toEqual([
-        new Application({ _id: 2, meta: { cpStatusStringLong: CommentCodes.NOT_STARTED.code } })
-      ]);
-    });
+  //     const filteredApplications = component.applyCommentPeriodFilter(applicationsMissingCPStatus);
+  //     expect(filteredApplications).toEqual([
+  //       new Application({ _id: 2, meta: { cpStatusStringLong: CommentCodes.NOT_STARTED.code } })
+  //     ]);
+  //   });
 
-    it('filters out applications whose cpStatusStringLong does not match the commentCodeFilters', () => {
-      component.commentCodeFilters = [CommentCodes.CLOSED.code];
+  //   it('filters out applications whose cpStatusStringLong does not match the commentCodeFilters', () => {
+  //     component.commentCodeFilters = [CommentCodes.CLOSED.code];
 
-      const filteredApplications = component.applyCommentPeriodFilter(applications);
-      expect(filteredApplications).toEqual([
-        new Application({ _id: 1, meta: { cpStatusStringLong: CommentCodes.CLOSED.code } })
-      ]);
-    });
+  //     const filteredApplications = component.applyCommentPeriodFilter(applications);
+  //     expect(filteredApplications).toEqual([
+  //       new Application({ _id: 1, meta: { cpStatusStringLong: CommentCodes.CLOSED.code } })
+  //     ]);
+  //   });
 
-    it('filters out applications whose cpStatusStringLong does not match the commentCodeFilters', () => {
-      component.commentCodeFilters = [CommentCodes.CLOSED.code, CommentCodes.OPEN.code];
+  //   it('filters out applications whose cpStatusStringLong does not match the commentCodeFilters', () => {
+  //     component.commentCodeFilters = [CommentCodes.CLOSED.code, CommentCodes.OPEN.code];
 
-      const filteredApplications = component.applyCommentPeriodFilter(applications);
-      expect(filteredApplications).toEqual([
-        new Application({ _id: 1, meta: { cpStatusStringLong: CommentCodes.CLOSED.code } }),
-        new Application({ _id: 4, meta: { cpStatusStringLong: CommentCodes.OPEN.code } })
-      ]);
-    });
-  });
+  //     const filteredApplications = component.applyCommentPeriodFilter(applications);
+  //     expect(filteredApplications).toEqual([
+  //       new Application({ _id: 1, meta: { cpStatusStringLong: CommentCodes.CLOSED.code } }),
+  //       new Application({ _id: 4, meta: { cpStatusStringLong: CommentCodes.OPEN.code } })
+  //     ]);
+  //   });
+  // });
 
   describe('sort', () => {
     let component;
@@ -803,17 +808,17 @@ describe('ListComponent', () => {
       expect(component.sorting.column).toEqual('columnA');
       expect(component.sorting.direction).toEqual(1);
 
-      component.sort('columnB');
-      expect(component.sorting.column).toEqual('columnB');
+      component.sort('columnA');
+      expect(component.sorting.column).toEqual('columnA');
       expect(component.sorting.direction).toEqual(-1);
 
-      component.sort('columnC');
-      expect(component.sorting.column).toEqual('columnC');
+      component.sort('columnA');
+      expect(component.sorting.column).toEqual('columnA');
       expect(component.sorting.direction).toEqual(1);
 
       component.sort('columnD');
       expect(component.sorting.column).toEqual('columnD');
-      expect(component.sorting.direction).toEqual(-1);
+      expect(component.sorting.direction).toEqual(1);
     });
   });
 

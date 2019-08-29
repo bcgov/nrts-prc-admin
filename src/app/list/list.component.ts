@@ -236,7 +236,8 @@ export class ListComponent implements OnInit, OnDestroy {
     this.pagination.currentPage = +this.paramMap.get('page') || 1;
 
     this.sorting.column = (this.paramMap.get('sortBy') && this.paramMap.get('sortBy').slice(1)) || null;
-    this.sorting.direction = this.paramMap.get('sortBy') && this.paramMap.get('sortBy').charAt(0) === '-' ? -1 : 1 || 0;
+    this.sorting.direction =
+      (this.paramMap.get('sortBy') && (this.paramMap.get('sortBy').charAt(0) === '-' ? -1 : 1)) || 0;
 
     this.purposeCodeFilters = (this.paramMap.get('purpose') && this.paramMap.get('purpose').split('|')) || [];
     this.regionCodeFilter = this.paramMap.get('region') || '';
