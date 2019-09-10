@@ -49,6 +49,7 @@ export class ListComponent implements OnInit, OnDestroy {
   public purposeCodeFilters: string[] = [];
   public regionCodeFilter = '';
   public statusCodeFilters: string[] = [];
+  public applicantFilter = '';
   // public commentCodeFilters: string[] = [];
 
   // need to reset pagination when a filter is changed, as we can't be sure how many pages of results will exist.
@@ -242,6 +243,7 @@ export class ListComponent implements OnInit, OnDestroy {
     this.purposeCodeFilters = (this.paramMap.get('purpose') && this.paramMap.get('purpose').split('|')) || [];
     this.regionCodeFilter = this.paramMap.get('region') || '';
     this.statusCodeFilters = (this.paramMap.get('status') && this.paramMap.get('status').split('|')) || [];
+    this.applicantFilter = this.paramMap.get('applicant') || '';
     // this.commentCodeFilters = (this.paramMap.get('comment') && this.paramMap.get('comment').split('|')) || [];
   }
 
@@ -273,6 +275,10 @@ export class ListComponent implements OnInit, OnDestroy {
       businessUnit: {
         value: ConstantUtils.getCode(CodeType.REGION, this.regionCodeFilter),
         modifier: QueryParamModifier.Equal
+      },
+      client: {
+        value: this.applicantFilter,
+        modifier: QueryParamModifier.Text
       }
     };
 
@@ -370,6 +376,9 @@ export class ListComponent implements OnInit, OnDestroy {
     if (this.statusCodeFilters && this.statusCodeFilters.length) {
       params['status'] = this.convertArrayIntoPipeString(this.statusCodeFilters);
     }
+    if (this.applicantFilter) {
+      params['applicant'] = this.applicantFilter;
+    }
     // if (this.commentCodeFilters && this.commentCodeFilters.length) {
     //   params['comment'] = this.convertArrayIntoPipeString(this.commentCodeFilters);
     // }
@@ -393,6 +402,7 @@ export class ListComponent implements OnInit, OnDestroy {
     this.purposeCodeFilters = [];
     this.regionCodeFilter = '';
     this.statusCodeFilters = [];
+    this.applicantFilter = '';
     // this.commentCodeFilters = [];
 
     this.location.go(this.router.createUrlTree([], { relativeTo: this.route }).toString());
@@ -432,6 +442,12 @@ export class ListComponent implements OnInit, OnDestroy {
    */
   public setRegionFilter(regionCode: string): void {
     this.regionCodeFilter = regionCode || '';
+    this.filterChanged = true;
+    this.saveQueryParameters();
+  }
+
+  public setApplicantFilter(applicantString: string): void {
+    this.applicantFilter = applicantString || '';
     this.filterChanged = true;
     this.saveQueryParameters();
   }

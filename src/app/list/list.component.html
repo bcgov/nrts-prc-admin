@@ -7,13 +7,13 @@
       <div class="filter-grid">
         <div>
           <select class="form-control filter-select" (change)="setRegionFilter($event.target.value)"
-            [disabled]="searching || exporting" title="Filter by region">
+            [disabled]="searching || exporting" title="Filter by Region">
             <option value="">Filter by Region</option>
             <option *ngFor="let regionCode of regionCodes" [value]="regionCode.param"
               [selected]="regionCodeFilter === regionCode.param">{{regionCode.text.long}}</option>
           </select>
           <select class="form-control filter-select" (change)="setPurposeFilter($event.target.value)"
-            [disabled]="searching || exporting" title="Filter by purpose">
+            [disabled]="searching || exporting" title="Filter by Purpose">
             <option value="">Filter by Purpose</option>
             <option *ngFor="let purposeCode of purposeCodes" [value]="purposeCode.param"
               [selected]="purposeCodeFilters[0] === purposeCode.param">{{purposeCode.text.long}}</option>
@@ -23,11 +23,14 @@
 
         <div>
           <select class="form-control filter-select" (change)="setStatusFilter($event.target.value)"
-            [disabled]="searching || exporting" title="Filter by status">
+            [disabled]="searching || exporting" title="Filter by Status">
             <option value="">Filter by Status</option>
             <option *ngFor="let statusCode of statusCodes" [value]="statusCode.param"
               [selected]="statusCodeFilters[0] === statusCode.param">{{statusCode.text.long}}</option>
           </select>
+          <input class="form-control filter-input" (change)="setApplicantFilter($event.target.value)"
+            [value]="applicantFilter" [disabled]="searching || exporting" placeholder="Filter by Applicant"
+            title="Filter by Applicant">
           <!-- <select class="form-control filter-select" (change)="setCommentFilter($event.target.value)"
             [disabled]="searching || exporting" title="Filter by comment period">
             <option value="">Filter by Comment Period</option>
@@ -101,27 +104,27 @@
             <th class="sortable" (click)="sort('client')">Applicant(s)
               <i class="sort"
                 [ngClass]="{'sort-asc': (sorting.column == 'client' && sorting.direction < 0), 'sort-desc': (sorting.column == 'client' && sorting.direction > 0) }"
-                aria-hidden="true"></i>
+                aria-hidden="true" title="Sort by applicant"></i>
             </th>
             <th class="sortable" (click)="sort('cl_file')">CL File
               <i class="sort"
                 [ngClass]="{'sort-asc': (sorting.column == 'cl_file' && sorting.direction < 0), 'sort-desc': (sorting.column == 'cl_file' && sorting.direction > 0) }"
-                aria-hidden="true"></i>
+                aria-hidden="true" title="Sort by cl file"></i>
             </th>
             <th class="sortable" (click)="sort('businessUnit')">Region
               <i class="sort"
                 [ngClass]="{'sort-asc': (sorting.column == 'businessUnit' && sorting.direction < 0), 'sort-desc': (sorting.column == 'businessUnit' && sorting.direction > 0) }"
-                aria-hidden="true"></i>
+                aria-hidden="true" title="Sort by region"></i>
             </th>
             <th class="sortable" (click)="sort('createdDate')">Created
               <i class="sort"
                 [ngClass]="{'sort-asc': (sorting.column == 'createdDate' && sorting.direction < 0), 'sort-desc': (sorting.column == 'createdDate' && sorting.direction > 0) }"
-                aria-hidden="true"></i>
+                aria-hidden="true" title="Sort by created date"></i>
             </th>
             <th class="sortable" (click)="sort('purpose')">Purpose / Subpurpose
               <i class="sort"
                 [ngClass]="{'sort-asc': (sorting.column == 'purpose' && sorting.direction < 0), 'sort-desc': (sorting.column == 'purpose' && sorting.direction > 0) }"
-                aria-hidden="true"></i>
+                aria-hidden="true" title="Sort by purpose"></i>
             </th>
             <th>Status</th>
             <th>Retired</th>
@@ -138,7 +141,7 @@
               </td>
               <td data-label="CL File">
                 <span>
-                  <a [routerLink]="['/a', app._id]">{{app.meta.clFile || '-'}}</a>
+                  <a [routerLink]="['/a', app._id]" title="View application details">{{app.meta.clFile || '-'}}</a>
                 </span>
               </td>
               <td data-label="Region">

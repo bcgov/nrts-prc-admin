@@ -22,10 +22,11 @@ import { User } from 'app/models/user';
  * @enum {number}
  */
 export enum QueryParamModifier {
-  Equal = 'eq', // value must be equal to this, if multiple value must match at least one
-  Not_Equal = 'ne', // value must not be equal to this, if multiple value must not match any
+  Equal = 'eq', // value must be equal to this, for multiple values must match at least one
+  Not_Equal = 'ne', // value must not be equal to this, for multiple values must not match any
   Since = 'since', // date must be on or after this date
-  Until = 'until' // date must be before this date
+  Until = 'until', // date must be before this date
+  Text = 'text' // value must exist in any text indexed fields.
 }
 
 /**
@@ -219,7 +220,7 @@ export class ApiService {
   /**
    * Fetch all applications that match the provided parameters.
    *
-   * @param {IApplicationQueryParamSet} [queryParams=null]
+   * @param {IApplicationQueryParamSet} [queryParams=null] optional query parameters to filter results
    * @returns {Observable<Application[]>}
    * @memberof ApiService
    */
@@ -825,7 +826,7 @@ export class ApiService {
     }
 
     if (params.client && params.client.value) {
-      queryString += `client=${encodeURIComponent(params.client.value)}&`;
+      queryString += `client[${params.client.modifier}]=${encodeURIComponent(params.client.value)}&`;
     }
 
     if (params.tenureStage && params.tenureStage.value) {

@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule /*, HttpTestingController*/ } from '@angular/common/http/testing';
-import { ApiService, IApplicationParameters } from './api';
+import { ApiService, IApplicationQueryParamSet, QueryParamModifier } from './api';
 
 describe('ApiService', () => {
   // let httpMock: HttpTestingController;
@@ -57,27 +57,28 @@ describe('ApiService', () => {
     });
 
     it('given all query params', () => {
-      const queryParams: IApplicationParameters = {
+      const queryParams: IApplicationQueryParamSet = {
         pageNum: 0,
         pageSize: 30,
-        cpStart: new Date('2019-01-01'),
-        cpEnd: new Date('2019-02-02'),
-        tantalisID: 123,
-        cl_file: 321,
-        purpose: ['PURPOSE'],
-        subpurpose: ['SUBPURPOSE'],
-        status: ['STATUS'],
-        reason: ['REGION'],
-        subtype: 'SUBTYPE',
-        agency: 'AGENCY',
-        businessUnit: 'BUSINESSUNIT',
-        client: 'CLIENT',
-        tenureStage: 'TENURESTAGE',
-        areaHectares: '123.123',
-        statusHistoryEffectiveDate: new Date('2019-03-03'),
-        centroid: '[[[123, 123]]]',
-        publishDate: new Date('2019-04-04'),
-        isDeleted: false
+        sortBy: 'status',
+        isDeleted: false,
+        cpStart: { value: new Date('2019-01-01') },
+        cpEnd: { value: new Date('2019-02-02') },
+        tantalisID: { value: 123 },
+        cl_file: { value: 321 },
+        purpose: { value: ['PURPOSE'] },
+        subpurpose: { value: ['SUBPURPOSE'] },
+        status: { value: ['STATUS'] },
+        reason: { value: ['REGION'], modifier: QueryParamModifier.Not_Equal },
+        subtype: { value: 'SUBTYPE' },
+        agency: { value: 'AGENCY' },
+        businessUnit: { value: 'BUSINESSUNIT' },
+        client: { value: 'CLIENT' },
+        tenureStage: { value: 'TENURESTAGE' },
+        areaHectares: { value: '123.123' },
+        statusHistoryEffectiveDate: { value: new Date('2019-03-03') },
+        centroid: { value: '[[[123, 123]]]' },
+        publishDate: { value: new Date('2019-04-04') }
       };
 
       const result = service.buildApplicationQueryParametersString(queryParams);
@@ -85,6 +86,8 @@ describe('ApiService', () => {
       const expectedResult =
         'pageNum=0&' +
         'pageSize=30&' +
+        'sortBy=status' +
+        'isDeleted=false' +
         `cpStart=${new Date('2019-01-01').toISOString()}` +
         `&cpEnd=${new Date('2019-02-02').toISOString()}` +
         '&tantalisID=123' +
@@ -92,7 +95,7 @@ describe('ApiService', () => {
         'purpose[eq]=PURPOSE&' +
         'subpurpose[eq]=SUBPURPOSE' +
         '&status[eq]=STATUS&' +
-        'reason[eq]=REGION&' +
+        'reason[ne]=REGION&' +
         'subtype=SUBTYPE&' +
         'agency=AGENCY&' +
         'businessUnit[eq]=BUSINESSUNIT&' +
@@ -101,8 +104,7 @@ describe('ApiService', () => {
         'areaHectares=123.123&' +
         `statusHistoryEffectiveDate=${new Date('2019-03-03').toISOString()}` +
         '&centroid=[[[123, 123]]]&' +
-        `publishDate=${new Date('2019-04-04').toISOString()}&` +
-        'isDeleted=false';
+        `publishDate=${new Date('2019-04-04').toISOString()}`;
 
       expect(result).toEqual(expectedResult);
     });

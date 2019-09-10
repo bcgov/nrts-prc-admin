@@ -17,8 +17,15 @@
   grid-column-gap: 2rem;
   margin-top: 2rem;
 
-  .filter-select {
+  .filter-select,
+  .filter-input {
     margin-bottom: 1rem;
+  }
+
+  .filter-input {
+    @include placeholder {
+      color: $gray7;
+    }
   }
 
   .filter-buttons {
@@ -91,7 +98,7 @@
 
 select {
   option:first-child {
-    color: $gray5;
+    color: $gray6;
   }
 }
 

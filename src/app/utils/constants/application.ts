@@ -3,6 +3,10 @@ import { ICodeSet, ICodeGroup } from './interfaces';
 /**
  * Application Status codes.
  *
+ * Note: the code only exists in ACRFD, while the mapped codes are the actual Tantalis status codes and should be used
+ *       when making calls to the Tantalis API.
+ *
+ *
  * @export
  * @class StatusCodes
  * @implements {ICodeSet}
@@ -78,6 +82,7 @@ export class StatusCodes implements ICodeSet {
  * Application Reason codes.
  *
  * Note:
+ *  - the code is the actual Tantalis reason code.
  *  - the reason code indicates additional information about the status code.
  *  - the reason codes don't have unique text, instead they use the same text as their Status
  *    counterpart: (Decision_Approved and Decision_Not_Approved).
@@ -110,6 +115,8 @@ export class ReasonCodes implements ICodeSet {
 
 /**
  * Application Region codes.
+ *
+ * Note: the code is the actual Tantalis businessUnit code.
  *
  * @export
  * @class RegionCodes
@@ -191,7 +198,8 @@ export class RegionCodes implements ICodeSet {
 /**
  * Application Purpose codes.
  *
- * Note: the mappedCodes are the subPurpose codes that belong to this parent code.
+ * Note: the code is the actual Tantalis purpose code, while the mappedCodes are the subPurpose codes that belong to
+ *       this parent code.
  *
  * @export
  * @class PurposeCodes
@@ -562,6 +570,8 @@ export class PurposeCodes implements ICodeSet {
 
 /**
  * Application Land Use Type codes.
+ *
+ * Note: these codes are currently not used in ACRFD.
  *
  * @export
  * @class LandUseTypeCodes

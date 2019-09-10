@@ -193,6 +193,28 @@ export class ApplicationService {
     );
   }
 
+  // /**
+  //  * Search by applications auto-complete.
+  //  *
+  //  * @param {string} appId
+  //  * @param {IGetParameters} [params=null]
+  //  * @returns {Observable<Application>}
+  //  * @memberof ApplicationService
+  //  */
+  // getByApplicant(searchString: string): Observable<string[]> {
+  //   const queryParams: IApplicationQueryParamSet = {
+  //     client: { value: searchString, modifier: QueryParamModifier.Text }
+  //   };
+  //   this.api.getApplications(queryParams, ['applicant']).pipe(
+  //     mergeMap(apps => {
+  //       if (!apps || apps.length === 0) {
+  //         return of(null as Application);
+  //       }
+  //     }),
+  //     catchError(error => this.api.handleError(error))
+  //   );
+  // }
+
   /**
    * Fetches comment data.
    *
