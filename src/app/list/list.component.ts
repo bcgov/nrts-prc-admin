@@ -165,8 +165,7 @@ export class ListComponent implements OnInit, OnDestroy {
             { label: 'publish date', ...this.getExportDateFormatter('publishDate') },
             'purpose',
             'subpurpose',
-            'status',
-            'reason',
+            { label: 'status', ...this.getExportStatusFormatter('status', 'reason') },
             { label: 'last status update date', ...this.getExportDateFormatter('statusHistoryEffectiveDate') },
             'type',
             'subtype',
@@ -201,27 +200,52 @@ export class ListComponent implements OnInit, OnDestroy {
    *
    * Note: See www.npmjs.com/package/json2csv for details on what this function is supporting.
    *
-   * @param {string} property the object property for the date (not the date value itself). Can be the path to a nested
-   *                          date field: 'some.nested.date'
-   * @returns an object with the necessary functions to convert the specific row field into a formatted date string.
+   * @param {string} dateProperty the object property for the date (the key path, not the value). Can be the path to a
+   *                              nested date field: 'some.nested.date'
+   * @returns {object} an object with the necessary functions to convert the specific row field into a formatted date
+   *                   string.
    * @memberof ListComponent
    */
-  public getExportDateFormatter(property: string): object {
+  public getExportDateFormatter(dateProperty: string): object {
     return {
       value: row => {
-        const prop = _.get(row, property);
+        const dateProp = _.get(row, dateProperty);
 
-        if (!prop) {
+        if (!dateProp) {
           return null;
         }
 
-        const date = moment(prop);
+        const date = moment(dateProp);
 
         if (!date.isValid()) {
-          return prop;
+          return dateProp;
         }
 
         return date.format('YYYY-MM-DD');
+      }
+    };
+  }
+
+  /**
+   * Convenience method for converting an export Tantalis status code into its ACRFD status code.
+   *
+   * Note: See www.npmjs.com/package/json2csv for details on what this function is supporting.
+   *
+   * @param {string} statusProperty the object property for the status (the key path, not the value). Can be the path to
+   *                                a nested status field: 'some.nested.status'
+   * @param {string} reasonProperty the object property for the reason (the key path, not the value). Can be the path to
+   *                                a nested reason field: 'some.nested.reason'
+   * @returns {object} an object with the necessary functions to convert the specific Tantalis status code into its
+   *                   ACRFD status code.
+   * @memberof ListComponent
+   */
+  public getExportStatusFormatter(statusProperty: string, reasonProperty: string): object {
+    return {
+      value: row => {
+        const statusProp = _.get(row, statusProperty);
+        const reasonProp = _.get(row, reasonProperty);
+
+        return this.applicationService.getStatusStringLong(new Application({ status: statusProp, reason: reasonProp }));
       }
     };
   }
@@ -625,7 +649,7 @@ export class ListComponent implements OnInit, OnDestroy {
    *
    * @param {Application} application
    * @returns {boolean} true if the application has an abandoned status AND an amendment reason, false otherwise.
-   * @memberof ApplicationService
+   * @memberof ListComponent
    */
   isAmendment(application: Application): boolean {
     return !!(
@@ -641,7 +665,7 @@ export class ListComponent implements OnInit, OnDestroy {
    *
    * @param {Application} application
    * @returns {string}
-   * @memberof ApplicationService
+   * @memberof ListComponent
    */
   getStatusStringLong(application: Application): string {
     if (!application) {
