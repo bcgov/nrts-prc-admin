@@ -1,6 +1,6 @@
 {
   "*.ts": [
-    "ng lint base-app2 --fix --format=stylish",
+    "ng lint nrts-prc-admin --fix --format=stylish",
     "prettier --write --loglevel warn",
     "git add"
   ],

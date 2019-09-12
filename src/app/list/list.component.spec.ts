@@ -618,6 +618,81 @@ describe('ListComponent', () => {
     });
   });
 
+  describe('setApplicantFilter', () => {
+    let component;
+    beforeEach(() => {
+      ({ component } = createComponent());
+    });
+
+    describe('applicantCode is undefined', () => {
+      beforeEach(() => {
+        component.applicantFilter = 'oldFilter';
+        component.filterChanged = false;
+
+        component.setApplicantFilter(undefined);
+      });
+
+      it('sets applicantFilter to empty array', () => {
+        expect(component.applicantFilter).toEqual('');
+      });
+
+      it('sets filterChanged to true', () => {
+        expect(component.filterChanged).toEqual(true);
+      });
+    });
+
+    describe('applicantCode is null', () => {
+      beforeEach(() => {
+        component.applicantFilter = 'oldFilter';
+        component.filterChanged = false;
+
+        component.setApplicantFilter(null);
+      });
+
+      it('sets applicantFilter to empty string', () => {
+        expect(component.applicantFilter).toEqual('');
+      });
+
+      it('sets filterChanged to true', () => {
+        expect(component.filterChanged).toEqual(true);
+      });
+    });
+
+    describe('applicantCode is empty string', () => {
+      beforeEach(() => {
+        component.applicantFilter = 'oldFilter';
+        component.filterChanged = false;
+
+        component.setApplicantFilter('');
+      });
+
+      it('sets applicantFilter to empty string', () => {
+        expect(component.applicantFilter).toEqual('');
+      });
+
+      it('sets filterChanged to true', () => {
+        expect(component.filterChanged).toEqual(true);
+      });
+    });
+
+    describe('applicantCode is valid', () => {
+      beforeEach(() => {
+        component.applicantFilter = 'oldFilter';
+        component.filterChanged = false;
+
+        component.setApplicantFilter('newFilter');
+      });
+
+      it('sets applicantFilter to new filter', () => {
+        expect(component.applicantFilter).toEqual('newFilter');
+      });
+
+      it('sets filterChanged to true', () => {
+        expect(component.filterChanged).toEqual(true);
+      });
+    });
+  });
+
   // describe('setCommentFilter', () => {
   //   let component;
   //   beforeEach(() => {

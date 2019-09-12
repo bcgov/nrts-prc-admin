@@ -18,6 +18,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ActivatedRouteStub } from 'app/spec/helpers';
 import { InlineSVGModule } from 'ng-inline-svg';
 import { LinkifyPipe } from 'app/pipes/linkify.pipe';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('ApplicationDetailComponent', () => {
   let component: ApplicationDetailComponent;
@@ -25,34 +26,25 @@ describe('ApplicationDetailComponent', () => {
   const existingApplication = new Application();
   const validRouteData = { application: existingApplication };
 
+  const apiServiceSpy = jasmine.createSpyObj('ApiService', ['refreshApplication']);
+  const matSnackBarSpy = jasmine.createSpyObj('MatSnackBar', ['open']);
   const activatedRouteStub = new ActivatedRouteStub(validRouteData);
-  const routerSpy = {
-    navigate: jasmine.createSpy('navigate')
-  };
-
-  const applicationServiceStub = {
-    getRegionString() {
-      return 'Skeena, Smithers';
-    },
-
-    getRegionCode() {
-      return 'SK';
-    }
-  };
+  const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
+  const applicationServiceSpy = jasmine.createSpyObj('ApplicationService', ['getStatusStringLong']);
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [ApplicationDetailComponent, NewlinesPipe, LinkifyPipe, ApplicationAsideComponent],
-      imports: [RouterTestingModule, NgbModule, InlineSVGModule],
+      imports: [RouterTestingModule, HttpClientTestingModule, NgbModule, InlineSVGModule],
       providers: [
-        { provide: MatSnackBar },
-        { provide: ApiService },
-        { provide: DialogService },
-        { provide: ApplicationService, useValue: applicationServiceStub },
-        { provide: CommentPeriodService },
-        { provide: DecisionService },
-        { provide: DocumentService },
-        { provide: FeatureService },
+        { provide: MatSnackBar, useValue: matSnackBarSpy },
+        { provide: ApiService, useValue: apiServiceSpy },
+        DialogService,
+        { provide: ApplicationService, useValue: applicationServiceSpy },
+        CommentPeriodService,
+        DecisionService,
+        DocumentService,
+        FeatureService,
         { provide: ActivatedRoute, useValue: activatedRouteStub },
         { provide: Router, useValue: routerSpy }
       ]
@@ -74,9 +66,9 @@ describe('ApplicationDetailComponent', () => {
       activatedRouteStub.setData(validRouteData);
     });
 
-    it('sets the component application to the one from the route', () => {
+    it('sets the component application to the one from the route', async(() => {
       expect(component.application).toEqual(existingApplication);
-    });
+    }));
   });
 
   describe('when the application is not available from the route', () => {
@@ -84,9 +76,9 @@ describe('ApplicationDetailComponent', () => {
       activatedRouteStub.setData({ something: 'went wrong' });
     });
 
-    it('redirects to /search', () => {
+    it('redirects to /search', async(() => {
       component.ngOnInit();
       expect(routerSpy.navigate).toHaveBeenCalledWith(['/search']);
-    });
+    }));
   });
 });

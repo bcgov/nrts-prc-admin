@@ -1,4 +1,4 @@
-import { TestBed, inject } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 
 import { AuthenticationService } from './authentication.service';
 
@@ -9,7 +9,8 @@ describe('AuthenticationService', () => {
     });
   });
 
-  it('should be created', inject([AuthenticationService], (service: AuthenticationService) => {
+  it('should be created', () => {
+    const service = TestBed.get(AuthenticationService);
     expect(service).toBeTruthy();
-  }));
+  });
 });

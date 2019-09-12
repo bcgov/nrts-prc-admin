@@ -1,4 +1,4 @@
-import { TestBed, inject } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { Observable, of } from 'rxjs';
 import * as moment from 'moment';
 
@@ -17,6 +17,7 @@ import { Decision } from 'app/models/decision';
 import { Application } from 'app/models/application';
 import { StatusCodes, ReasonCodes, RegionCodes } from 'app/utils/constants/application';
 import { CommentCodes } from 'app/utils/constants/comment';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('ApplicationService', () => {
   let service: any;
@@ -91,6 +92,7 @@ describe('ApplicationService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
       providers: [
         ApplicationService,
         { provide: ApiService, useValue: apiServiceStub },
@@ -105,9 +107,10 @@ describe('ApplicationService', () => {
     service = TestBed.get(ApplicationService);
   });
 
-  it('should be created', inject([ApplicationService], (appService: ApplicationService) => {
+  it('should be created', () => {
+    const appService = TestBed.get(ApplicationService);
     expect(appService).toBeTruthy();
-  }));
+  });
 
   describe('getAll()', () => {
     it('retrieves the applications from the api service', () => {

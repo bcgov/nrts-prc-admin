@@ -2,6 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { HeaderComponent } from './header.component';
 import { RouterTestingModule } from '@angular/router/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ApiService } from 'app/services/api';
 import { KeycloakService } from 'app/services/keycloak.service';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -10,7 +11,7 @@ describe('HeaderComponent', () => {
   let component: HeaderComponent;
   let fixture: ComponentFixture<HeaderComponent>;
 
-  const mockKeycloakService = {
+  const keycloakServiceStub = {
     isValidForSite: () => {
       return true;
     }
@@ -18,9 +19,9 @@ describe('HeaderComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      providers: [{ provide: ApiService }, { provide: KeycloakService, useValue: mockKeycloakService }],
+      providers: [ApiService, { provide: KeycloakService, useValue: keycloakServiceStub }],
       declarations: [HeaderComponent],
-      imports: [RouterTestingModule, BrowserAnimationsModule]
+      imports: [RouterTestingModule, HttpClientTestingModule, BrowserAnimationsModule]
     }).compileComponents();
   }));
 

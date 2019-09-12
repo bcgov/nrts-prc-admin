@@ -44,6 +44,7 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
   ngOnInit() {
     // get data from route resolver
     this.route.data.pipe(takeUntil(this.ngUnsubscribe)).subscribe((data: { application: Application }) => {
+      console.log(data);
       if (data.application) {
         this.application = data.application;
       } else {

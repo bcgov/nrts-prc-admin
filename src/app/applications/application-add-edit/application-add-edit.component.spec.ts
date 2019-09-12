@@ -12,6 +12,7 @@ import { ApplicationService } from 'app/services/application.service';
 import { CommentPeriodService } from 'app/services/commentperiod.service';
 import { DecisionService } from 'app/services/decision.service';
 import { DocumentService } from 'app/services/document.service';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 xdescribe('ApplicationAddEditComponent', () => {
   let component: ApplicationAddEditComponent;
@@ -19,16 +20,16 @@ xdescribe('ApplicationAddEditComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      imports: [FormsModule, NgbModule, RouterTestingModule],
+      imports: [FormsModule, NgbModule, HttpClientTestingModule, RouterTestingModule],
       declarations: [ApplicationAddEditComponent, FileUploadComponent],
       providers: [
-        { provide: DialogService },
-        { provide: MatSnackBar },
-        { provide: ApiService },
-        { provide: ApplicationService },
-        { provide: CommentPeriodService },
-        { provide: DecisionService },
-        { provide: DocumentService }
+        DialogService,
+        MatSnackBar,
+        ApiService,
+        ApplicationService,
+        CommentPeriodService,
+        DecisionService,
+        DocumentService
       ]
     }).compileComponents();
   }));
