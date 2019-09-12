@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { async, TestBed } from '@angular/core/testing';
 import { Component, Input, DebugElement } from '@angular/core';
 import { ReviewCommentsComponent } from './review-comments.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
@@ -14,8 +14,9 @@ import { CommentPeriod } from 'app/models/commentperiod';
 import { ActivatedRoute } from '@angular/router';
 import { ActivatedRouteStub } from 'app/spec/helpers';
 import { of, throwError } from 'rxjs';
-import { SearchComponent } from 'app/search/search.component';
 import { By } from '@angular/platform-browser';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { SearchComponent } from 'app/search/search.component';
 
 @Component({ selector: 'app-comment-detail', template: '' })
 class CommentDetailStubComponent {
@@ -23,8 +24,6 @@ class CommentDetailStubComponent {
 }
 
 describe('ReviewCommentsComponent', () => {
-  let component: ReviewCommentsComponent;
-  let fixture: ComponentFixture<ReviewCommentsComponent>;
   const commentPeriod = new CommentPeriod({ _id: 'COMMENT_PERIOD_ID' });
   const existingApplication = new Application({
     _id: 'APPLICATION_ID',
@@ -35,6 +34,7 @@ describe('ReviewCommentsComponent', () => {
   const validRouteData = { application: existingApplication };
 
   const activatedRouteStub = new ActivatedRouteStub(validRouteData);
+
   const firstComment = new Comment({
     _id: 'FIRST_COMMENT',
     name: 'Zebras are great'
@@ -44,52 +44,77 @@ describe('ReviewCommentsComponent', () => {
     name: 'Apples are tasty'
   });
   const comments = [firstComment, secondComment];
-  let sortSelector: HTMLSelectElement;
 
   const commentServiceStub = {
     getCountByPeriodId() {
       return of(20);
     },
-
     getAllByApplicationId() {
       return of(comments);
     }
   };
 
+  let sortSelector: HTMLSelectElement;
+
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [
         NgbModule,
+        HttpClientTestingModule,
         RouterTestingModule.withRoutes([{ path: 'search', component: SearchComponent }]),
         FormsModule
       ],
       declarations: [ReviewCommentsComponent, NewlinesPipe, CommentDetailStubComponent, SearchComponent],
       providers: [
         { provide: CommentService, useValue: commentServiceStub },
-        { provide: ExportService },
-        { provide: ApiService },
+        ExportService,
+        ApiService,
         { provide: ActivatedRoute, useValue: activatedRouteStub }
       ]
     }).compileComponents();
   }));
 
-  beforeEach(() => {
-    fixture = TestBed.createComponent(ReviewCommentsComponent);
-    component = fixture.componentInstance;
-    sortSelector = fixture.nativeElement.querySelector('.sort-comments');
-    fixture.detectChanges();
-  });
+  /**
+   * Initializes the component and fixture.
+   *
+   * - In most cases, this will be called in the beforeEach.
+   * - In tests that require custom mock behaviour, set up the mock behaviour before calling this.
+   *
+   * @param {boolean} [detectChanges=true] set to false if you want to manually call fixture.detectChanges(), etc.
+   *   Usually you want to control this when the timing of ngOnInit, and similar auto-exec functions, matters.
+   * @returns {{component, fixture}} Object containing the component and test fixture.
+   */
+  function createComponent(detectChanges: boolean = true) {
+    const fixture = TestBed.createComponent(ReviewCommentsComponent);
+    const component = fixture.componentInstance;
 
-  it('should create', () => {
+    if (detectChanges) {
+      fixture.detectChanges();
+    }
+
+    return { component, fixture };
+  }
+
+  it('should be created', () => {
+    const { component } = createComponent();
+
     expect(component).toBeTruthy();
   });
 
   describe('when the application is retrievable from the route', () => {
+    let component;
+    let fixture;
+
     let commentService;
 
     beforeEach(() => {
-      activatedRouteStub.setData(validRouteData);
+      const activatedRouteMock = TestBed.get(ActivatedRoute);
+      activatedRouteMock.setData(validRouteData);
       commentService = TestBed.get(CommentService);
+
+      ({ component, fixture } = createComponent());
+
+      sortSelector = fixture.nativeElement.querySelector('.sort-comments');
     });
 
     it('sets the component application to the one from the route', () => {
@@ -256,16 +281,22 @@ describe('ReviewCommentsComponent', () => {
   });
 
   describe('when the application is not available from the route', () => {
+    let component;
+    let fixture;
+
     beforeEach(() => {
-      activatedRouteStub.setData({ something: 'went wrong' });
+      const activatedRouteMock = TestBed.get(ActivatedRoute);
+      activatedRouteMock.setData({ something: 'went wrong' });
+
+      ({ component, fixture } = createComponent(false));
     });
 
-    it('redirects to /search', () => {
-      const navigateSpy = spyOn((component as any).router, 'navigate');
+    it('redirects to /search', async(() => {
+      const navigateSpy = spyOn((component as any).router, 'navigate').and.stub();
 
-      component.ngOnInit();
+      fixture.detectChanges();
 
       expect(navigateSpy).toHaveBeenCalledWith(['/search']);
-    });
+    }));
   });
 });

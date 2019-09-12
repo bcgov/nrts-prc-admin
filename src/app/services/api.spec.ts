@@ -73,7 +73,7 @@ describe('ApiService', () => {
         subtype: { value: 'SUBTYPE' },
         agency: { value: 'AGENCY' },
         businessUnit: { value: 'BUSINESSUNIT' },
-        client: { value: 'CLIENT' },
+        client: { value: 'CLIENT', modifier: QueryParamModifier.Text },
         tenureStage: { value: 'TENURESTAGE' },
         areaHectares: { value: '123.123' },
         statusHistoryEffectiveDate: { value: new Date('2019-03-03') },
@@ -84,26 +84,26 @@ describe('ApiService', () => {
       const result = service.buildApplicationQueryParametersString(queryParams);
 
       const expectedResult =
+        'isDeleted=false&' +
+        'sortBy=status&' +
         'pageNum=0&' +
         'pageSize=30&' +
-        'sortBy=status' +
-        'isDeleted=false' +
-        `cpStart=${new Date('2019-01-01').toISOString()}` +
-        `&cpEnd=${new Date('2019-02-02').toISOString()}` +
-        '&tantalisID=123' +
-        '&cl_file=321&' +
+        `cpStart=${new Date('2019-01-01').toISOString()}&` +
+        `cpEnd=${new Date('2019-02-02').toISOString()}&` +
+        'tantalisID=123&' +
+        'cl_file=321&' +
         'purpose[eq]=PURPOSE&' +
-        'subpurpose[eq]=SUBPURPOSE' +
-        '&status[eq]=STATUS&' +
+        'subpurpose[eq]=SUBPURPOSE&' +
+        'status[eq]=STATUS&' +
         'reason[ne]=REGION&' +
         'subtype=SUBTYPE&' +
         'agency=AGENCY&' +
         'businessUnit[eq]=BUSINESSUNIT&' +
-        'client=CLIENT&' +
+        'client[text]=CLIENT&' +
         'tenureStage=TENURESTAGE&' +
         'areaHectares=123.123&' +
-        `statusHistoryEffectiveDate=${new Date('2019-03-03').toISOString()}` +
-        '&centroid=[[[123, 123]]]&' +
+        `statusHistoryEffectiveDate=${new Date('2019-03-03').toISOString()}&` +
+        'centroid=[[[123, 123]]]&' +
         `publishDate=${new Date('2019-04-04').toISOString()}`;
 
       expect(result).toEqual(expectedResult);

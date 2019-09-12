@@ -17,7 +17,7 @@ describe('UsersComponent', () => {
     TestBed.configureTestingModule({
       declarations: [UsersComponent],
       imports: [NgbModule],
-      providers: [{ provide: DialogService }, { provide: UserService, useValue: mockUserService }]
+      providers: [DialogService, { provide: UserService, useValue: mockUserService }]
     }).compileComponents();
   }));
 

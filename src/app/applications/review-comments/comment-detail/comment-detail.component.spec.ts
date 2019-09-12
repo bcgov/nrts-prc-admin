@@ -5,6 +5,7 @@ import { ApiService } from 'app/services/api';
 import { CommentDetailComponent } from './comment-detail.component';
 import { CommentService } from 'app/services/comment.service';
 import { DocumentService } from 'app/services/document.service';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('CommentDetailComponent', () => {
   let component: CommentDetailComponent;
@@ -12,8 +13,9 @@ describe('CommentDetailComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
       declarations: [CommentDetailComponent, NewlinesPipe],
-      providers: [{ provide: ApiService }, { provide: CommentService }, { provide: DocumentService }]
+      providers: [ApiService, CommentService, DocumentService]
     }).compileComponents();
   }));
 

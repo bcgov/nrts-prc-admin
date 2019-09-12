@@ -6,6 +6,7 @@ import { DocumentService } from 'app/services/document.service';
 import { CommentPeriodService } from 'app/services/commentperiod.service';
 import { Comment } from 'app/models/comment';
 import { CommentPeriod } from 'app/models/commentperiod';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('CommentService', () => {
   let service;
@@ -14,12 +15,8 @@ describe('CommentService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [
-        CommentService,
-        { provide: ApiService },
-        { provide: DocumentService },
-        { provide: CommentPeriodService }
-      ]
+      imports: [HttpClientTestingModule],
+      providers: [CommentService, ApiService, DocumentService, CommentPeriodService]
     });
 
     service = TestBed.get(CommentService);
