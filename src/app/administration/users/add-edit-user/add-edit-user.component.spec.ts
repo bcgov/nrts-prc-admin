@@ -9,11 +9,13 @@ describe('AddEditUserComponent', () => {
   let component: AddEditUserComponent;
   let fixture: ComponentFixture<AddEditUserComponent>;
 
+  const userServiceSpy = jasmine.createSpyObj('UserService', ['add', 'save']);
+
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [AddEditUserComponent],
       imports: [FormsModule],
-      providers: [{ provide: DialogService }, { provide: UserService }]
+      providers: [DialogService, { provide: UserService, useValue: userServiceSpy }]
     }).compileComponents();
   }));
 

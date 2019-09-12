@@ -1,16 +1,19 @@
-import { TestBed, inject } from '@angular/core/testing';
+import { async, TestBed } from '@angular/core/testing';
 
 import { ApplicationDetailResolver } from './application-resolver.service';
 import { ApplicationService } from 'app/services/application.service';
 
 describe('ApplicationDetailResolverService', () => {
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: [ApplicationDetailResolver, { provide: ApplicationService }]
-    });
-  });
+  const applicationServiceSpy = jasmine.createSpyObj('ApplicationService', ['getById']);
 
-  it('should be created', inject([ApplicationDetailResolver], (service: ApplicationDetailResolver) => {
-    expect(service).toBeTruthy();
+  beforeEach(async(() => {
+    TestBed.configureTestingModule({
+      providers: [ApplicationDetailResolver, { provide: ApplicationService, useValue: applicationServiceSpy }]
+    });
   }));
+
+  it('should be created', () => {
+    const service = TestBed.get(ApplicationDetailResolver);
+    expect(service).toBeTruthy();
+  });
 });

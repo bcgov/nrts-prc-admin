@@ -4,12 +4,14 @@ import { ApiService } from 'app/services/api';
 import { of, throwError } from 'rxjs';
 import { CommentPeriodService } from './commentperiod.service';
 import { CommentCodes } from 'app/utils/constants/comment';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('CommentPeriodService', () => {
   let service: CommentPeriodService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
       providers: [
         CommentPeriodService,
         {

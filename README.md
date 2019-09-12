@@ -137,6 +137,10 @@ npm run lint-fix
 
 [Jasmine](https://jasmine.github.io/), [Karma](https://karma-runner.github.io/latest/index.html), [Protractor](http://www.protractortest.org/)
 
+### Important Note
+
+When viewing test output in the browser, via localhost:9876, Firefox produces somewhat cryptic error output.  Chrome doesn't have this issue.
+
 ## Run Tests
 
 * Run the unit tests with `watch=true`
@@ -144,13 +148,15 @@ npm run lint-fix
 ```
 npm run tests
 ```
-* Run the unit tests with `watch=false`
+* Run the unit tests with `watch=false` and run the coverage report
+
+  View the coverage report at `./coverage/index.html`
 ```
 npm run tests-ci
 ```
 * Run the end-to-end tests
 
-  Before running the tests make sure you are serving the app via `ng serve`.
+  Before running the tests make sure you are serving the app via `ng serve`
 ```
 npm run e2e
 ```
