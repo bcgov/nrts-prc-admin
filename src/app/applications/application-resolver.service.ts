@@ -37,13 +37,13 @@ export class ApplicationDetailResolver implements Resolve<Application> {
 
       // 7-digit CL File number for display
       if (application.cl_file) {
-        application.clFile = application.cl_file.toString().padStart(7, '0');
+        application.meta.clFile = application.cl_file.toString().padStart(7, '0');
       }
 
       // derive unique applicants
       if (application.client) {
         const clients = application.client.split(', ');
-        application.applicants = _.uniq(clients).join(', ');
+        application.meta.applicants = _.uniq(clients).join(', ');
       }
 
       // derive retire date
@@ -55,12 +55,12 @@ export class ApplicationDetailResolver implements Resolve<Application> {
           StatusCodes.ABANDONED.code
         ].includes(ConstantUtils.getCode(CodeType.STATUS, application.status))
       ) {
-        application.retireDate = moment(application.statusHistoryEffectiveDate)
+        application.meta.retireDate = moment(application.statusHistoryEffectiveDate)
           .endOf('day')
           .add(6, 'months')
           .toDate();
         // set flag if retire date is in the past
-        application.isRetired = moment(application.retireDate).isBefore();
+        application.meta.isRetired = moment(application.meta.retireDate).isBefore();
       }
 
       return of(application);

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, of, forkJoin } from 'rxjs';
-import { map, flatMap, mergeMap, catchError } from 'rxjs/operators';
+import { map, mergeMap, catchError } from 'rxjs/operators';
 import * as _ from 'lodash';
 
 import { ApiService } from './api';
@@ -26,7 +26,7 @@ export class CommentService {
 
   // get count of comments for the specified comment period id
   getCountByPeriodId(periodId: string): Observable<number> {
-    return this.api.getCountCommentsByPeriodId(periodId).pipe(catchError(error => this.api.handleError(error)));
+    return this.api.getCountCommentsByCommentPeriodId(periodId).pipe(catchError(error => this.api.handleError(error)));
   }
 
   // get all comments for the specified application id
@@ -62,7 +62,7 @@ export class CommentService {
     params: IGetParameters = null
   ): Observable<Comment[]> {
     // first get just the comments
-    return this.api.getCommentsByPeriodId(periodId, pageNum, pageSize, sortBy).pipe(
+    return this.api.getCommentsByCommentPeriodId(periodId, pageNum, pageSize, sortBy).pipe(
       map(res => {
         if (res && res.length > 0) {
           const comments: Comment[] = [];
@@ -73,7 +73,7 @@ export class CommentService {
         }
         return [];
       }),
-      flatMap(comments => {
+      mergeMap(comments => {
         // now get the documents for each comment
         if (params && params.getDocuments) {
           const observables: Array<Observable<Comment>> = [];
@@ -103,7 +103,7 @@ export class CommentService {
   getById(commentId: string, params: IGetParameters = null): Observable<Comment> {
     // first get the comment data
     return this.api.getComment(commentId).pipe(
-      flatMap(comments => {
+      mergeMap(comments => {
         if (comments && comments.length > 0) {
           // return the first (only) comment
           const comment = new Comment(comments[0]);

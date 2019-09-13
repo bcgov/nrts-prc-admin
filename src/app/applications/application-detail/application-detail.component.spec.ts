@@ -16,6 +16,8 @@ import { FeatureService } from 'app/services/feature.service';
 import { Application } from 'app/models/application';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ActivatedRouteStub } from 'app/spec/helpers';
+import { InlineSVGModule } from 'ng-inline-svg';
+import { LinkifyPipe } from 'app/pipes/linkify.pipe';
 
 describe('ApplicationDetailComponent', () => {
   let component: ApplicationDetailComponent;
@@ -40,8 +42,8 @@ describe('ApplicationDetailComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ApplicationDetailComponent, NewlinesPipe, ApplicationAsideComponent],
-      imports: [RouterTestingModule, NgbModule],
+      declarations: [ApplicationDetailComponent, NewlinesPipe, LinkifyPipe, ApplicationAsideComponent],
+      imports: [RouterTestingModule, NgbModule, InlineSVGModule],
       providers: [
         { provide: MatSnackBar },
         { provide: ApiService },

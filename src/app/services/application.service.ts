@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
-import { Observable, of, forkJoin } from 'rxjs';
-import { flatMap, map, catchError } from 'rxjs/operators';
+import { Observable, of, combineLatest, forkJoin } from 'rxjs';
+import { mergeMap, map, catchError } from 'rxjs/operators';
 import * as moment from 'moment';
 import * as _ from 'lodash';
 
-import { ApiService } from './api';
+import { ApiService, IApplicationQueryParamSet } from './api';
 import { DocumentService } from './document.service';
 import { CommentPeriodService } from './commentperiod.service';
 import { CommentService } from './comment.service';
@@ -12,7 +12,6 @@ import { DecisionService } from './decision.service';
 import { FeatureService } from './feature.service';
 
 import { Application } from 'app/models/application';
-import { CommentPeriod } from 'app/models/commentperiod';
 
 import { StatusCodes, ReasonCodes } from 'app/utils/constants/application';
 import { ConstantUtils, CodeType } from 'app/utils/constants/constantUtils';
@@ -49,40 +48,76 @@ export class ApplicationService {
   /**
    * Get applications count.
    *
-   * @returns {Observable<number>}
+   * @param {IApplicationQueryParamSet} [queryParams={ isDeleted: false }]
    * @memberof ApplicationService
    */
-  getCount(): Observable<number> {
-    return this.api.getCountApplications().pipe(catchError(error => this.api.handleError(error)));
+  getCount(queryParamSets: IApplicationQueryParamSet[] = null): Observable<number> {
+    if (!queryParamSets || !queryParamSets.length) {
+      queryParamSets = [{ isDeleted: false }];
+    }
+
+    const observables: Array<Observable<number>> = queryParamSets.map(queryParamSet =>
+      this.api.getCountApplications(queryParamSet).pipe(catchError(this.api.handleError))
+    );
+
+    return combineLatest(observables, (...args: number[]) => args.reduce((sum, arg) => (sum += arg))).pipe(
+      catchError(this.api.handleError)
+    );
   }
 
   /**
    * Get all applications.
    *
-   * Note: currently returns at most 1000 records.
-   *
-   * @param {IGetParameters} [params=null]
+   * @param {IGetParameters} [dataParams=null]
+   * @param {IApplicationQueryParamSet[]} [queryParamSets=null]
    * @returns {Observable<Application[]>}
    * @memberof ApplicationService
    */
-  getAll(params: IGetParameters = null): Observable<Application[]> {
+  getAll(
+    dataParams: IGetParameters = null,
+    queryParamSets: IApplicationQueryParamSet[] = null
+  ): Observable<Application[]> {
     // first get just the applications
-    // NB: max 1000 records
-    return this.api.getApplications(0, 1000).pipe(
-      flatMap(apps => {
-        if (!apps || apps.length === 0) {
-          // NB: forkJoin([]) will complete immediately
-          // so return empty observable instead
+    // return this.api.getApplications(queryParamSets).pipe(
+    //   mergeMap(apps => {
+    //     if (!apps || apps.length === 0) {
+    //       // NB: forkJoin([]) will complete immediately
+    //       // so return empty observable instead
+    //       return of([] as Application[]);
+    //     }
+    //     const observables: Array<Observable<Application>> = [];
+    //     apps.forEach(app => {
+    //       // now get the rest of the data for each application
+    //       observables.push(this._getExtraAppData(new Application(app), dataParams || {}));
+    //     });
+    //     return forkJoin(observables);
+    //   }),
+    //   catchError(error => this.api.handleError(error))
+    // );
+
+    let observables: Array<Observable<Application[]>>;
+
+    if (queryParamSets) {
+      observables = queryParamSets.map(queryParamSet => this.api.getApplications(queryParamSet));
+    } else {
+      observables = [this.api.getApplications()];
+    }
+
+    return combineLatest(...observables).pipe(
+      mergeMap((res: Application[]) => {
+        const resApps = _.flatten(res);
+        if (!resApps || resApps.length === 0) {
           return of([] as Application[]);
         }
-        const observables: Array<Observable<Application>> = [];
-        apps.forEach(app => {
+
+        const dataObservables: Array<Observable<Application>> = [];
+        resApps.forEach(app => {
           // now get the rest of the data for each application
-          observables.push(this._getExtraAppData(new Application(app), params || {}));
+          dataObservables.push(this._getExtraAppData(new Application(app), dataParams || {}));
         });
-        return forkJoin(observables);
+        return forkJoin(dataObservables);
       }),
-      catchError(error => this.api.handleError(error))
+      catchError(this.api.handleError)
     );
   }
 
@@ -97,7 +132,7 @@ export class ApplicationService {
   getByCrownLandID(clid: string, params: IGetParameters = null): Observable<Application[]> {
     // first get just the applications
     return this.api.getApplicationsByCrownLandID(clid).pipe(
-      flatMap(apps => {
+      mergeMap(apps => {
         if (!apps || apps.length === 0) {
           // NB: forkJoin([]) will complete immediately
           // so return empty observable instead
@@ -125,7 +160,7 @@ export class ApplicationService {
   getByTantalisID(tantalisID: number, params: IGetParameters = null): Observable<Application> {
     // first get just the application
     return this.api.getApplicationByTantalisId(tantalisID).pipe(
-      flatMap(apps => {
+      mergeMap(apps => {
         if (!apps || apps.length === 0) {
           return of(null as Application);
         }
@@ -147,7 +182,7 @@ export class ApplicationService {
   getById(appId: string, params: IGetParameters = null): Observable<Application> {
     // first get just the application
     return this.api.getApplication(appId).pipe(
-      flatMap(apps => {
+      mergeMap(apps => {
         if (!apps || apps.length === 0) {
           return of(null as Application);
         }
@@ -155,6 +190,73 @@ export class ApplicationService {
         return this._getExtraAppData(new Application(apps[0]), params || {});
       }),
       catchError(error => this.api.handleError(error))
+    );
+  }
+
+  // /**
+  //  * Search by applications auto-complete.
+  //  *
+  //  * @param {string} appId
+  //  * @param {IGetParameters} [params=null]
+  //  * @returns {Observable<Application>}
+  //  * @memberof ApplicationService
+  //  */
+  // getByApplicant(searchString: string): Observable<string[]> {
+  //   const queryParams: IApplicationQueryParamSet = {
+  //     client: { value: searchString, modifier: QueryParamModifier.Text }
+  //   };
+  //   this.api.getApplications(queryParams, ['applicant']).pipe(
+  //     mergeMap(apps => {
+  //       if (!apps || apps.length === 0) {
+  //         return of(null as Application);
+  //       }
+  //     }),
+  //     catchError(error => this.api.handleError(error))
+  //   );
+  // }
+
+  /**
+   * Fetches comment data.
+   *
+   * @private
+   * @param {Application} application
+   * @returns
+   * @memberof ApplicationService
+   */
+  private _getExtraCommentData(application: Application) {
+    return this.commentPeriodService.getAllByApplicationId(application._id).pipe(
+      mergeMap(periods => {
+        application.meta.currentPeriod = this.commentPeriodService.getCurrent(periods);
+
+        // user-friendly comment period long status string
+        const commentPeriodCode = this.commentPeriodService.getCode(application.meta.currentPeriod);
+        application.meta.cpStatusStringLong = ConstantUtils.getTextLong(CodeType.COMMENT, commentPeriodCode);
+
+        // derive days remaining for display
+        // use moment to handle Daylight Saving Time changes
+        if (application.meta.currentPeriod && this.commentPeriodService.isOpen(commentPeriodCode)) {
+          const now = new Date();
+          const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+          application.meta.currentPeriod.meta.daysRemaining =
+            moment(application.meta.currentPeriod.endDate).diff(moment(today), 'days') + 1; // including today
+        }
+
+        // get the number of comments for the current comment period only
+        // multiple comment periods are currently not supported
+        if (!application.meta.currentPeriod) {
+          application.meta.numComments = 0;
+          return of(application);
+        }
+
+        return forkJoin(
+          this.commentService.getCountByPeriodId(application.meta.currentPeriod._id).pipe(
+            map(numComments => {
+              application.meta.numComments = numComments;
+              return of(application);
+            })
+          )
+        );
+      })
     );
   }
 
@@ -175,57 +277,31 @@ export class ApplicationService {
     return forkJoin(
       getFeatures ? this.featureService.getByApplicationId(application._id) : of(null),
       getDocuments ? this.documentService.getAllByApplicationId(application._id) : of(null),
-      getCurrentPeriod ? this.commentPeriodService.getAllByApplicationId(application._id) : of(null),
+      getCurrentPeriod ? this._getExtraCommentData(application) : of(null),
       getDecision ? this.decisionService.getByApplicationId(application._id, { getDocuments: true }) : of(null)
     ).pipe(
       map(payloads => {
         if (getFeatures) {
-          application.features = payloads[0];
+          application.meta.features = payloads[0];
         }
 
         if (getDocuments) {
-          application.documents = payloads[1];
-        }
-
-        if (getCurrentPeriod) {
-          const periods: CommentPeriod[] = payloads[2];
-          application.currentPeriod = this.commentPeriodService.getCurrent(periods);
-
-          // user-friendly comment period long status string
-          const commentPeriodCode = this.commentPeriodService.getCode(application.currentPeriod);
-          application.cpStatus = ConstantUtils.getTextLong(CodeType.COMMENT, commentPeriodCode);
-
-          // derive days remaining for display
-          // use moment to handle Daylight Saving Time changes
-          if (application.currentPeriod && this.commentPeriodService.isOpen(commentPeriodCode)) {
-            const now = new Date();
-            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-            application.currentPeriod['daysRemaining'] =
-              moment(application.currentPeriod.endDate).diff(moment(today), 'days') + 1; // including today
-          }
-
-          // get the number of comments for the current comment period only
-          // multiple comment periods are currently not supported
-          if (application.currentPeriod) {
-            this.commentService.getCountByPeriodId(application.currentPeriod._id).subscribe(numComments => {
-              application['numComments'] = numComments;
-            });
-          }
+          application.meta.documents = payloads[1];
         }
 
         if (getDecision) {
-          application.decision = payloads[3];
+          application.meta.decision = payloads[3];
         }
 
         // 7-digit CL File number for display
         if (application.cl_file) {
-          application.clFile = application.cl_file.toString().padStart(7, '0');
+          application.meta.clFile = application.cl_file.toString().padStart(7, '0');
         }
 
         // derive unique applicants
         if (application.client) {
           const clients = application.client.split(', ');
-          application.applicants = _.uniq(clients).join(', ');
+          application.meta.applicants = _.uniq(clients).join(', ');
         }
 
         // derive retire date
@@ -237,12 +313,12 @@ export class ApplicationService {
             StatusCodes.ABANDONED.code
           ].includes(ConstantUtils.getCode(CodeType.STATUS, application.status))
         ) {
-          application.retireDate = moment(application.statusHistoryEffectiveDate)
+          application.meta.retireDate = moment(application.statusHistoryEffectiveDate)
             .endOf('day')
             .add(6, 'months')
             .toDate();
           // set flag if retire date is in the past
-          application.isRetired = moment(application.retireDate).isBefore();
+          application.meta.isRetired = moment(application.meta.retireDate).isBefore();
         }
 
         // finally update the object and return
@@ -269,10 +345,10 @@ export class ApplicationService {
     delete app._id;
 
     // don't send attached data (features, documents, etc)
-    delete app.features;
-    delete app.documents;
-    delete app.currentPeriod;
-    delete app.decision;
+    delete app.meta.features;
+    delete app.meta.documents;
+    delete app.meta.currentPeriod;
+    delete app.meta.decision;
 
     // replace newlines with \\n (JSON format)
     if (app.description) {
@@ -297,10 +373,10 @@ export class ApplicationService {
     const app = _.cloneDeep(orig);
 
     // don't send attached data (features, documents, etc)
-    delete app.features;
-    delete app.documents;
-    delete app.currentPeriod;
-    delete app.decision;
+    delete app.meta.features;
+    delete app.meta.documents;
+    delete app.meta.currentPeriod;
+    delete app.meta.decision;
 
     // replace newlines with \\n (JSON format)
     if (app.description) {
@@ -333,7 +409,7 @@ export class ApplicationService {
    * @memberof ApplicationService
    */
   isAmendment(application: Application): boolean {
-    return (
+    return !!(
       application &&
       ConstantUtils.getCode(CodeType.STATUS, application.status) === StatusCodes.ABANDONED.code &&
       (ConstantUtils.getCode(CodeType.REASON, application.reason) === ReasonCodes.AMENDMENT_APPROVED.code ||
