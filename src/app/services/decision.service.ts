@@ -77,7 +77,7 @@ export class DecisionService {
     delete decision._id;
 
     // don't send documents
-    delete decision.meta.documents;
+    delete decision.meta;
 
     return this.api.addDecision(decision).pipe(catchError(error => this.api.handleError(error)));
   }
@@ -87,7 +87,7 @@ export class DecisionService {
     const decision = _.cloneDeep(orig);
 
     // don't send documents
-    delete decision.meta.documents;
+    delete decision.meta;
 
     return this.api.saveDecision(decision).pipe(catchError(error => this.api.handleError(error)));
   }

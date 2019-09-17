@@ -345,10 +345,7 @@ export class ApplicationService {
     delete app._id;
 
     // don't send attached data (features, documents, etc)
-    delete app.meta.features;
-    delete app.meta.documents;
-    delete app.meta.currentPeriod;
-    delete app.meta.decision;
+    delete app.meta;
 
     // replace newlines with \\n (JSON format)
     if (app.description) {
@@ -373,10 +370,7 @@ export class ApplicationService {
     const app = _.cloneDeep(orig);
 
     // don't send attached data (features, documents, etc)
-    delete app.meta.features;
-    delete app.meta.documents;
-    delete app.meta.currentPeriod;
-    delete app.meta.decision;
+    delete app.meta;
 
     // replace newlines with \\n (JSON format)
     if (app.description) {

@@ -159,9 +159,10 @@ export class ReviewCommentsComponent implements OnInit, OnDestroy {
               delete document.internalURL;
               delete document.internalMime;
               delete document.isDeleted;
+              delete document.meta;
             });
             // add necessary properties
-            // comment.meta.applicants = this.application.meta.applicants; // FUTURE
+            // comment.applicants = this.application.meta.applicants; // FUTURE
             comment['cl_file'] = this.application.meta.clFile;
             return this.flatten_fastest(comment);
           });

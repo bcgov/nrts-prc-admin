@@ -43,11 +43,11 @@
 
               <div class="comment-body">{{item.comment}}</div>
 
-              <div class="comment-attachments" *ngIf="item.meta.documents.length > 0">
+              <div class="comment-attachments" *ngIf="item.documents.length > 0">
                 <i class="material-icons">
                   attach_file
                 </i>
-                {{item.meta.documents && item.meta.documents.length}} {{item.meta.documents.length === 1 ? "Attachment":"Attachments"}}
+                {{item.documents && item.documents.length}} {{item.documents.length === 1 ? "Attachment":"Attachments"}}
               </div>
             </div>
           </ng-template>
