@@ -63,7 +63,8 @@ describe('ApplicationDetailComponent', () => {
 
   describe('when the application is retrievable from the route', () => {
     beforeEach(() => {
-      activatedRouteStub.setData(validRouteData);
+      const activatedRouteMock = TestBed.get(ActivatedRoute);
+      activatedRouteMock.setData(validRouteData);
     });
 
     it('sets the component application to the one from the route', async(() => {
@@ -73,7 +74,8 @@ describe('ApplicationDetailComponent', () => {
 
   describe('when the application is not available from the route', () => {
     beforeEach(() => {
-      activatedRouteStub.setData({ something: 'went wrong' });
+      const activatedRouteMock = TestBed.get(ActivatedRoute);
+      activatedRouteMock.setData({ something: 'went wrong' });
     });
 
     it('redirects to /search', async(() => {

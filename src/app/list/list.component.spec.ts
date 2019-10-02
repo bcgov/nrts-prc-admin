@@ -8,7 +8,7 @@ import { OrderByPipe } from 'app/pipes/order-by.pipe';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Application } from 'app/models/application';
 // import { CommentCodes } from 'app/utils/constants/comment';
-import ActivatedRouteStub from 'app/spec/helpers';
+import { ActivatedRouteStub } from 'app/spec/helpers';
 import { ExportService } from 'app/services/export.service';
 import { QueryParamModifier } from 'app/services/api';
 

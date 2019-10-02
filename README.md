@@ -137,6 +137,10 @@ npm run lint-fix
 
 [Jasmine](https://jasmine.github.io/), [Karma](https://karma-runner.github.io/latest/index.html), [Protractor](http://www.protractortest.org/)
 
+### Important Note
+
+When viewing test output in the browser, via localhost:9876, Firefox produces somewhat cryptic error output.  Chrome doesn't have this issue.
+
 ## Run Tests
 
 * Run the unit tests with `watch=true`

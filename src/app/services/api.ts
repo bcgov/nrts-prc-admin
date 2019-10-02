@@ -769,6 +769,14 @@ export class ApiService {
 
     let queryString = '';
 
+    if ([true, false].includes(params.isDeleted)) {
+      queryString += `isDeleted=${params.isDeleted}&`;
+    }
+
+    if (params.sortBy) {
+      queryString += `sortBy=${params.sortBy}&`;
+    }
+
     if (params.pageNum >= 0) {
       queryString += `pageNum=${params.pageNum}&`;
     }
@@ -847,14 +855,6 @@ export class ApiService {
 
     if (params.publishDate && params.publishDate.value) {
       queryString += `publishDate=${params.publishDate.value.toISOString()}&`;
-    }
-
-    if ([true, false].includes(params.isDeleted)) {
-      queryString += `isDeleted=${params.isDeleted}&`;
-    }
-
-    if (params.sortBy) {
-      queryString += `sortBy=${params.sortBy}&`;
     }
 
     // trim the last &

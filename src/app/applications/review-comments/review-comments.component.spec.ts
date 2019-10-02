@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { async, TestBed } from '@angular/core/testing';
 import { Component, Input, DebugElement } from '@angular/core';
 import { ReviewCommentsComponent } from './review-comments.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
@@ -23,9 +23,7 @@ class CommentDetailStubComponent {
   @Input() comment: Comment;
 }
 
-describe('ReviewCommentsComponent', () => {
-  let component: ReviewCommentsComponent;
-  let fixture: ComponentFixture<ReviewCommentsComponent>;
+fdescribe('ReviewCommentsComponent', () => {
   const commentPeriod = new CommentPeriod({ _id: 'COMMENT_PERIOD_ID' });
   const existingApplication = new Application({
     _id: 'APPLICATION_ID',
@@ -36,6 +34,7 @@ describe('ReviewCommentsComponent', () => {
   const validRouteData = { application: existingApplication };
 
   const activatedRouteStub = new ActivatedRouteStub(validRouteData);
+
   const firstComment = new Comment({
     _id: 'FIRST_COMMENT',
     name: 'Zebras are great'
@@ -45,17 +44,17 @@ describe('ReviewCommentsComponent', () => {
     name: 'Apples are tasty'
   });
   const comments = [firstComment, secondComment];
-  let sortSelector: HTMLSelectElement;
 
   const commentServiceStub = {
     getCountByPeriodId() {
       return of(20);
     },
-
     getAllByApplicationId() {
       return of(comments);
     }
   };
+
+  let sortSelector: HTMLSelectElement;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -75,23 +74,47 @@ describe('ReviewCommentsComponent', () => {
     }).compileComponents();
   }));
 
-  beforeEach(() => {
-    fixture = TestBed.createComponent(ReviewCommentsComponent);
-    component = fixture.componentInstance;
-    sortSelector = fixture.nativeElement.querySelector('.sort-comments');
-    fixture.detectChanges();
-  });
+  /**
+   * Initializes the component and fixture.
+   *
+   * - In most cases, this will be called in the beforeEach.
+   * - In tests that require custom mock behaviour, set up the mock behaviour before calling this.
+   *
+   * @param {boolean} [detectChanges=true] set to false if you want to manually call fixture.detectChanges(), etc.
+   *   Usually you want to control this when the timing of ngOnInit, and similar auto-exec functions, matters.
+   * @returns {{component, fixture}} Object containing the component and test fixture.
+   */
+  function createComponent(detectChanges: boolean = true) {
+    const fixture = TestBed.createComponent(ReviewCommentsComponent);
+    const component = fixture.componentInstance;
 
-  it('should create', () => {
+    if (detectChanges) {
+      fixture.detectChanges();
+    }
+
+    return { component, fixture };
+  }
+
+  it('should be created', () => {
+    const { component } = createComponent();
+
     expect(component).toBeTruthy();
   });
 
   describe('when the application is retrievable from the route', () => {
+    let component;
+    let fixture;
+
     let commentService;
 
     beforeEach(() => {
-      activatedRouteStub.setData(validRouteData);
+      const activatedRouteMock = TestBed.get(ActivatedRoute);
+      activatedRouteMock.setData(validRouteData);
       commentService = TestBed.get(CommentService);
+
+      ({ component, fixture } = createComponent());
+
+      sortSelector = fixture.nativeElement.querySelector('.sort-comments');
     });
 
     it('sets the component application to the one from the route', () => {
@@ -257,17 +280,27 @@ describe('ReviewCommentsComponent', () => {
     });
   });
 
-  describe('when the application is not available from the route', () => {
+  fdescribe('when the application is not available from the route', () => {
+    let component;
+    let fixture;
+
     beforeEach(() => {
-      activatedRouteStub.setData({ something: 'went wrong' });
+      const activatedRouteMock = TestBed.get(ActivatedRoute);
+      activatedRouteMock.setData({ something: 'went wrong' });
+
+      ({ component, fixture } = createComponent());
+
+      spyOn(component, 'getData').and.stub();
+
+      sortSelector = fixture.nativeElement.querySelector('.sort-comments');
     });
 
-    it('redirects to /search', () => {
+    it('redirects to /search', async(() => {
       const navigateSpy = spyOn((component as any).router, 'navigate');
 
       component.ngOnInit();
 
       expect(navigateSpy).toHaveBeenCalledWith(['/search']);
-    });
+    }));
   });
 });

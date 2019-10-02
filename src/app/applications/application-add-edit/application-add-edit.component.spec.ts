@@ -14,7 +14,7 @@ import { DecisionService } from 'app/services/decision.service';
 import { DocumentService } from 'app/services/document.service';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 
-xdescribe('ApplicationAddEditComponent', () => {
+describe('ApplicationAddEditComponent', () => {
   let component: ApplicationAddEditComponent;
   let fixture: ComponentFixture<ApplicationAddEditComponent>;
 
