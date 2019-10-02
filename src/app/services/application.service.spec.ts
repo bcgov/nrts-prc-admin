@@ -42,8 +42,8 @@ describe('ApplicationService', () => {
   const featureServiceStub = {
     getByApplicationId() {
       const features = [
-        new Feature({ id: 'FFFFF', properties: { TENURE_AREA_IN_HECTARES: 12 } }),
-        new Feature({ id: 'GGGGG', properties: { TENURE_AREA_IN_HECTARES: 13 } })
+        new Feature({ _id: 'FFFFF', properties: { TENURE_AREA_IN_HECTARES: 12 } }),
+        new Feature({ _id: 'GGGGG', properties: { TENURE_AREA_IN_HECTARES: 13 } })
       ];
       return of(features);
     }
@@ -144,7 +144,7 @@ describe('ApplicationService', () => {
         existingApplication.cl_file = null;
         service.getAll().subscribe(applications => {
           const application = applications[0];
-          expect(application.meta.clFile).toBeUndefined();
+          expect(application.meta.clFile).toBeNull();
         });
       });
 
@@ -309,7 +309,7 @@ describe('ApplicationService', () => {
       it('clFile property is null if there is no cl_file property', () => {
         existingApplication.cl_file = null;
         service.getById('AAAA').subscribe(application => {
-          expect(application.meta.clFile).toBeUndefined();
+          expect(application.meta.clFile).toBeNull();
         });
       });
 
@@ -327,8 +327,8 @@ describe('ApplicationService', () => {
         service.getById('AAAA', { getFeatures: true }).subscribe(application => {
           expect(application.meta.features).toBeDefined();
           expect(application.meta.features).not.toBeNull();
-          expect(application.meta.features[0].id).toBe('FFFFF');
-          expect(application.meta.features[1].id).toBe('GGGGG');
+          expect(application.meta.features[0]._id).toBe('FFFFF');
+          expect(application.meta.features[1]._id).toBe('GGGGG');
         });
       });
     });
@@ -424,7 +424,7 @@ describe('ApplicationService', () => {
 
         it('does not set the daysRemaining value', () => {
           service.getById('AAAA', { getCurrentPeriod: true }).subscribe(application => {
-            expect(application.meta.currentPeriod.meta.daysRemaining).not.toBeDefined();
+            expect(application.meta.currentPeriod.meta.daysRemaining).toBeNull();
           });
         });
       });

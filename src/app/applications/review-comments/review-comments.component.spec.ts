@@ -14,7 +14,6 @@ import { CommentPeriod } from 'app/models/commentperiod';
 import { ActivatedRoute } from '@angular/router';
 import { ActivatedRouteStub } from 'app/spec/helpers';
 import { of, throwError } from 'rxjs';
-import { SearchComponent } from 'app/search/search.component';
 import { By } from '@angular/platform-browser';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 
@@ -23,7 +22,7 @@ class CommentDetailStubComponent {
   @Input() comment: Comment;
 }
 
-fdescribe('ReviewCommentsComponent', () => {
+describe('ReviewCommentsComponent', () => {
   const commentPeriod = new CommentPeriod({ _id: 'COMMENT_PERIOD_ID' });
   const existingApplication = new Application({
     _id: 'APPLICATION_ID',
@@ -58,13 +57,8 @@ fdescribe('ReviewCommentsComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      imports: [
-        NgbModule,
-        HttpClientTestingModule,
-        RouterTestingModule.withRoutes([{ path: 'search', component: SearchComponent }]),
-        FormsModule
-      ],
-      declarations: [ReviewCommentsComponent, NewlinesPipe, CommentDetailStubComponent, SearchComponent],
+      imports: [NgbModule, HttpClientTestingModule, RouterTestingModule, FormsModule],
+      declarations: [ReviewCommentsComponent, NewlinesPipe, CommentDetailStubComponent],
       providers: [
         { provide: CommentService, useValue: commentServiceStub },
         ExportService,
@@ -280,7 +274,7 @@ fdescribe('ReviewCommentsComponent', () => {
     });
   });
 
-  fdescribe('when the application is not available from the route', () => {
+  describe('when the application is not available from the route', () => {
     let component;
     let fixture;
 
@@ -288,17 +282,13 @@ fdescribe('ReviewCommentsComponent', () => {
       const activatedRouteMock = TestBed.get(ActivatedRoute);
       activatedRouteMock.setData({ something: 'went wrong' });
 
-      ({ component, fixture } = createComponent());
-
-      spyOn(component, 'getData').and.stub();
-
-      sortSelector = fixture.nativeElement.querySelector('.sort-comments');
+      ({ component, fixture } = createComponent(false));
     });
 
     it('redirects to /search', async(() => {
-      const navigateSpy = spyOn((component as any).router, 'navigate');
+      const navigateSpy = spyOn((component as any).router, 'navigate').and.stub();
 
-      component.ngOnInit();
+      fixture.detectChanges();
 
       expect(navigateSpy).toHaveBeenCalledWith(['/search']);
     }));

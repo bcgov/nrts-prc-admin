@@ -148,13 +148,15 @@ When viewing test output in the browser, via localhost:9876, Firefox produces so
 ```
 npm run tests
 ```
-* Run the unit tests with `watch=false`
+* Run the unit tests with `watch=false` and run the coverage report
+
+  View the coverage report at `./coverage/index.html`
 ```
 npm run tests-ci
 ```
 * Run the end-to-end tests
 
-  Before running the tests make sure you are serving the app via `ng serve`.
+  Before running the tests make sure you are serving the app via `ng serve`
 ```
 npm run e2e
 ```

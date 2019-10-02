@@ -329,9 +329,12 @@ export class ListComponent implements OnInit, OnDestroy {
 
     // Certain Statuses require unique considerations, which are accounted for here
 
+    // convert the array of statusCodeFilters into a flattened array of non-null/undefined status (ICodeGroup) objects
     const appStatusCodeGroups =
       (this.statusCodeFilters &&
-        _.flatMap(this.statusCodeFilters, statusParam => ConstantUtils.getCodeGroup(CodeType.STATUS, statusParam))) ||
+        _.flatMap(this.statusCodeFilters, statusParam =>
+          ConstantUtils.getCodeGroup(CodeType.STATUS, statusParam)
+        ).filter(Boolean)) ||
       [];
 
     appStatusCodeGroups.forEach(statusCodeGroup => {

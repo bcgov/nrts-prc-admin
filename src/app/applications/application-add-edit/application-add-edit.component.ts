@@ -15,7 +15,6 @@ import { Application } from 'app/models/application';
 import { CommentPeriod } from 'app/models/commentperiod';
 import { Document } from 'app/models/document';
 import { Decision } from 'app/models/decision';
-import { ApiService } from 'app/services/api';
 import { ApplicationService } from 'app/services/application.service';
 import { CommentPeriodService } from 'app/services/commentperiod.service';
 import { DecisionService } from 'app/services/decision.service';
@@ -51,7 +50,6 @@ export class ApplicationAddEditComponent implements OnInit, AfterViewInit, OnDes
     private router: Router,
     // private location: Location,
     public snackBar: MatSnackBar,
-    public api: ApiService, // also also used in template
     private applicationService: ApplicationService,
     private commentPeriodService: CommentPeriodService,
     private dialogService: DialogService,
