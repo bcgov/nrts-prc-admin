@@ -16,6 +16,7 @@ import { ActivatedRouteStub } from 'app/spec/helpers';
 import { of, throwError } from 'rxjs';
 import { By } from '@angular/platform-browser';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { SearchComponent } from 'app/search/search.component';
 
 @Component({ selector: 'app-comment-detail', template: '' })
 class CommentDetailStubComponent {
@@ -57,8 +58,13 @@ describe('ReviewCommentsComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      imports: [NgbModule, HttpClientTestingModule, RouterTestingModule, FormsModule],
-      declarations: [ReviewCommentsComponent, NewlinesPipe, CommentDetailStubComponent],
+      imports: [
+        NgbModule,
+        HttpClientTestingModule,
+        RouterTestingModule.withRoutes([{ path: 'search', component: SearchComponent }]),
+        FormsModule
+      ],
+      declarations: [ReviewCommentsComponent, NewlinesPipe, CommentDetailStubComponent, SearchComponent],
       providers: [
         { provide: CommentService, useValue: commentServiceStub },
         ExportService,
