@@ -13,7 +13,6 @@ import { Decision } from 'app/models/decision';
 import { Document } from 'app/models/document';
 import { Feature } from 'app/models/feature';
 import { SearchResults } from 'app/models/search';
-import { User } from 'app/models/user';
 
 /**
  * Supported query param field modifiers used by the api to interpret the query param value.
@@ -51,16 +50,6 @@ export interface IQueryParamSet {
 export interface IQueryParamValue<T> {
   value: T;
   modifier?: QueryParamModifier;
-}
-
-interface ILocalLoginResponse {
-  _id: string;
-  title: string;
-  created_at: string;
-  startTime: string;
-  endTime: string;
-  state: boolean;
-  accessToken: string;
 }
 
 /**
@@ -186,31 +175,6 @@ export class ApiService {
       : 'Server error';
     console.log('API error =', reason);
     return throwError(error);
-  }
-
-  login(username: string, password: string): Observable<boolean> {
-    return this.http
-      .post<ILocalLoginResponse>(`${this.pathAPI}/login/token`, { username: username, password: password })
-      .pipe(
-        map(res => {
-          // login successful if there's a jwt token in the response
-          if (res && res.accessToken) {
-            this.token = res.accessToken;
-
-            // store username and jwt token in local storage to keep user logged in between page refreshes
-            window.localStorage.setItem('currentUser', JSON.stringify({ username: username, token: this.token }));
-
-            return true; // successful login
-          }
-          return false; // failed login
-        })
-      );
-  }
-
-  logout() {
-    // clear token + remove user from local storage to log user out
-    this.token = null;
-    window.localStorage.removeItem('currentUser');
   }
 
   //
@@ -534,7 +498,7 @@ export class ApiService {
 
   getCountCommentsByCommentPeriodId(periodId: string): Observable<number> {
     // NB: count only pending comments
-    const queryString = `comment?isDeleted=false&commentStatus='Pending'&_commentPeriod=${periodId}`;
+    const queryString = `comment?isDeleted=false&_commentPeriod=${periodId}`;
     return this.http.head<HttpResponse<object>>(`${this.pathAPI}/${queryString}`, { observe: 'response' }).pipe(
       map(res => {
         // retrieve the count from the response headers
@@ -549,16 +513,7 @@ export class ApiService {
     pageSize: number,
     sortBy: string
   ): Observable<Comment[]> {
-    const fields = [
-      '_addedBy',
-      '_commentPeriod',
-      'commentNumber',
-      'comment',
-      'commentAuthor',
-      'review',
-      'dateAdded',
-      'commentStatus'
-    ];
+    const fields = ['_addedBy', '_commentPeriod', 'comment', 'commentAuthor', 'dateAdded'];
 
     let queryString = `comment?isDeleted=false&_commentPeriod=${periodId}&`;
     if (pageNum !== null) {
@@ -577,16 +532,7 @@ export class ApiService {
 
   // NB: returns array with 1 element
   getComment(id: string): Observable<Comment[]> {
-    const fields = [
-      '_addedBy',
-      '_commentPeriod',
-      'commentNumber',
-      'comment',
-      'commentAuthor',
-      'review',
-      'dateAdded',
-      'commentStatus'
-    ];
+    const fields = ['_addedBy', '_commentPeriod', 'comment', 'commentAuthor', 'dateAdded'];
     const queryString = `comment/${id}?fields=${this.convertArrayIntoPipeString(fields)}`;
     return this.http.get<Comment[]>(`${this.pathAPI}/${queryString}`, {});
   }
@@ -715,26 +661,6 @@ export class ApiService {
   searchAppsByDispositionID(dtid: number): Observable<SearchResults> {
     const queryString = `ttlsapi/dispositionTransactionId/${dtid}`;
     return this.http.get<SearchResults>(`${this.pathAPI}/${queryString}`, {});
-  }
-
-  //
-  // Users
-  //
-
-  getUsers(): Observable<User[]> {
-    const fields = ['displayName', 'username', 'firstName', 'lastName'];
-    const queryString = `user?fields=${this.convertArrayIntoPipeString(fields)}`;
-    return this.http.get<User[]>(`${this.pathAPI}/${queryString}`, {});
-  }
-
-  saveUser(user: User): Observable<User> {
-    const queryString = `user/${user._id}`;
-    return this.http.put<User>(`${this.pathAPI}/${queryString}`, user, {});
-  }
-
-  addUser(user: User): Observable<User> {
-    const queryString = 'user/';
-    return this.http.post<User>(`${this.pathAPI}/${queryString}`, user, {});
   }
 
   /**

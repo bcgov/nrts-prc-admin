@@ -148,7 +148,6 @@ export class ReviewCommentsComponent implements OnInit, OnDestroy {
           const flatComments = comments.map(comment => {
             // sanitize and flatten each comment object
             delete comment._commentPeriod;
-            delete comment.commentNumber;
             // sanitize documents
             comment.documents.forEach(document => {
               delete document._id;
@@ -167,27 +166,22 @@ export class ReviewCommentsComponent implements OnInit, OnDestroy {
             return this.flatten_fastest(comment);
           });
 
-          const excelFileName =
-            'comments-' + this.application.meta.applicants.replace(/\s/g, '_') + moment(new Date()).format('-YYYYMMDD');
-          const columnOrder: string[] = [
-            'cl_file',
-            '_id',
-            '_addedBy',
-            'dateAdded',
-            'commentAuthor.contactName',
-            'commentAuthor.orgName',
-            'commentAuthor.location',
-            'commentAuthor.requestedAnonymous',
-            'commentAuthor.internal.email',
-            'commentAuthor.internal.phone',
-            'comment',
-            'review.reviewerDate',
-            'review.reviewerNotes',
-            'commentStatus',
-            'isPublished'
-            // document columns go here
+          const fileName = `ACRFD_Comments_Export_${this.application.meta.applicants.replace(
+            /\s/g,
+            '_'
+          )}_ ${moment().format('YYYY-MM-DD_HH-mm')}`;
+          const fields: any[] = [
+            { label: 'CL File', value: this.exportService.getExportPadStartFormatter('cl_file') },
+            { label: 'Added By', value: '_addedBy' },
+            { label: 'Date Added', value: this.exportService.getExportDateFormatter('dateAdded') },
+            { label: 'Comment Author: Name', value: 'commentAuthor.contactName' },
+            { label: 'Comment Author: Org', value: 'commentAuthor.orgName' },
+            { label: 'Comment Author: Location', value: 'commentAuthor.location' },
+            { label: 'Comment Author: Email', value: 'commentAuthor.internal.email' },
+            { label: 'Comment Author: Phone', value: 'commentAuthor.internal.phone' },
+            { label: 'Comment', value: 'comment' }
           ];
-          this.exportService.exportAsExcelFile(flatComments, excelFileName, columnOrder);
+          this.exportService.exportAsCSV(flatComments, fileName, fields);
         },
         error => console.log('error =', error)
       );

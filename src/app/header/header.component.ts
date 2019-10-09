@@ -69,12 +69,6 @@ export class HeaderComponent implements OnInit {
     }
   }
 
-  navigateToLogout() {
-    // reset login status
-    this.api.logout();
-    window.location.href = this.keycloakService.getLogoutURL();
-  }
-
   toggleNav() {
     this.isNavMenuOpen = !this.isNavMenuOpen;
   }

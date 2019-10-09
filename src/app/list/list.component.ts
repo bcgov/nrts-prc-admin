@@ -155,28 +155,37 @@ export class ListComponent implements OnInit, OnDestroy {
           // All fields that will be included in the csv, and optionally what the column header text will be.
           // See www.npmjs.com/package/json2csv for details on the format of the fields array.
           const fields: any[] = [
-            { label: 'CL File', value: this.getExportPadStartFormatter('cl_file') },
+            { label: 'CL File', value: this.exportService.getExportPadStartFormatter('cl_file') },
             { label: 'Disposition ID', value: 'tantalisID' },
             { label: 'Applicant (client)', value: 'client' },
             { label: 'Business Unit', value: 'businessUnit' },
             { label: 'Location', value: 'location' },
             { label: 'Area (hectares)', value: 'areaHectares' },
-            { label: 'Created Date', value: this.getExportDateFormatter('createdDate') },
-            { label: 'Publish Date', value: this.getExportDateFormatter('publishDate') },
+            { label: 'Created Date', value: this.exportService.getExportDateFormatter('createdDate') },
+            { label: 'Publish Date', value: this.exportService.getExportDateFormatter('publishDate') },
             { label: 'Purpose', value: 'purpose' },
             { label: 'Subpurpose', value: 'subpurpose' },
             { label: 'status', value: this.getExportStatusFormatter('status', 'reason') },
-            { label: 'last status update date', value: this.getExportDateFormatter('statusHistoryEffectiveDate') },
+            {
+              label: 'last status update date',
+              value: this.exportService.getExportDateFormatter('statusHistoryEffectiveDate')
+            },
             { label: 'Type', value: 'type' },
             { label: 'Subtype', value: 'subtype' },
             { label: 'Tenure Stage', value: 'tenureStage' },
             { label: 'Description', value: 'description' },
             { label: 'Legal Description', value: 'legalDescription' },
             { label: 'Is Retired', value: 'meta.isRetired' },
-            { label: 'Retire Date', value: this.getExportDateFormatter('meta.retireDate') },
+            { label: 'Retire Date', value: this.exportService.getExportDateFormatter('meta.retireDate') },
             { label: 'Comment Period: Status', value: 'meta.cpStatusStringLong' },
-            { label: 'Comment Period: Start Date', value: this.getExportDateFormatter('meta.currentPeriod.startDate') },
-            { label: 'Comment Period: End Date', value: this.getExportDateFormatter('meta.currentPeriod.endDate') },
+            {
+              label: 'Comment Period: Start Date',
+              value: this.exportService.getExportDateFormatter('meta.currentPeriod.startDate')
+            },
+            {
+              label: 'Comment Period: End Date',
+              value: this.exportService.getExportDateFormatter('meta.currentPeriod.endDate')
+            },
             { label: 'Comment Period: Number of Comments', value: 'meta.numComments' }
           ];
           this.exportService.exportAsCSV(
@@ -192,35 +201,6 @@ export class ListComponent implements OnInit, OnDestroy {
           alert("Uh-oh, couldn't export applications");
         }
       );
-  }
-
-  /**
-   * Convenience method for converting an export date field to a formatted date string that is recognized by Excel as
-   * a Date.
-   *
-   * Note: See www.npmjs.com/package/json2csv for details on what this function is supporting.
-   *
-   * @param {string} dateProperty the object property for the date (the key path, not the value). Can be the path to a
-   *                              nested date field: 'some.nested.date'
-   * @returns {(row) => string} a function that takes a row and returns a string
-   * @memberof ListComponent
-   */
-  public getExportDateFormatter(dateProperty: string): (row) => string {
-    return row => {
-      const dateProp = _.get(row, dateProperty);
-
-      if (!dateProp) {
-        return null;
-      }
-
-      const date = moment(dateProp);
-
-      if (!date.isValid()) {
-        return dateProp;
-      }
-
-      return date.format('YYYY-MM-DD');
-    };
   }
 
   /**
@@ -241,29 +221,6 @@ export class ListComponent implements OnInit, OnDestroy {
       const reasonProp = _.get(row, reasonProperty);
 
       return this.applicationService.getStatusStringLong(new Application({ status: statusProp, reason: reasonProp }));
-    };
-  }
-
-  /**
-   * Convenience method for padding a value with 0's to at least 7 characters.
-   * If the string is of length 7 or more to begin with, no padding is performed.
-   *
-   * Note: See www.npmjs.com/package/json2csv for details on what this function is supporting.
-   *
-   * @param {string} property the object property for a value (the key path, not the value). Can be the path to a
-   *                          nested field: 'some.nested.value'
-   * @returns {(row) => string} a function that takes a row and returns a string
-   * @memberof ListComponent
-   */
-  public getExportPadStartFormatter(property: string): (row) => string {
-    return row => {
-      const prop = _.get(row, property);
-
-      if (!prop) {
-        return null;
-      }
-
-      return prop.toString().padStart(7, '0');
     };
   }
 
