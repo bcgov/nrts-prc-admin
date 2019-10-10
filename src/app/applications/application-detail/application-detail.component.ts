@@ -104,7 +104,8 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
         ConfirmComponent,
         {
           title: 'Confirm Deletion',
-          message: 'Do you really want to delete this application?'
+          message: 'Do you really want to delete this application?',
+          okOnly: false
         },
         {
           backdropColor: 'rgba(0, 0, 0, 0.5)'
@@ -243,7 +244,8 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
         ConfirmComponent,
         {
           title: 'Confirm Publish',
-          message: 'Publishing this application will make it visible to the public. Are you sure you want to proceed?'
+          message: 'Publishing this application will make it visible to the public. Are you sure you want to proceed?',
+          okOnly: false
         },
         {
           backdropColor: 'rgba(0, 0, 0, 0.5)'

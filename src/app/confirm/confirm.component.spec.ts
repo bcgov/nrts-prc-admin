@@ -10,7 +10,7 @@ describe('ConfirmComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [ConfirmComponent],
-      providers: [{ provide: DialogService }]
+      providers: [DialogService]
     }).compileComponents();
   }));
 

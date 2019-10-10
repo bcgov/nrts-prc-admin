@@ -8,7 +8,7 @@ import { OrderByPipe } from 'app/pipes/order-by.pipe';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Application } from 'app/models/application';
 // import { CommentCodes } from 'app/utils/constants/comment';
-import ActivatedRouteStub from 'app/spec/helpers';
+import { ActivatedRouteStub } from 'app/spec/helpers';
 import { ExportService } from 'app/services/export.service';
 import { QueryParamModifier } from 'app/services/api';
 
@@ -610,6 +610,81 @@ describe('ListComponent', () => {
 
       it('sets regionCodeFilter to new filter', () => {
         expect(component.regionCodeFilter).toEqual('newFilter');
+      });
+
+      it('sets filterChanged to true', () => {
+        expect(component.filterChanged).toEqual(true);
+      });
+    });
+  });
+
+  describe('setApplicantFilter', () => {
+    let component;
+    beforeEach(() => {
+      ({ component } = createComponent());
+    });
+
+    describe('applicantCode is undefined', () => {
+      beforeEach(() => {
+        component.applicantFilter = 'oldFilter';
+        component.filterChanged = false;
+
+        component.setApplicantFilter(undefined);
+      });
+
+      it('sets applicantFilter to empty array', () => {
+        expect(component.applicantFilter).toEqual('');
+      });
+
+      it('sets filterChanged to true', () => {
+        expect(component.filterChanged).toEqual(true);
+      });
+    });
+
+    describe('applicantCode is null', () => {
+      beforeEach(() => {
+        component.applicantFilter = 'oldFilter';
+        component.filterChanged = false;
+
+        component.setApplicantFilter(null);
+      });
+
+      it('sets applicantFilter to empty string', () => {
+        expect(component.applicantFilter).toEqual('');
+      });
+
+      it('sets filterChanged to true', () => {
+        expect(component.filterChanged).toEqual(true);
+      });
+    });
+
+    describe('applicantCode is empty string', () => {
+      beforeEach(() => {
+        component.applicantFilter = 'oldFilter';
+        component.filterChanged = false;
+
+        component.setApplicantFilter('');
+      });
+
+      it('sets applicantFilter to empty string', () => {
+        expect(component.applicantFilter).toEqual('');
+      });
+
+      it('sets filterChanged to true', () => {
+        expect(component.filterChanged).toEqual(true);
+      });
+    });
+
+    describe('applicantCode is valid', () => {
+      beforeEach(() => {
+        component.applicantFilter = 'oldFilter';
+        component.filterChanged = false;
+
+        component.setApplicantFilter('newFilter');
+      });
+
+      it('sets applicantFilter to new filter', () => {
+        expect(component.applicantFilter).toEqual('newFilter');
       });
 
       it('sets filterChanged to true', () => {

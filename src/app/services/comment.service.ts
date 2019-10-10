@@ -142,9 +142,6 @@ export class CommentService {
     if (comment.comment) {
       comment.comment = comment.comment.replace(/\n/g, '\\n');
     }
-    if (comment.review && comment.review.reviewerNotes) {
-      comment.review.reviewerNotes = comment.review.reviewerNotes.replace(/\n/g, '\\n');
-    }
 
     return this.api.addComment(comment).pipe(catchError(error => this.api.handleError(error)));
   }
@@ -160,9 +157,6 @@ export class CommentService {
     if (comment.comment) {
       comment.comment = comment.comment.replace(/\n/g, '\\n');
     }
-    if (comment.review && comment.review.reviewerNotes) {
-      comment.review.reviewerNotes = comment.review.reviewerNotes.replace(/\n/g, '\\n');
-    }
 
     return this.api.saveComment(comment).pipe(catchError(error => this.api.handleError(error)));
   }
@@ -173,32 +167,5 @@ export class CommentService {
 
   unPublish(comment: Comment): Observable<Comment> {
     return this.api.unPublishComment(comment).pipe(catchError(error => this.api.handleError(error)));
-  }
-
-  isAccepted(comment: Comment): boolean {
-    return comment && comment.commentStatus && comment.commentStatus.toLowerCase() === this.accepted.toLowerCase();
-  }
-
-  isPending(comment: Comment): boolean {
-    return comment && comment.commentStatus && comment.commentStatus.toLowerCase() === this.pending.toLowerCase();
-  }
-
-  isRejected(comment: Comment): boolean {
-    return comment && comment.commentStatus && comment.commentStatus.toLowerCase() === this.rejected.toLowerCase();
-  }
-
-  doAccept(comment: Comment): Comment {
-    comment.commentStatus = this.accepted;
-    return comment;
-  }
-
-  doPending(comment: Comment): Comment {
-    comment.commentStatus = this.pending;
-    return comment;
-  }
-
-  doReject(comment: Comment): Comment {
-    comment.commentStatus = this.rejected;
-    return comment;
   }
 }

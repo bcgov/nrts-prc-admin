@@ -17,13 +17,9 @@ import { AppComponent } from 'app/app.component';
 import { HomeComponent } from 'app/home/home.component';
 import { SearchComponent } from 'app/search/search.component';
 import { ListComponent } from 'app/list/list.component';
-import { LoginComponent } from 'app/login/login.component';
 import { ConfirmComponent } from 'app/confirm/confirm.component';
 import { HeaderComponent } from 'app/header/header.component';
 import { FooterComponent } from 'app/footer/footer.component';
-import { AdministrationComponent } from 'app/administration/administration.component';
-import { UsersComponent } from 'app/administration/users/users.component';
-import { AddEditUserComponent } from 'app/administration/users/add-edit-user/add-edit-user.component';
 
 // services
 import { SearchService } from 'app/services/search.service';
@@ -34,7 +30,6 @@ import { CommentPeriodService } from 'app/services/commentperiod.service';
 import { CommentService } from 'app/services/comment.service';
 import { DocumentService } from 'app/services/document.service';
 import { DecisionService } from 'app/services/decision.service';
-import { UserService } from 'app/services/user.service';
 import { CanDeactivateGuard } from 'app/services/can-deactivate-guard.service';
 import { KeycloakService } from 'app/services/keycloak.service';
 
@@ -51,13 +46,9 @@ export function kcFactory(keycloakService: KeycloakService) {
     AppComponent,
     HomeComponent,
     SearchComponent,
-    LoginComponent,
     ConfirmComponent,
     HeaderComponent,
     FooterComponent,
-    AdministrationComponent,
-    UsersComponent,
-    AddEditUserComponent,
     NotAuthorizedComponent,
     ListComponent
   ],
@@ -94,10 +85,9 @@ export function kcFactory(keycloakService: KeycloakService) {
     CommentService,
     DocumentService,
     DecisionService,
-    UserService,
     CanDeactivateGuard
   ],
-  entryComponents: [ConfirmComponent, AddEditUserComponent],
+  entryComponents: [ConfirmComponent],
   bootstrap: [AppComponent]
 })
 export class AppModule {
