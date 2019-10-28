@@ -269,11 +269,12 @@ describe('SearchComponent', () => {
       _id: '111111',
       cl_file: '66666',
       tantalisID: '123456',
-      applicants: 'Mr Moneybags',
       purpose: 'Shred',
       subpurpose: 'Powder',
       status: 'Application Under Review',
       meta: {
+        applicants: 'Mr Moneybags',
+        cpStatusStringLong: 'Commenting Closed',
         currentPeriod: valemontCommentPeriod
       }
     });
@@ -315,8 +316,8 @@ describe('SearchComponent', () => {
 
       describe('when the application "isCreated" property is true', () => {
         beforeEach(() => {
-          valemontApplication['isCreated'] = true;
-          valemontApplication['numComments'] = 200;
+          valemontApplication.meta.isCreated = true;
+          valemontApplication.meta.numComments = 200;
         });
 
         it('renders the comment period status and number of comments', () => {
@@ -347,7 +348,7 @@ describe('SearchComponent', () => {
 
       describe('when the application "isCreated" property is false', () => {
         beforeEach(() => {
-          valemontApplication['isCreated'] = false;
+          valemontApplication.meta.isCreated = false;
         });
 
         it('does not render commenting details', () => {

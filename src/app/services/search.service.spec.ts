@@ -7,10 +7,12 @@ import { SearchService } from './search.service';
 import { SearchResults } from 'app/models/search';
 import { InterestedParty } from 'app/models/interestedParty';
 import { ReasonCodes, StatusCodes } from 'app/utils/constants/application';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('SearchService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
       providers: [
         SearchService,
         {
@@ -27,8 +29,7 @@ describe('SearchService', () => {
             'getByCrownLandID',
             'getByTantalisID',
             'getStatusString',
-            'getStatusCode',
-            'getRegionCode'
+            'getStatusCode'
           ])
         }
       ]
@@ -101,10 +102,10 @@ describe('SearchService', () => {
 
           it('has an isCreated property set to true', () => {
             expect(prcResult[0]._id).toBe('1');
-            expect(prcResult[0]['isCreated']).toBe(true);
+            expect(prcResult[0].meta.isCreated).toBeTruthy();
 
             expect(prcResult[1]._id).toBe('2');
-            expect(prcResult[1]['isCreated']).toBe(true);
+            expect(prcResult[1].meta.isCreated).toBeTruthy();
           });
         });
 
@@ -114,10 +115,6 @@ describe('SearchService', () => {
 
         it('does not call ApplicationService getStatusCode', () => {
           expect(ApplicationServiceSpy.getStatusCode).not.toHaveBeenCalled();
-        });
-
-        it('does not call ApplicationService getRegionCode', () => {
-          expect(ApplicationServiceSpy.getRegionCode).not.toHaveBeenCalled();
         });
       });
 
@@ -249,8 +246,8 @@ describe('SearchService', () => {
           });
 
           it('does not add an isCreated property set to true', () => {
-            expect(prcResult[0]['isCreated']).toBe(undefined);
-            expect(prcResult[1]['isCreated']).toBe(undefined);
+            expect(prcResult[0].meta.isCreated).toBeFalsy();
+            expect(prcResult[1].meta.isCreated).toBeFalsy();
           });
 
           it('has a clFile property padded to 7 digits', () => {
@@ -310,7 +307,7 @@ describe('SearchService', () => {
 
           it('has an isCreated property set to true', () => {
             expect(prcResult[0]._id).toBe('2');
-            expect(prcResult[0]['isCreated']).toBe(true);
+            expect(prcResult[0].meta.isCreated).toBeTruthy();
           });
         });
       });
@@ -387,7 +384,7 @@ describe('SearchService', () => {
             expect(tantalisResult[0].type).toBe('tenure-type-1');
             expect(tantalisResult[0].subtype).toBe('tenure-subtype-1');
             expect(tantalisResult[0].status).toBe('DECISION APPROVED');
-            expect(tantalisResult[0].reason).toBe(null);
+            expect(tantalisResult[0].reason).toBe('tenure-reason-1');
             expect(tantalisResult[0].tenureStage).toBe('tenure-stage-1');
             expect(tantalisResult[0].location).toBe('tenure-location-1');
             expect(tantalisResult[0].businessUnit).toBe('CA - LAND MGMNT - CARIBOO FIELD OFFICE');
@@ -405,7 +402,7 @@ describe('SearchService', () => {
           });
 
           it('does not add an isCreated property set to true', () => {
-            expect(tantalisResult[0]['isCreated']).toBe(undefined);
+            expect(tantalisResult[0].meta.isCreated).toBeFalsy();
           });
 
           it('has a clFile property padded to 7 digits', () => {

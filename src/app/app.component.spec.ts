@@ -7,6 +7,7 @@ import { FooterComponent } from './footer/footer.component';
 import { ApiService } from 'app/services/api';
 import { KeycloakService } from 'app/services/keycloak.service';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('AppComponent', () => {
   beforeEach(async(() => {
@@ -18,8 +19,8 @@ describe('AppComponent', () => {
 
     TestBed.configureTestingModule({
       declarations: [AppComponent, HeaderComponent, FooterComponent],
-      imports: [RouterTestingModule, BrowserAnimationsModule],
-      providers: [{ provide: ApiService }, { provide: KeycloakService, useValue: mockKeycloakService }]
+      imports: [RouterTestingModule, HttpClientTestingModule, BrowserAnimationsModule],
+      providers: [ApiService, { provide: KeycloakService, useValue: mockKeycloakService }]
     }).compileComponents();
   }));
 

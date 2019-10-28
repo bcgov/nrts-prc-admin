@@ -1,6 +1,6 @@
 import { BaseApp2Page } from './app.po';
 
-describe('base-app2 App', () => {
+describe('nrts-prc-admin App', () => {
   let page: BaseApp2Page;
 
   beforeEach(() => {
