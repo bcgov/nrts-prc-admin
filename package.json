@@ -47,7 +47,7 @@
     "keycloak-angular": "3.0.3",
     "leaflet": "1.5.1",
     "linkify-it": "2.1.0",
-    "lodash": "4.17.11",
+    "lodash": "4.17.19",
     "moment": "2.24.0",
     "mygovbc-bootstrap-theme": "0.4.1",
     "ng-inline-svg": "8.5.1",
