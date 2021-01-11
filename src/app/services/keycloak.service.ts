@@ -20,21 +20,21 @@ export class KeycloakService {
       case 'https://nrts-prc-master.pathfinder.gov.bc.ca':
         // Local, Dev, Master
         this.keycloakEnabled = true;
-        this.keycloakUrl = 'https://sso-dev.pathfinder.gov.bc.ca/auth';
+        this.keycloakUrl = 'https://dev.oidc.gov.bc.ca/auth';
         this.keycloakRealm = 'prc';
         break;
 
       case 'https://nrts-prc-test.pathfinder.gov.bc.ca':
         // Test
         this.keycloakEnabled = true;
-        this.keycloakUrl = 'https://sso-test.pathfinder.gov.bc.ca/auth';
+        this.keycloakUrl = 'https://test.oidc.gov.bc.ca/auth';
         this.keycloakRealm = 'acrfd';
         break;
 
       default:
         // Prod
         this.keycloakEnabled = true;
-        this.keycloakUrl = 'https://sso.pathfinder.gov.bc.ca/auth';
+        this.keycloakUrl = 'https://oidc.gov.bc.ca/auth';
         this.keycloakRealm = 'acrfd';
     }
   }
