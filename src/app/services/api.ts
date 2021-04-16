@@ -166,10 +166,13 @@ export class ApiService {
         this.pathAPI = 'https://nrts-prc-master.pathfinder.gov.bc.ca/api';
         this.env = 'master';
         break;
-
       case 'nrts-prc-test.pathfinder.gov.bc.ca':
         // Test
         this.pathAPI = 'https://nrts-prc-test.pathfinder.gov.bc.ca/api';
+        this.env = 'test';
+        break;
+      case 'acrfd-admin-86cabb-test.apps.silver.devops.gov.bc.ca':
+        this.pathAPI = 'https://nrpti-api-86cabb-test.apps.silver.devops.gov.bc.ca/api';
         this.env = 'test';
         break;
 
