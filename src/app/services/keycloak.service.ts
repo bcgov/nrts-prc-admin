@@ -26,6 +26,7 @@ export class KeycloakService {
         break;
 
       case 'https://nrts-prc-test.pathfinder.gov.bc.ca':
+      case 'https://nrts-prc-api-86cabb-test.apps.silver.devops.gov.bc.ca';
         // Test
         this.keycloakEnabled = true;
         this.keycloakUrl = 'https://test.oidc.gov.bc.ca/auth';
