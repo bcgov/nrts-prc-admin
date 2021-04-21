@@ -156,8 +156,8 @@ export class ApiService {
         this.pathAPI = 'https://nrts-prc-dev.pathfinder.gov.bc.ca/api';
         this.env = 'dev';
         break;
-      case 'acrfd-admin-86cabb-dev.apps.silver.devops.gov.bc.ca':
-        this.pathAPI = 'https://nrpti-api-86cabb-dev.apps.silver.devops.gov.bc.ca/api';
+      case 'acrfd-86cabb-dev.apps.silver.devops.gov.bc.ca':
+        this.pathAPI = 'https://acrfd-86cabb-dev.apps.silver.devops.gov.bc.ca/api';
         this.env = 'dev';
         break;
 
@@ -171,7 +171,7 @@ export class ApiService {
         this.pathAPI = 'https://nrts-prc-test.pathfinder.gov.bc.ca/api';
         this.env = 'test';
         break;
-      case 'acrfd-admin-86cabb-test.apps.silver.devops.gov.bc.ca':
+      case 'acrfd-86cabb-test.apps.silver.devops.gov.bc.ca':
         this.pathAPI = 'https://nrpti-api-86cabb-test.apps.silver.devops.gov.bc.ca/api';
         this.env = 'test';
         break;
