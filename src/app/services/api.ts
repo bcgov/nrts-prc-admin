@@ -172,7 +172,7 @@ export class ApiService {
         this.env = 'test';
         break;
       case 'acrfd-86cabb-test.apps.silver.devops.gov.bc.ca':
-        this.pathAPI = 'https://nrpti-api-86cabb-test.apps.silver.devops.gov.bc.ca/api';
+        this.pathAPI = 'https://acrfd-86cabb-test.apps.silver.devops.gov.bc.ca/api';
         this.env = 'test';
         break;
 
