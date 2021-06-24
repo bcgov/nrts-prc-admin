@@ -175,6 +175,11 @@ export class ApiService {
         this.pathAPI = 'https://acrfd-86cabb-test.apps.silver.devops.gov.bc.ca/api';
         this.env = 'test';
         break;
+      case 'acrfd-admin-86cabb-dev.apps.silver.devops.gov.bc.ca':
+        this.pathAPI = 'https://nrts-prc-api-86cabb-dev.apps.silver.devops.gov.bc.ca/api';
+        this.env = 'dev';
+        break;
+        
 
       default:
         // Prod
