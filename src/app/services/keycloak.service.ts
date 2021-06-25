@@ -19,6 +19,7 @@ export class KeycloakService {
       case 'https://nrts-prc-dev.pathfinder.gov.bc.ca':
       case 'https://nrts-prc-master.pathfinder.gov.bc.ca':
       case 'https://acrfd-86cabb-dev.apps.silver.devops.gov.bc.ca':
+      case 'https://acrfd-admin-86cabb-dev.apps.silver.devops.gov.bc.ca':
         // Local, Dev, Master
         this.keycloakEnabled = true;
         this.keycloakUrl = 'https://dev.oidc.gov.bc.ca/auth';
