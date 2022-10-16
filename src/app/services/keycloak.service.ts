@@ -70,7 +70,10 @@ export class KeycloakService {
         const config = {
           url: this.keycloakUrl,
           realm: this.keycloakRealm,
-          clientId: 'acrfd-4192'
+          clientId: 'acrfd-4192',
+          credentials: {
+            secret: process.env.secret
+          }
         };
 
         // console.log('KC Auth init.');
