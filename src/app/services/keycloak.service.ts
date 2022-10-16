@@ -22,23 +22,23 @@ export class KeycloakService {
       case 'https://acrfd-admin-86cabb-dev.apps.silver.devops.gov.bc.ca':
         // Local, Dev, Master
         this.keycloakEnabled = true;
-        this.keycloakUrl = 'https://dev.oidc.gov.bc.ca/auth';
-        this.keycloakRealm = 'prc';
+        this.keycloakUrl = 'https://dev.loginproxy.gov.bc.ca/auth';
+        this.keycloakRealm = 'standard';
         break;
 
       case 'https://nrts-prc-test.pathfinder.gov.bc.ca':
       case 'https://acrfd-86cabb-test.apps.silver.devops.gov.bc.ca':
         // Test
         this.keycloakEnabled = true;
-        this.keycloakUrl = 'https://test.oidc.gov.bc.ca/auth';
-        this.keycloakRealm = 'acrfd';
+        this.keycloakUrl = 'https://test.loginproxy.gov.bc.ca/auth';
+        this.keycloakRealm = 'standard';
         break;
 
       default:
         // Prod
         this.keycloakEnabled = true;
-        this.keycloakUrl = 'https://oidc.gov.bc.ca/auth';
-        this.keycloakRealm = 'acrfd';
+        this.keycloakUrl = 'https://loginproxy.gov.bc.ca/auth';
+        this.keycloakRealm = 'standard';
     }
   }
 
@@ -70,7 +70,7 @@ export class KeycloakService {
         const config = {
           url: this.keycloakUrl,
           realm: this.keycloakRealm,
-          clientId: 'prc-admin-console'
+          clientId: 'acrfd-4192'
         };
 
         // console.log('KC Auth init.');
