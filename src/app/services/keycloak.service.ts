@@ -30,7 +30,7 @@ export class KeycloakService {
       case 'https://acrfd-86cabb-test.apps.silver.devops.gov.bc.ca':
         // Test
         this.keycloakEnabled = true;
-        this.keycloakUrl = process.env.keycloak_url;
+        this.keycloakUrl = 'https://test.loginproxy.gov.bc.ca/auth';
         this.keycloakRealm = 'standard';
         break;
 
@@ -70,15 +70,19 @@ export class KeycloakService {
         const config = {
           url: this.keycloakUrl,
           realm: this.keycloakRealm,
-          clientId: 'acrfd-4192',
-          credentials: {
-            secret: process.env.secret
-          }
+          clientId: 'acrfd-4192'
+        };
+
+        const initOptions = {
+          checkLoginIframe: false,
+          pkceMethod: 'S256',
+          onLoad: 'login-required'
         };
 
         // console.log('KC Auth init.');
 
         this.keycloakAuth = new Keycloak(config);
+        this.keycloakAuth.init(initOptions);
 
         this.keycloakAuth.onAuthSuccess = () => {
           // console.log('onAuthSuccess');
@@ -138,11 +142,9 @@ export class KeycloakService {
   }
 
   isValidForSite() {
-    console.log('Checking Role Access');
     if (!this.getToken()) {
       return false;
     }
-    console.log('Retrieved token');
     const jwt = new JwtUtil().decodeToken(this.getToken());
     console.log(jwt);
     if (jwt && jwt.realm_access && jwt.realm_access.roles) {
