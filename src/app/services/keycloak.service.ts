@@ -30,7 +30,7 @@ export class KeycloakService {
       case 'https://acrfd-86cabb-test.apps.silver.devops.gov.bc.ca':
         // Test
         this.keycloakEnabled = true;
-        this.keycloakUrl = 'https://test.loginproxy.gov.bc.ca/auth';
+        this.keycloakUrl = process.env.keycloak_url;
         this.keycloakRealm = 'standard';
         break;
 
