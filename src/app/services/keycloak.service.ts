@@ -138,11 +138,13 @@ export class KeycloakService {
   }
 
   isValidForSite() {
+    console.log('Checking Role Access');
     if (!this.getToken()) {
       return false;
     }
+    console.log('Retrieved token');
     const jwt = new JwtUtil().decodeToken(this.getToken());
-
+    console.log(jwt);
     if (jwt && jwt.realm_access && jwt.realm_access.roles) {
       return _.includes(jwt.realm_access.roles, 'sysadmin');
     } else {
