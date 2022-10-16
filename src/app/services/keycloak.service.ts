@@ -73,17 +73,9 @@ export class KeycloakService {
           clientId: 'acrfd-4192'
         };
 
-        const initOptions = {
-          checkLoginIframe: false,
-          pkceMethod: 'S256',
-          onLoad: 'login-required'
-        };
-
         // console.log('KC Auth init.');
 
         this.keycloakAuth = new Keycloak(config);
-        this.keycloakAuth.init(initOptions);
-
         this.keycloakAuth.onAuthSuccess = () => {
           // console.log('onAuthSuccess');
         };
@@ -117,8 +109,15 @@ export class KeycloakService {
         };
 
         // Initialize.
+
+        const initOptions = {
+          checkLoginIframe: false,
+          pkceMethod: 'S256',
+          onLoad: 'login-required'
+        };
+
         this.keycloakAuth
-          .init({})
+          .init(initOptions)
           .success(auth => {
             // console.log('KC Refresh Success?:', this.keycloakAuth.authServerUrl);
             console.log('KC Success:', auth);
@@ -146,9 +145,8 @@ export class KeycloakService {
       return false;
     }
     const jwt = new JwtUtil().decodeToken(this.getToken());
-    console.log(jwt);
-    if (jwt && jwt.realm_access && jwt.realm_access.roles) {
-      return _.includes(jwt.realm_access.roles, 'sysadmin');
+    if (jwt && jwt.client_roles) {
+      return _.includes(jwt.client_roles, 'sysadmin');
     } else {
       return false;
     }
