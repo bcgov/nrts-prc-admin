@@ -42,24 +42,8 @@ import { KeycloakService } from 'app/services/keycloak.service';
 import { TokenInterceptor } from './utils/token-interceptor';
 import { NotAuthorizedComponent } from './not-authorized/not-authorized.component';
 
-declare var Keycloak: any;
-
 export function kcFactory(keycloakService: KeycloakService) {
-  return () =>
-    new Promise<void>((resolve, reject) => {
-      const waitForKeycloak = () => {
-        if (typeof Keycloak !== 'undefined') {
-          keycloakService
-            .init()
-            .then(resolve)
-            .catch(reject);
-        } else {
-          // Try again in 50ms
-          setTimeout(waitForKeycloak, 5000);
-        }
-      };
-      waitForKeycloak();
-    });
+  return () => keycloakService.init();
 }
 
 @NgModule({

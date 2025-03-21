@@ -72,12 +72,9 @@ export class KeycloakService {
           realm: this.keycloakRealm,
           clientId: 'prc-admin-console'
         };
-        if (typeof Keycloak === 'undefined') {
-          console.error('Keycloak script not loaded!');
-          return Promise.reject('Keycloak not available');
-        }
+
         // console.log('KC Auth init.');
-        console.log('Is Keycloak available?', typeof Keycloak);
+
         this.keycloakAuth = new Keycloak(config);
 
         this.keycloakAuth.onAuthSuccess = () => {
