@@ -12,7 +12,7 @@ export class KeycloakService {
   private keycloakEnabled = true;
   private keycloakUrl: string;
   private keycloakRealm: string;
-  private clientId = 'prc-admin-console';
+  private clientId = 'acrfd-4192';
 
   constructor() {
     const origin = window.location.origin;
@@ -29,13 +29,13 @@ export class KeycloakService {
 
       case 'https://nrts-prc-test.pathfinder.gov.bc.ca':
       case 'https://acrfd-86cabb-test.apps.silver.devops.gov.bc.ca':
-        this.keycloakUrl = 'https://test.oidc.gov.bc.ca/auth';
-        this.keycloakRealm = 'acrfd';
+        this.keycloakUrl = 'https://test.loginproxy.gov.bc.ca';
+        this.keycloakRealm = 'standard';
         break;
 
       default:
-        this.keycloakUrl = 'https://oidc.gov.bc.ca/auth';
-        this.keycloakRealm = 'acrfd';
+        this.keycloakUrl = 'https://loginproxy.gov.bc.ca/auth';
+        this.keycloakRealm = 'standard';
     }
   }
 
@@ -47,17 +47,19 @@ export class KeycloakService {
     if (!this.keycloakEnabled) {
       return Promise.resolve(true);
     }
-
+  
     this.keycloak = new Keycloak({
       url: this.keycloakUrl,
       realm: this.keycloakRealm,
       clientId: this.clientId
     });
-
+  
     return this.keycloak
       .init({
         onLoad: 'login-required',
-        checkLoginIframe: false
+        checkLoginIframe: false,
+        pkceMethod: 'S256', // Keycloak 26+ may enforce this
+        redirectUri: window.location.origin + '/admin/'
       })
       .then(authenticated => {
         console.log('Keycloak initialized:', authenticated);
@@ -70,7 +72,7 @@ export class KeycloakService {
   }
 
   getToken(): string {
-    return this.keycloak ?.token || '' ;
+    return this.keycloak?.token || '';
   }
 
   refreshToken(): Observable<void> {
