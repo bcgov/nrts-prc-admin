@@ -49,50 +49,54 @@ export class KeycloakService {
       return Promise.resolve(true);
     }
 
-    this.keycloak = new Keycloak({
+    console.log('[Keycloak] Starting init...');
+    console.log('[Keycloak] Config:', {
       url: this.keycloakUrl,
       realm: this.keycloakRealm,
-      clientId: this.clientId
+      clientId: this.clientId,
+      redirectUri: `${window.location.origin}/admin/`
     });
 
-    return this.keycloak
-      .init({
-        onLoad: 'login-required',
-        checkLoginIframe: false,
-        pkceMethod: 'S256',
-        redirectUri: `${window.location.origin}/admin/`
-      })
-      .then(authenticated => {
-        console.log('[Keycloak] Initialized. Authenticated:', authenticated);
-
-        if (!authenticated) {
-          console.warn('[Keycloak] Not authenticated after init.');
-          return Promise.reject('Not authenticated');
-        }
-
-        if (!this.keycloak.token) {
-          console.error('[Keycloak] Token is missing after init.');
-          return Promise.reject('Missing token');
-        }
-
-        console.log('[Keycloak] Token present:', this.keycloak.token);
-
-        // Clean up Keycloak hash fragments like #iss=
-        if (window.location.hash.includes('iss=')) {
-          history.replaceState(null, '', window.location.pathname);
-          console.log('[Keycloak] Cleaned up hash from URL.');
-        }
-
-        return true;
-      })
-      .catch(err => {
-        console.error('[Keycloak] Init error:', err);
-        return Promise.reject(err);
+    try {
+      this.keycloak = new Keycloak({
+        url: this.keycloakUrl,
+        realm: this.keycloakRealm,
+        clientId: this.clientId
       });
+    } catch (e) {
+      console.error('[Keycloak] Failed to create instance:', e);
+      return Promise.reject(e);
+    }
+
+    try {
+      return this.keycloak
+        .init({
+          onLoad: 'login-required',
+          checkLoginIframe: false,
+          pkceMethod: 'S256',
+          flow: 'standard',
+          redirectUri: `${window.location.origin}/admin/`,
+        })
+        .then(authenticated => {
+          console.log('[Keycloak] Init result:', authenticated);
+          if (!authenticated) {
+            console.warn('[Keycloak] Not authenticated. Forcing login...');
+            this.keycloak.login();
+          }
+          return authenticated;
+        })
+        .catch(err => {
+          console.error('[Keycloak] Init failed in catch:', err);
+          return Promise.reject(err);
+        });
+    } catch (e) {
+      console.error('[Keycloak] Init threw exception:', e);
+      return Promise.reject(e);
+    }
   }
 
   getToken(): string {
-    return this.keycloak ? .token || '' ;
+    return this.keycloak ? .token || ''  ;
   }
 
   refreshToken(): Observable<void> {
