@@ -2,7 +2,9 @@ import { Injectable } from '@angular/core';
 import { JwtUtil } from 'app/jwt-util';
 import { Observable } from 'rxjs';
 import * as _ from 'lodash';
-import Keycloak from 'keycloak-js';
+
+// Fallback import (loses some type safety)
+const Keycloak = require('keycloak-js').default;
 
 @Injectable()
 export class KeycloakService {
