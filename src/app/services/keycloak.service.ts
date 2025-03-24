@@ -44,6 +44,7 @@ export class KeycloakService {
   }
 
   init(): Promise<boolean> {
+    console.log('[Keycloak] Init function reached 🔥');
     if (!this.keycloakEnabled) {
       console.warn('[Keycloak] Disabled, skipping init.');
       return Promise.resolve(true);
@@ -96,7 +97,7 @@ export class KeycloakService {
   }
 
   getToken(): string {
-    return this.keycloak ? .token || ''  ;
+    return this.keycloak ? .token || ''   ;
   }
 
   refreshToken(): Observable<void> {

@@ -43,6 +43,7 @@ import { TokenInterceptor } from './utils/token-interceptor';
 import { NotAuthorizedComponent } from './not-authorized/not-authorized.component';
 
 export function kcFactory(keycloakService: KeycloakService) {
+  console.log('kcFactory Init Start.');
   return () => keycloakService.init();
 }
 
