@@ -12,7 +12,7 @@ if (environment.production) {
 function loadKeycloakScript(): Promise<void> {
   return new Promise((resolve, reject) => {
     const script = document.createElement('script');
-    script.src = 'https://app.unpkg.com/keycloak-js@25.0.6/files/dist/keycloak.min.js';
+    script.src = 'https://unpkg.com/keycloak-js@25.0.6/dist/keycloak.min.js';
     script.onload = () => resolve();
     script.onerror = () => reject('Failed to load Keycloak');
     document.head.appendChild(script);
