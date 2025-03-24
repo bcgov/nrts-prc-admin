@@ -15,6 +15,7 @@ export class KeycloakService {
   private clientId = 'acrfd-4192';
 
   constructor() {
+    console.log('[Keycloak] Service Constructor Reached');
     const origin = window.location.origin;
 
     switch (origin) {
