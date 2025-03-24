@@ -3,7 +3,11 @@ import { JwtUtil } from 'app/jwt-util';
 import { Observable } from 'rxjs';
 import * as _ from 'lodash';
 
-declare var Keycloak: any;
+declare global {
+  interface Window {
+    Keycloak: any;
+  }
+}
 
 @Injectable()
 export class KeycloakService {
@@ -73,9 +77,13 @@ export class KeycloakService {
           clientId: 'acrfd-4192'
         };
 
-        // console.log('KC Auth init.');
+        if (typeof window.Keycloak !== 'function') {
+          console.error('❌ Keycloak script not loaded in time');
+          return Promise.reject('Keycloak not available');
+        }
 
-        this.keycloakAuth = new Keycloak(config);
+        this.keycloakAuth = new window.Keycloak(config);
+
         this.keycloakAuth.onAuthSuccess = () => {
           // console.log('onAuthSuccess');
         };

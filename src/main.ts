@@ -9,4 +9,21 @@ if (environment.production) {
   enableProdMode();
 }
 
+function loadKeycloakScript(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/keycloak-js@26.1.4/dist/keycloak.min.js';
+    script.onload = () => resolve();
+    script.onerror = () => reject('Failed to load Keycloak');
+    document.head.appendChild(script);
+  });
+}
+
+loadKeycloakScript().then(() => {
+  // Only start Angular app after Keycloak is loaded
+  platformBrowserDynamic()
+    .bootstrapModule(AppModule)
+    .catch(err => console.error(err));
+});
+
 platformBrowserDynamic().bootstrapModule(AppModule);
