@@ -3,8 +3,7 @@ import { JwtUtil } from 'app/jwt-util';
 import { Observable } from 'rxjs';
 import * as _ from 'lodash';
 
-// Fallback import (loses some type safety)
-const Keycloak = require('keycloak-js').default;
+declare var Keycloak: any;
 
 @Injectable()
 export class KeycloakService {
