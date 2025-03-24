@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import * as _ from 'lodash';
 
 declare global {
+  /* tslint:disable-next-line:interface-name */
   interface Window {
     Keycloak: any;
   }
