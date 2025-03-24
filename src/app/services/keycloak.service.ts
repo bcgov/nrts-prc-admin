@@ -2,8 +2,7 @@ import { Injectable } from '@angular/core';
 import { JwtUtil } from 'app/jwt-util';
 import { Observable } from 'rxjs';
 import * as _ from 'lodash';
-
-declare var Keycloak: any;
+import Keycloak from 'keycloak-js';
 
 @Injectable()
 export class KeycloakService {
