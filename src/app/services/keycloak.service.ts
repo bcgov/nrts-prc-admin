@@ -53,15 +53,21 @@ export class KeycloakService {
     name = name.replace(/[\[\]]/g, '\\$&');
     const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
     const results = regex.exec(url);
-    if (!results) return null;
-    if (!results[2]) return '';
+    if (!results) {
+      return null;
+    }
+    if (!results[2]) {
+      return '';
+    }
     return decodeURIComponent(results[2].replace(/\+/g, ' '));
   }
 
   init(): Promise<any> {
     this.loggedOut = this.getParameterByName('loggedout');
 
-    if (!this.keycloakEnabled) return Promise.resolve();
+    if (!this.keycloakEnabled) {
+      return Promise.resolve();
+    }
 
     return new Promise((resolve, reject) => {
       const config = {
@@ -78,9 +84,13 @@ export class KeycloakService {
       this.keycloakAuth = new window.Keycloak(config);
 
       this.keycloakAuth.onAuthSuccess = () => {};
-      this.keycloakAuth.onAuthError = () => console.log('onAuthError');
+      this.keycloakAuth.onAuthError = () => {
+        console.log('onAuthError');
+      };
       this.keycloakAuth.onAuthRefreshSuccess = () => {};
-      this.keycloakAuth.onAuthRefreshError = () => console.log('onAuthRefreshError');
+      this.keycloakAuth.onAuthRefreshError = () => {
+        console.log('onAuthRefreshError');
+      };
       this.keycloakAuth.onAuthLogout = () => {};
 
       this.keycloakAuth.onTokenExpired = () => {
@@ -121,12 +131,18 @@ export class KeycloakService {
     });
   }
 
-  isValidForSite() {
+  isValidForSite(): boolean {
     const token = this.getToken();
-    if (!token) return false;
+    if (!token) {
+      return false;
+    }
 
     const jwt = new JwtUtil().decodeToken(token);
-    return jwt && jwt.client_roles && _.includes(jwt.client_roles, 'sysadmin');
+    if (jwt && jwt.client_roles) {
+      return _.includes(jwt.client_roles, 'sysadmin');
+    } else {
+      return false;
+    }
   }
 
   getToken(): string {
@@ -134,6 +150,7 @@ export class KeycloakService {
       const currentUser = JSON.parse(window.localStorage.getItem('currentUser'));
       return currentUser ? currentUser.token : null;
     }
+
     return this.keycloakAuth.token;
   }
 
