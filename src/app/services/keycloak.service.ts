@@ -25,7 +25,6 @@ export class KeycloakService {
       case 'https://nrts-prc-master.pathfinder.gov.bc.ca':
       case 'https://acrfd-86cabb-dev.apps.silver.devops.gov.bc.ca':
       case 'https://acrfd-admin-86cabb-dev.apps.silver.devops.gov.bc.ca':
-        // Local, Dev, Master
         this.keycloakEnabled = true;
         this.keycloakUrl = 'https://dev.loginproxy.gov.bc.ca/auth';
         this.keycloakRealm = 'standard';
@@ -33,14 +32,12 @@ export class KeycloakService {
 
       case 'https://nrts-prc-test.pathfinder.gov.bc.ca':
       case 'https://acrfd-86cabb-test.apps.silver.devops.gov.bc.ca':
-        // Test
         this.keycloakEnabled = true;
         this.keycloakUrl = 'https://test.loginproxy.gov.bc.ca/auth';
         this.keycloakRealm = 'standard';
         break;
 
       default:
-        // Prod
         this.keycloakEnabled = true;
         this.keycloakUrl = 'https://loginproxy.gov.bc.ca/auth';
         this.keycloakRealm = 'standard';
@@ -56,144 +53,100 @@ export class KeycloakService {
     name = name.replace(/[\[\]]/g, '\\$&');
     const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
     const results = regex.exec(url);
-    if (!results) {
-      return null;
-    }
-    if (!results[2]) {
-      return '';
-    }
+    if (!results) return null;
+    if (!results[2]) return '';
     return decodeURIComponent(results[2].replace(/\+/g, ' '));
   }
 
   init(): Promise<any> {
     this.loggedOut = this.getParameterByName('loggedout');
 
-    if (this.keycloakEnabled) {
-      // Bootup KC
-      this.keycloakEnabled = true;
-      return new Promise((resolve, reject) => {
-        const config = {
-          url: this.keycloakUrl,
-          realm: this.keycloakRealm,
-          clientId: 'acrfd-4192'
-        };
+    if (!this.keycloakEnabled) return Promise.resolve();
 
-        if (typeof window.Keycloak !== 'function') {
-          console.error('❌ Keycloak script not loaded in time');
-          return Promise.reject('Keycloak not available');
-        }
+    return new Promise((resolve, reject) => {
+      const config = {
+        url: this.keycloakUrl,
+        realm: this.keycloakRealm,
+        clientId: 'acrfd-4192'
+      };
 
-        this.keycloakAuth = new window.Keycloak(config);
+      if (typeof window.Keycloak !== 'function') {
+        console.error('❌ Keycloak script not loaded in time');
+        return reject('Keycloak not available');
+      }
 
-        this.keycloakAuth.onAuthSuccess = () => {
-          // console.log('onAuthSuccess');
-        };
+      this.keycloakAuth = new window.Keycloak(config);
 
-        this.keycloakAuth.onAuthError = () => {
-          console.log('onAuthError');
-        };
+      this.keycloakAuth.onAuthSuccess = () => {};
+      this.keycloakAuth.onAuthError = () => console.log('onAuthError');
+      this.keycloakAuth.onAuthRefreshSuccess = () => {};
+      this.keycloakAuth.onAuthRefreshError = () => console.log('onAuthRefreshError');
+      this.keycloakAuth.onAuthLogout = () => {};
 
-        this.keycloakAuth.onAuthRefreshSuccess = () => {
-          // console.log('onAuthRefreshSuccess');
-        };
-
-        this.keycloakAuth.onAuthRefreshError = () => {
-          console.log('onAuthRefreshError');
-        };
-
-        this.keycloakAuth.onAuthLogout = () => {
-          // console.log('onAuthLogout');
-        };
-
-        // Try to get refresh tokens in the background
-        this.keycloakAuth.onTokenExpired = () => {
-          this.keycloakAuth
-            .updateToken()
-            .success(refreshed => {
-              console.log('KC refreshed token?:', refreshed);
-            })
-            .error(err => {
-              console.log('KC refresh error:', err);
-            });
-        };
-
-        // Initialize.
-
-        const initOptions = {
-          checkLoginIframe: false,
-          pkceMethod: 'S256',
-          onLoad: 'login-required'
-        };
-
+      this.keycloakAuth.onTokenExpired = () => {
         this.keycloakAuth
-          .init(initOptions)
-          .success(auth => {
-            // console.log('KC Refresh Success?:', this.keycloakAuth.authServerUrl);
-            console.log('KC Success:', auth);
-            if (!auth) {
-              if (this.loggedOut === 'true') {
-                // Don't do anything, they wanted to remain logged out.
-                resolve();
-              } else {
-                this.keycloakAuth.login({ idpHint: 'idir' });
-              }
-            } else {
-              resolve();
-            }
+          .updateToken(30)
+          .then(refreshed => {
+            console.log('KC refreshed token?:', refreshed);
           })
-          .error(err => {
-            console.log('KC error:', err);
-            reject();
+          .catch(err => {
+            console.log('KC refresh error:', err);
           });
-      });
-    }
+      };
+
+      const initOptions = {
+        checkLoginIframe: false,
+        pkceMethod: 'S256',
+        onLoad: 'login-required'
+      };
+
+      this.keycloakAuth
+        .init(initOptions)
+        .then(auth => {
+          console.log('KC Success:', auth);
+          if (!auth) {
+            if (this.loggedOut === 'true') {
+              resolve();
+            } else {
+              this.keycloakAuth.login({ idpHint: 'idir' });
+            }
+          } else {
+            resolve();
+          }
+        })
+        .catch(err => {
+          console.log('KC error:', err);
+          reject(err);
+        });
+    });
   }
 
   isValidForSite() {
-    if (!this.getToken()) {
-      return false;
-    }
-    const jwt = new JwtUtil().decodeToken(this.getToken());
-    if (jwt && jwt.client_roles) {
-      return _.includes(jwt.client_roles, 'sysadmin');
-    } else {
-      return false;
-    }
+    const token = this.getToken();
+    if (!token) return false;
+
+    const jwt = new JwtUtil().decodeToken(token);
+    return jwt && jwt.client_roles && _.includes(jwt.client_roles, 'sysadmin');
   }
 
-  /**
-   * Returns the current keycloak auth token.
-   *
-   * @returns {string} keycloak auth token.
-   * @memberof KeycloakService
-   */
   getToken(): string {
     if (!this.keycloakEnabled) {
-      // return the local storage token
       const currentUser = JSON.parse(window.localStorage.getItem('currentUser'));
       return currentUser ? currentUser.token : null;
     }
-
     return this.keycloakAuth.token;
   }
 
-  /**
-   * Returns an observable that emits when the auth token has been refreshed.
-   * Call {@link KeycloakService#getToken} to fetch the updated token.
-   *
-   * @returns {Observable<string>}
-   * @memberof KeycloakService
-   */
   refreshToken(): Observable<any> {
     return new Observable(observer => {
       this.keycloakAuth
         .updateToken(30)
-        .success(refreshed => {
+        .then(refreshed => {
           console.log('KC refreshed token?:', refreshed);
           observer.next();
           observer.complete();
         })
-        .error(err => {
+        .catch(err => {
           console.log('KC refresh error:', err);
           observer.error();
         });
@@ -203,10 +156,6 @@ export class KeycloakService {
   }
 
   getLogoutURL(): string {
-    // TODO? need to do two stage logoff.
-    // logoff prc, as well as bcgov?
-    // https://logon.gov.bc.ca/clp-cgi/logoff.cgi?returl=http://localhost:4200/admin/
-    // https://logontest.gov.bc.ca/clp-cgi/logoff.cgi?returl=http://localhost:4200/admin/
     if (this.keycloakEnabled) {
       return (
         this.keycloakAuth.authServerUrl +
@@ -217,7 +166,6 @@ export class KeycloakService {
         '/admin/not-authorized?loggedout=true'
       );
     } else {
-      // go to the /login page
       return window.location.origin + '/admin/login';
     }
   }
